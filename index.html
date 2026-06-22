@@ -5,34 +5,66 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>DroneOps</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════
-   TOKENS — instrument de vol : chaud, rond, technique
+   TOKENS — double thème
+   JOUR (défaut) : fond clair, contraste maximal, lisible en plein soleil.
+   NUIT (body.night) : EFIS sombre atténué, ne pas éblouir.
+   Noms de variables conservés : tout le CSS suit automatiquement.
    ═══════════════════════════════════════════════════════ */
 :root {
-  --bg:        #F7F5F1;   /* blanc cassé chaud, jamais clinique */
-  --paper:     #FFFFFF;
-  --stone:     #EAE6DC;   /* séparateurs, fonds creux */
-  --stone-2:   #D4CFC4;   /* bordures */
-  --ink:       #1C1E22;   /* texte principal, quasi-noir */
-  --ink-soft:  #5B5A56;   /* texte secondaire */
-  --ink-faint: #9C988E;   /* texte tertiaire */
+  /* ── MODE JOUR (haute lisibilité plein soleil) ── */
+  --bg:        #FFFFFF;   /* blanc franc — luminosité maximale */
+  --paper:     #F4F6F9;   /* gris très clair — surfaces */
+  --stone:     #E8ECF1;   /* gris clair — cartes creuses */
+  --stone-2:   #C4CDD8;   /* bordures nettes (contraste appuyé) */
+  --ink:       #0A0E14;   /* quasi-noir — texte principal */
+  --ink-soft:  #44505F;   /* gris foncé — texte secondaire */
+  --ink-faint: #6B7785;   /* gris moyen — texte tertiaire */
 
-  --orange:    #FF5A1F;   /* accent unique — aiguille d'instrument */
-  --orange-d:  #FFE4D6;
-  --green:     #1E8E6B;
-  --green-d:   #DCEFE7;
-  --amber:     #C97A1A;
-  --amber-d:   #F6E6CF;
-  --red:       #C73E3E;
-  --red-d:     #F7DEDE;
+  --orange:    #0B7C8C;   /* sarcelle foncé — accent (fort contraste sur blanc) */
+  --orange-d:  rgba(11,124,140,0.12);
+  --green:     #157F3C;   /* vert foncé — GO (lisible plein jour) */
+  --green-d:   rgba(21,127,60,0.12);
+  --amber:     #A85D00;   /* ambre foncé — CAUTION */
+  --amber-d:   rgba(168,93,0,0.13);
+  --red:       #C02626;   /* rouge foncé — WARNING */
+  --red-d:     rgba(192,38,38,0.11);
 
-  --disp:      'Space Grotesk', sans-serif;
+  --btn-text:  #FFFFFF;   /* texte sur bouton accent */
+  --glow:      none;      /* pas de halo en mode jour */
+
+  --disp:      'Sora', sans-serif;
   --body:      'Inter', sans-serif;
   --safe-b:    env(safe-area-inset-bottom, 0px);
+}
+
+body.night {
+  /* ── MODE NUIT (EFIS atténué, anti-éblouissement) ── */
+  --bg:        #0B0F14;
+  --paper:     #121821;
+  --stone:     #1A2230;
+  --stone-2:   #2A3645;
+  --ink:       #D6E2F0;   /* blanc bleuté légèrement atténué (pas de blanc pur la nuit) */
+  --ink-soft:  #8DA2BD;
+  --ink-faint: #54657D;
+
+  --orange:    #4EC8B6;   /* cyan atténué (moins agressif que pur EFIS) */
+  --orange-d:  rgba(78,200,182,0.13);
+  --green:     #3FB46B;
+  --green-d:   rgba(63,180,107,0.14);
+  --amber:     #D9962F;
+  --amber-d:   rgba(217,150,47,0.14);
+  --red:       #E06A6A;
+  --red-d:     rgba(224,106,106,0.14);
+
+  --btn-text:  #04140F;
+  --glow:      0 0 8px;   /* léger halo réservé au mode nuit */
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -53,38 +85,55 @@ a { color: var(--orange); }
 /* ── TOP BAR ──────────────────────────────────────────── */
 .topbar {
   background: var(--bg);
-  padding: 18px 22px 10px;
+  padding: 18px 22px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid var(--stone-2);
 }
 .topbar-brand {
   font-family: var(--disp);
   font-size: 17px;
   font-weight: 700;
   color: var(--ink);
-  letter-spacing: -0.01em;
+  letter-spacing: .01em;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 .topbar-brand .dot {
   width: 9px; height: 9px;
   border-radius: 50%;
   background: var(--orange);
   display: inline-block;
+  box-shadow: var(--glow) var(--orange);
 }
 .topbar-time {
   font-family: var(--disp);
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink-soft);
-  background: var(--paper);
+  color: var(--orange);
+  background: var(--stone);
+  border: 1px solid var(--stone-2);
   padding: 5px 13px;
   border-radius: 99px;
-  letter-spacing: .02em;
+  letter-spacing: .04em;
+  font-variant-numeric: tabular-nums;
 }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.theme-toggle {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--stone);
+  border: 1px solid var(--stone-2);
+  font-size: 17px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .12s, background .15s;
+  flex-shrink: 0;
+}
+.theme-toggle:active { transform: scale(.92); }
 
 /* ── SCREENS ──────────────────────────────────────────── */
 .screen { display: none; flex-direction: column; flex: 1; }
@@ -97,7 +146,8 @@ a { color: var(--orange); }
   background: var(--paper);
   border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(28,30,34,0.04);
+  border: 1px solid var(--stone-2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
 .section-head {
   padding: 18px 22px 8px;
@@ -119,8 +169,8 @@ a { color: var(--orange); }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-left: 2px; }
 .field input, .field select, .field textarea {
-  background: var(--bg);
-  border: 1.5px solid transparent;
+  background: var(--stone);
+  border: 1.5px solid var(--stone-2);
   border-radius: 18px;
   color: var(--ink);
   font-family: var(--disp);
@@ -132,7 +182,7 @@ a { color: var(--orange); }
   width: 100%;
   -webkit-appearance: none;
 }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--orange); background: var(--paper); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--orange); background: var(--bg); }
 .field input::placeholder { color: var(--ink-faint); font-weight: 500; }
 .field select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239C988E' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -252,8 +302,8 @@ a { color: var(--orange); }
 .cta-bar { padding: 14px 18px calc(18px + var(--safe-b)); background: var(--bg); }
 .btn-analyse {
   width: 100%;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--orange);
+  color: var(--btn-text);
   font-family: var(--disp);
   font-size: 15px;
   font-weight: 700;
@@ -267,7 +317,7 @@ a { color: var(--orange); }
   content: '';
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--orange);
+  background: var(--btn-text);
 }
 .btn-analyse:active { transform: scale(.98); opacity: .9; }
 .btn-analyse:disabled { opacity: .35; }
@@ -321,6 +371,9 @@ a { color: var(--orange); }
 .dial-arc.go   { stroke: var(--green); }
 .dial-arc.warn { stroke: var(--amber); }
 .dial-arc.nogo { stroke: var(--red); }
+body.night .dial-arc.go   { filter: drop-shadow(0 0 6px rgba(63,180,107,0.5)); }
+body.night .dial-arc.warn { filter: drop-shadow(0 0 6px rgba(217,150,47,0.5)); }
+body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); }
 
 .dial-center {
   position: absolute; inset: 0;
@@ -359,6 +412,7 @@ a { color: var(--orange); }
 }
 .kv-cell {
   background: var(--paper);
+  border: 1px solid var(--stone-2);
   border-radius: 22px;
   padding: 16px 8px 14px;
   display: flex;
@@ -443,9 +497,15 @@ a { color: var(--orange); }
 
 .module {
   background: var(--paper);
+  border: 1px solid var(--stone-2);
+  border-left: 3px solid var(--stone-2);
   border-radius: 24px;
   overflow: hidden;
 }
+.module.go   { border-left-color: var(--green); }
+.module.warn { border-left-color: var(--amber); }
+.module.nogo { border-left-color: var(--red); }
+.module.info { border-left-color: var(--orange); }
 .mod-hdr {
   display: flex; align-items: center; gap: 12px;
   padding: 16px 20px;
@@ -485,7 +545,7 @@ a { color: var(--orange); }
 
 /* Data cells inside modules */
 .dcells { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.dcell { background: var(--bg); border-radius: 16px; padding: 11px 14px; }
+.dcell { background: var(--bg); border: 1px solid var(--stone-2); border-radius: 16px; padding: 11px 14px; }
 .dcell .lbl { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
 .dcell .val { font-family: var(--disp); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
 .dcell .val.go   { color: var(--green); }
@@ -501,10 +561,10 @@ a { color: var(--orange); }
   border-radius: 16px;
   font-size: 13px; line-height: 1.5; align-items: flex-start;
 }
-.malert.go   { background: var(--green-d); color: #176B50; }
-.malert.warn { background: var(--amber-d); color: #8F5A0F; }
-.malert.nogo { background: var(--red-d);   color: #9E2E2E; }
-.malert.info { background: var(--orange-d); color: #C2440F; }
+.malert.go   { background: var(--green-d); color: var(--green); }
+.malert.warn { background: var(--amber-d); color: var(--amber); }
+.malert.nogo { background: var(--red-d);   color: var(--red); }
+.malert.info { background: var(--orange-d); color: var(--orange); }
 .malert-ico {
   flex-shrink: 0;
   width: 20px; height: 20px;
@@ -512,7 +572,7 @@ a { color: var(--orange); }
   display: flex; align-items: center; justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(255,255,255,.55);
+  background: var(--bg);
   margin-top: 1px;
 }
 
@@ -586,7 +646,10 @@ a { color: var(--orange); }
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-brand"><span class="dot"></span>DroneOps</div>
-  <div class="topbar-time" id="utc-clock">--:-- UTC</div>
+  <div class="topbar-right">
+    <div class="topbar-time" id="utc-clock">--:-- UTC</div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Basculer jour/nuit" title="Basculer jour/nuit">☀️</button>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
@@ -726,6 +789,26 @@ a { color: var(--orange); }
 </div>
 
 <script>
+// ── THÈME JOUR / NUIT ─────────────────────────────────
+function applyTheme(theme) {
+  const isNight = theme === 'night';
+  document.body.classList.toggle('night', isNight);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = isNight ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const isNight = document.body.classList.contains('night');
+  const next = isNight ? 'day' : 'night';
+  applyTheme(next);
+  try { localStorage.setItem('droneops-theme', next); } catch(e) {}
+}
+// Au démarrage : thème mémorisé, sinon jour par défaut (priorité plein soleil terrain)
+(function initTheme(){
+  let saved = null;
+  try { saved = localStorage.getItem('droneops-theme'); } catch(e) {}
+  applyTheme(saved || 'day');
+})();
+
 // ── CLOCK ─────────────────────────────────────────────
 function tickClock() {
   const d = new Date();
@@ -1587,7 +1670,7 @@ function buildTraffic(d, s) {
         <td>${a.spd_ms?Math.round(a.spd_ms*1.944)+' kt':'—'}</td>
         <td>${a.country}</td>
       </tr>`).join('')}
-      ${d.count>8?`<tr><td colspan="4" style="color:var(--t3)">… +${d.count-8} aéronef(s)</td></tr>`:''}
+      ${d.count>8?`<tr><td colspan="4" style="color:var(--ink-faint)">… +${d.count-8} aéronef(s)</td></tr>`:''}
       </tbody>
     </table>` : `<div class="malert go"><span class="malert-ico">✓</span><span>Aucun aéronef détecté dans le rayon (~30 km)</span></div>`}
     ${low.length>0?`<div class="malert warn mt8"><span class="malert-ico">⚠</span><span>${low.length} aéronef(s) sous 500 m — Communication radio recommandée</span></div>`:''}
@@ -1597,7 +1680,7 @@ function buildTraffic(d, s) {
 function buildKP(d, s) {
   const kp = d.kp;
   const kpStr = kp!==null ? kp.toFixed(1) : '—';
-  const kpCol = kp===null?'var(--t3)':kp<4?'var(--green)':kp<5?'var(--amber)':'var(--red)';
+  const kpCol = kp===null?'var(--ink-faint)':kp<4?'var(--green)':kp<5?'var(--amber)':'var(--red)';
   const kpPct = kp!==null ? Math.min((kp/9)*100,100) : 0;
   const levels = [{max:1,l:'Calme'},{max:2,l:'Très calme'},{max:3,l:'Légèrement actif'},{max:4,l:'Actif'},{max:5,l:'Tempête mineure G1'},{max:7,l:'Tempête modérée G2-G3'},{max:9,l:'Tempête sévère G4-G5'}];
   const lvl = kp!==null ? levels.find(x=>kp<=x.max)||levels[levels.length-1] : null;
