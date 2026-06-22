@@ -1159,14 +1159,17 @@ function getNotamChecklist(geo) {
   return {
     titre: 'NOTAM & SUP AIP',
     points: [
-      'Consultez les NOTAM actifs sur la zone et la période de vol via SOFIA Briefing.',
-      'Vérifiez les SUP AIP (suppléments à l\'AIP) qui pourraient s\'appliquer temporairement.',
-      'Portez une attention particulière aux TFR (restrictions temporaires de vol) en cas d\'événement local.',
-      'Imprimez ou capturez le briefing avant le vol, en cas de perte de connexion sur site.'
+      'Accès direct ci-dessous au briefing NOTAM officiel SOFIA — choisissez « Aérodrome » (NOTAM autour d\'un terrain proche) ou « Trajet » (cylindre centré sur votre zone).',
+      'Sur SOFIA : sélectionnez la zone, réglez la plage horaire sur votre créneau de vol, puis lancez le PIB (Plan d\'Information de Briefing).',
+      'Vérifiez aussi les zones militaires basse altitude (AZBA/RTBA) si votre vol est en zone rurale ou montagneuse.',
+      'Consultez les SUP AIP en cours via le visualisateur AIP, notamment les ZRT temporaires (événements, Tour de France, manifestations).',
+      'Exportez le briefing en PDF avant de partir, pour le conserver hors connexion sur le terrain.'
     ],
     liens: [
-      {label:'SOFIA Briefing (DGAC)', url:'https://sofia-briefing.aviation-civile.gouv.fr'},
-      {label:'SIA — SUP AIP', url:'https://www.sia.aviation-civile.gouv.fr'}
+      {label:'SOFIA — NOTAM aérodrome', url:'https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html'},
+      {label:'SOFIA — NOTAM trajet/zone', url:'https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamform.html'},
+      {label:'Visualisateur AIP (zones actives)', url:'https://www.sia.aviation-civile.gouv.fr/vaip'},
+      {label:'AZBA — zones militaires', url:'https://www.sia.aviation-civile.gouv.fr'}
     ]
   };
 }
