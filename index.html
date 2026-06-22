@@ -682,7 +682,7 @@ a { color: var(--orange); }
   <div class="loading-modules" id="lmods">
     <div class="lmod" id="lm-airspace"><span class="lmod-icon">○</span> Espace aérien</div>
     <div class="lmod" id="lm-notam"><span class="lmod-icon">○</span> NOTAM / SUP AIP</div>
-    <div class="lmod" id="lm-oaci"><span class="lmod-icon">○</span> Carte OACI</div>
+    <div class="lmod" id="lm-oaci"><span class="lmod-icon">○</span> Zones & Carte OACI</div>
     <div class="lmod" id="lm-meteo"><span class="lmod-icon">○</span> Météo temps réel</div>
     <div class="lmod" id="lm-traffic"><span class="lmod-icon">○</span> Trafic aérien ADS-B</div>
     <div class="lmod" id="lm-kp"><span class="lmod-icon">○</span> Indice KP — NOAA</div>
@@ -1136,10 +1136,36 @@ async function fetchOpenSky(lat, lon) {
   } catch(e) { return { count:0, aircraft:[], error:e.message }; }
 }
 
-// ── CLAUDE ────────────────────────────────────────────
+// ── ZONES DE RESTRICTION DRONE (API cquest — source SIA/DGAC, millésime 2021-01) ──
+// Renvoie les zones (interdites, réglementées, etc.) autour du point, triées par distance.
+// distance_m = 0 → on est DANS la zone. limite_alti_m = hauteur de vol max autorisée.
+async function fetchZonesDrone(lat, lon, rayon = 8000) {
+  try {
+    const url = `https://api.cquest.org/drone?lat=${lat}&lon=${lon}&rayon=${rayon}`;
+    const r = await fetchWithTimeout(url, {}, 8000);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const geojson = await r.json();
+    const zones = (geojson.features || []).map(f => {
+      const p = f.properties || {};
+      return {
+        nom: p.nom || p.name || p.zone || 'Zone non nommée',
+        type: p.type || p.nature || '',
+        limite_alti_m: (p.limite_alti_m !== undefined ? p.limite_alti_m : null),
+        distance_m: (p.distance_m !== undefined ? p.distance_m : null),
+        cap_deg: (p.cap_deg !== undefined ? p.cap_deg : null),
+        raw: p
+      };
+    });
+    // Tri par distance croissante (l'API le fait déjà, mais on sécurise)
+    zones.sort((a,b) => (a.distance_m ?? 1e12) - (b.distance_m ?? 1e12));
+    return { zones, count: zones.length, error: null };
+  } catch(e) {
+    return { zones: [], count: 0, error: e.message };
+  }
+}
+
 // ── CONTENU RÉGLEMENTAIRE STATIQUE (à vérifier manuellement) ──
-// Ces 3 modules ne sont pas analysés automatiquement : ils rassemblent les bons réflexes
-// et les liens officiels pour que la vérification manuelle soit rapide.
+// Ces modules rassemblent les bons réflexes et les liens officiels pour que la vérification manuelle soit rapide.
 function getAirspaceChecklist(geo) {
   return {
     titre: 'Espace aérien',
@@ -1227,24 +1253,34 @@ async function runAnalysis() {
 
   const results = {};
 
-  // Real APIs (météo, KP, trafic — fonctionnent en hébergement web indépendant)
-  const [kpData, meteoData, skyData] = await Promise.all([
+  // Real APIs (météo, KP, trafic, zones de restriction — fonctionnent en hébergement web indépendant)
+  const [kpData, meteoData, skyData, zonesData] = await Promise.all([
     fetchKP().then(d=>{ results.kp=d; lmod('kp', d.error?'fail':'done'); return d; }),
     geo ? fetchMeteo(lat,lon).then(d=>{ results.meteo=d; lmod('meteo', d.error?'fail':'done'); return d; }) : Promise.resolve({error:'Commune non localisée'}).then(d=>{results.meteo=d;lmod('meteo','fail');return d;}),
     geo ? fetchOpenSky(lat,lon).then(d=>{ results.traffic=d; lmod('traffic', d.error?'fail':'done'); return d; }) : Promise.resolve({count:0,aircraft:[],error:'Commune non localisée'}).then(d=>{results.traffic=d;lmod('traffic','fail');return d;}),
+    geo ? fetchZonesDrone(lat,lon).then(d=>{ results.zones=d; lmod('oaci', d.error?'fail':'done'); return d; }) : Promise.resolve({zones:[],count:0,error:'Commune non localisée'}).then(d=>{results.zones=d;lmod('oaci','fail');return d;}),
   ]);
 
-  // Checklists réglementaires statiques (pas d'analyse automatique — vérification manuelle requise)
+  // Checklists réglementaires statiques (espace aérien, NOTAM = vérification manuelle requise)
   results.airspace = getAirspaceChecklist(geo);
   results.notam = getNotamChecklist(geo);
-  results.oaci = getOaciChecklist(geo);
-  lmod('airspace','done'); lmod('notam','done'); lmod('oaci','done');
+  results.oaci = getOaciChecklist(geo); // checklist OACI conservée en complément des zones
+  lmod('airspace','done'); lmod('notam','done');
 
-  // Compute statuses — les 3 modules réglementaires sont neutres ("info", à vérifier), pas go/nogo automatique
+
+  // Statut du module OACI/zones basé sur les données réelles de restriction
+  function zonesStatus(zd) {
+    if (!zd || zd.error) return 'info';
+    const inside = zd.zones.filter(z => z.distance_m === 0);
+    if (inside.length > 0) return 'warn'; // dans une ou plusieurs zones — vigilance, vérification requise
+    return 'info';
+  }
+
+  // Compute statuses — espace aérien et NOTAM restent informatifs ; OACI/zones reflète les données réelles
   const statuses = {
     airspace: 'info',
     notam:    'info',
-    oaci:     'info',
+    oaci:     zonesStatus(zonesData),
     meteo:    meteoStatus(meteoData),
     traffic:  trafficStatus(skyData),
     kp:       kpStatus(kpData.kp)
@@ -1301,7 +1337,7 @@ function renderVerdict(global, statuses, results) {
   };
   document.getElementById('verdict-sub').textContent = subs[global];
 
-  const labels = { airspace:'Espace aérien', notam:'NOTAM/SUP AIP', oaci:'Carte OACI', meteo:'Météo', traffic:'Trafic ADS-B', kp:'Indice KP' };
+  const labels = { airspace:'Espace aérien', notam:'NOTAM/SUP AIP', oaci:'Zones & OACI', meteo:'Météo', traffic:'Trafic ADS-B', kp:'Indice KP' };
   const pills = Object.entries(statuses).map(([k,v]) =>
     `<div class="pill ${v}">${labels[k]}</div>`).join('');
   document.getElementById('pills-row').innerHTML = pills;
@@ -1377,8 +1413,8 @@ function renderDetails(results, statuses, inp) {
 
   const modules = [
     buildAirspace(results.airspace, statuses.airspace),
+    buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude),
     buildNotam(results.notam, statuses.notam),
-    buildOaci(results.oaci, statuses.oaci),
     buildMeteo(results.meteo, statuses.meteo, inp.altitude, inp.droneData),
     buildTraffic(results.traffic, statuses.traffic),
     buildKP(results.kp, statuses.kp),
@@ -1422,9 +1458,60 @@ function buildNotam(r, s) {
     ${srcLinks(r.liens)}`);
 }
 
-function buildOaci(r, s) {
-  return modWrap('oaci','Carte OACI', s, 'À VÉRIFIER', `
-    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+function buildOaci(r, s, zonesData, altMax) {
+  // r = checklist OACI statique ; zonesData = zones réelles de restriction
+  const badge = (zonesData && !zonesData.error && zonesData.zones.some(z=>z.distance_m===0)) ? 'ZONE PRÉSENTE' : 'À VÉRIFIER';
+
+  // Cas erreur API
+  if (!zonesData || zonesData.error) {
+    return modWrap('oaci','Zones & Carte OACI', s, 'À VÉRIFIER', `
+      <div class="malert warn"><span class="malert-ico">⚠</span><span>Zones de restriction indisponibles${zonesData?.error?' : '+zonesData.error:''} — vérifiez directement sur Géoportail.</span></div>
+      <div class="mod-alerts mt8">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+      ${srcLinks(r.liens)}`);
+  }
+
+  const inside = zonesData.zones.filter(z => z.distance_m === 0);
+  const nearby = zonesData.zones.filter(z => z.distance_m > 0).slice(0, 8);
+
+  const capLabel = (deg) => {
+    if (deg === null || deg === undefined) return '';
+    const dirs = ['N','NE','E','SE','S','SO','O','NO'];
+    return dirs[Math.round(deg/45)%8];
+  };
+
+  // Bloc "vous êtes dans ces zones"
+  let insideHtml = '';
+  if (inside.length > 0) {
+    insideHtml = `
+      <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚑</span><span><strong>Le point de vol est situé dans ${inside.length} zone${inside.length>1?'s':''} de restriction.</strong> Vérifiez les conditions applicables à votre statut étatique.</span></div>
+      <div class="dcells">
+        ${inside.map(z => dc(z.nom, z.limite_alti_m!=null ? `${z.limite_alti_m} m max` : 'Voir condition', z.limite_alti_m!=null && altMax>z.limite_alti_m ? 'nogo' : 'warn', z.type||'')).join('')}
+      </div>`;
+  } else {
+    insideHtml = `<div class="malert go" style="margin-bottom:10px"><span class="malert-ico">✓</span><span>Le point de vol n'est dans aucune zone de restriction recensée (hors interdictions temporaires — voir NOTAM).</span></div>`;
+  }
+
+  // Tableau des zones proches
+  let nearbyHtml = '';
+  if (nearby.length > 0) {
+    nearbyHtml = `
+      <div class="s-label" style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zones à proximité</div>
+      <table class="mtbl">
+        <thead><tr><th>Zone</th><th>Dist.</th><th>Cap</th><th>Plafond</th></tr></thead>
+        <tbody>${nearby.map(z=>`<tr>
+          <td style="font-weight:600">${z.nom}${z.type?`<br><span style="color:var(--ink-faint);font-size:10px">${z.type}</span>`:''}</td>
+          <td>${z.distance_m!=null ? (z.distance_m<1000 ? z.distance_m+' m' : (z.distance_m/1000).toFixed(1)+' km') : '—'}</td>
+          <td>${capLabel(z.cap_deg)}</td>
+          <td>${z.limite_alti_m!=null ? z.limite_alti_m+' m' : '—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+  }
+
+  return modWrap('oaci','Zones & Carte OACI', s, badge, `
+    ${insideHtml}
+    ${nearbyHtml}
+    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Données de zonage drone (source SIA/DGAC, millésime 2021) — <strong>indicatives</strong>, hors interdictions temporaires et établies pour le vol de loisir. Votre statut étatique peut modifier les autorisations applicables.</span></div>
+    <div class="mod-alerts mt8">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
     ${srcLinks(r.liens)}`);
 }
 
