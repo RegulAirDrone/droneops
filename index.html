@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DroneOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS — instrument de vol : chaud, rond, technique
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --bg:        #F7F5F1;   /* blanc cassé chaud, jamais clinique */
+  --paper:     #FFFFFF;
+  --stone:     #EAE6DC;   /* séparateurs, fonds creux */
+  --stone-2:   #D4CFC4;   /* bordures */
+  --ink:       #1C1E22;   /* texte principal, quasi-noir */
+  --ink-soft:  #5B5A56;   /* texte secondaire */
+  --ink-faint: #9C988E;   /* texte tertiaire */
+
+  --orange:    #FF5A1F;   /* accent unique — aiguille d'instrument */
+  --orange-d:  #FFE4D6;
+  --green:     #1E8E6B;
+  --green-d:   #DCEFE7;
+  --amber:     #C97A1A;
+  --amber-d:   #F6E6CF;
+  --red:       #C73E3E;
+  --red-d:     #F7DEDE;
+
+  --disp:      'Space Grotesk', sans-serif;
+  --body:      'Inter', sans-serif;
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+button { border: none; cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+a { color: var(--orange); }
+
+/* ── TOP BAR ──────────────────────────────────────────── */
+.topbar {
+  background: var(--bg);
+  padding: 18px 22px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-brand {
+  font-family: var(--disp);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-brand .dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: inline-block;
+}
+.topbar-time {
+  font-family: var(--disp);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--paper);
+  padding: 5px 13px;
+  border-radius: 99px;
+  letter-spacing: .02em;
+}
+
+/* ── SCREENS ──────────────────────────────────────────── */
+.screen { display: none; flex-direction: column; flex: 1; }
+.screen.active { display: flex; }
+
+/* ── SCREEN 1 — FORM ──────────────────────────────────── */
+.form-scroll { flex: 1; overflow-y: auto; padding: 8px 18px calc(18px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; }
+
+.section-card {
+  background: var(--paper);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(28,30,34,0.04);
+}
+.section-head {
+  padding: 18px 22px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--stone);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.section-title { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: .01em; }
+.section-body { padding: 10px 22px 22px; display: flex; flex-direction: column; gap: 16px; }
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-left: 2px; }
+.field input, .field select, .field textarea {
+  background: var(--bg);
+  border: 1.5px solid transparent;
+  border-radius: 18px;
+  color: var(--ink);
+  font-family: var(--disp);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 18px;
+  outline: none;
+  transition: border-color .18s, background .18s;
+  width: 100%;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--orange); background: var(--paper); }
+.field input::placeholder { color: var(--ink-faint); font-weight: 500; }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239C988E' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 18px center; padding-right: 40px;
+}
+.field select option { background: var(--paper); font-family: var(--body); }
+.field textarea { resize: none; min-height: 76px; font-family: var(--body); font-weight: 400; font-size: 14px; line-height: 1.5; }
+.field-hint { font-size: 11px; color: var(--ink-faint); padding-left: 2px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Commune autocomplete dropdown */
+.commune-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  margin-top: 4px;
+  background: var(--paper);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(28,30,34,0.14);
+  overflow: hidden;
+  z-index: 60;
+  max-height: 280px;
+  overflow-y: auto;
+  display: none;
+}
+.commune-suggestions.open { display: block; }
+.commune-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 18px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.commune-opt:active, .commune-opt.highlighted { background: var(--bg); }
+.commune-opt + .commune-opt { border-top: 1px solid var(--stone); }
+.commune-opt-name { font-family: var(--disp); font-size: 14px; font-weight: 600; color: var(--ink); }
+.commune-opt-dept {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--stone);
+  padding: 3px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.commune-opt-empty {
+  padding: 16px 18px;
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.geo-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin-top: -2px;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 16px;
+}
+.geo-status.ok { color: var(--green); }
+.geo-status.fail { color: var(--amber); }
+
+/* Drone specs panel — rounded pebble cluster */
+.drone-specs {
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: -2px;
+}
+.drone-specs-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.drone-specs-name { font-family: var(--disp); font-size: 14px; font-weight: 700; color: var(--ink); }
+.drone-specs-class {
+  font-family: var(--disp);
+  font-size: 11px; font-weight: 700;
+  color: var(--orange);
+  background: var(--orange-d);
+  padding: 4px 11px;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ds-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.ds-cell {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 10px 13px;
+}
+.ds-cell .ds-lbl { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 3px; }
+.ds-cell .ds-val { font-family: var(--disp); font-size: 14px; font-weight: 700; color: var(--ink); }
+.ds-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1.5px solid var(--stone);
+}
+
+/* CTA */
+.cta-bar { padding: 14px 18px calc(18px + var(--safe-b)); background: var(--bg); }
+.btn-analyse {
+  width: 100%;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--disp);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  padding: 19px;
+  border-radius: 24px;
+  transition: transform .12s, opacity .15s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-analyse::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+.btn-analyse:active { transform: scale(.98); opacity: .9; }
+.btn-analyse:disabled { opacity: .35; }
+
+/* ── SCREEN 2 — LOADING ───────────────────────────────── */
+#screen-loading { align-items: center; justify-content: center; gap: 30px; padding: 40px 24px; text-align: center; }
+
+.spinner-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 4px solid var(--stone);
+  border-top-color: var(--orange);
+  animation: spin .85s cubic-bezier(.5,0,.5,1) infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label { font-family: var(--disp); font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+
+.loading-modules { display: flex; flex-direction: column; gap: 9px; width: 100%; max-width: 340px; }
+.lmod {
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 13px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 600; color: var(--ink-soft);
+  transition: all .3s;
+}
+.lmod.done   { color: var(--green); background: var(--green-d); }
+.lmod.active { color: var(--orange); background: var(--orange-d); }
+.lmod.fail   { color: var(--amber); background: var(--amber-d); }
+.lmod-icon { font-size: 15px; width: 20px; text-align: center; }
+
+/* ── SCREEN 3 — VERDICT ───────────────────────────────── */
+#screen-verdict {
+  align-items: center;
+  padding: 28px 20px calc(20px + var(--safe-b));
+  gap: 0;
+  overflow-y: auto;
+}
+
+/* The dial — signature element */
+.dial-wrap {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 8px auto 4px;
+  flex-shrink: 0;
+}
+.dial-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dial-track { fill: none; stroke: var(--stone); stroke-width: 14; stroke-linecap: round; }
+.dial-arc   { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dasharray 1s cubic-bezier(.4,0,.2,1), stroke 0.4s; }
+.dial-arc.go   { stroke: var(--green); }
+.dial-arc.warn { stroke: var(--amber); }
+.dial-arc.nogo { stroke: var(--red); }
+
+.dial-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+}
+.dial-word {
+  font-family: var(--disp);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.dial-word.go   { color: var(--green); }
+.dial-word.warn { color: var(--amber); }
+.dial-word.nogo { color: var(--red); }
+.dial-icon { font-size: 22px; margin-bottom: 2px; }
+
+.verdict-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.55;
+  margin-top: 14px;
+  margin-bottom: 22px;
+}
+
+/* Key values — rounded token grid */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+}
+.kv-cell {
+  background: var(--paper);
+  border-radius: 22px;
+  padding: 16px 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.kv-cell .kv-icon-ring {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-bottom: 4px;
+  background: var(--stone);
+}
+.kv-cell.go .kv-icon-ring   { background: var(--green-d); }
+.kv-cell.warn .kv-icon-ring { background: var(--amber-d); }
+.kv-cell.nogo .kv-icon-ring { background: var(--red-d); }
+.kv-cell .kv-val { font-family: var(--disp); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.kv-cell.go .kv-val   { color: var(--green); }
+.kv-cell.warn .kv-val { color: var(--amber); }
+.kv-cell.nogo .kv-val { color: var(--red); }
+.kv-cell .kv-lbl { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: .04em; text-transform: uppercase; }
+.kv-cell .kv-sub { font-size: 9.5px; color: var(--ink-faint); margin-top: 1px; }
+
+/* Module status pills row */
+.pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  margin: 20px 0 4px;
+  width: 100%;
+  max-width: 380px;
+}
+.pill {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  padding: 6px 13px;
+  border-radius: 99px;
+}
+.pill.go   { color: var(--green); background: var(--green-d); }
+.pill.warn { color: var(--amber); background: var(--amber-d); }
+.pill.nogo { color: var(--red);   background: var(--red-d); }
+.pill.info { color: var(--orange); background: var(--orange-d); }
+
+.btn-details {
+  margin-top: 22px;
+  background: var(--paper);
+  border-radius: 24px;
+  color: var(--ink);
+  font-family: var(--disp);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 16px 32px;
+  transition: transform .12s;
+  width: 100%;
+  max-width: 380px;
+}
+.btn-details:active { transform: scale(.98); }
+
+.btn-new {
+  margin-top: 10px;
+  background: var(--ink);
+  border-radius: 24px;
+  color: var(--bg);
+  font-family: var(--disp);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 16px 32px;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: calc(10px + var(--safe-b));
+}
+.btn-new:active { transform: scale(.98); }
+
+/* ── SCREEN 4 — DETAILS ───────────────────────────────── */
+#screen-details { overflow-y: auto; }
+.details-scroll { flex: 1; overflow-y: auto; padding: 8px 16px calc(90px + var(--safe-b)); display: flex; flex-direction: column; gap: 12px; }
+
+.module {
+  background: var(--paper);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.mod-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mod-dot-ring {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.module.go .mod-dot-ring   { background: var(--green-d); }
+.module.warn .mod-dot-ring { background: var(--amber-d); }
+.module.nogo .mod-dot-ring { background: var(--red-d); }
+.module.info .mod-dot-ring { background: var(--orange-d); }
+.mod-dot { width: 8px; height: 8px; border-radius: 50%; }
+.go .mod-dot   { background: var(--green); }
+.warn .mod-dot { background: var(--amber); }
+.nogo .mod-dot { background: var(--red); }
+.info .mod-dot { background: var(--orange); }
+
+.mod-title { font-family: var(--disp); font-size: 14px; font-weight: 700; flex: 1; color: var(--ink); }
+.mod-badge {
+  font-size: 10.5px; font-weight: 700;
+  padding: 5px 12px; border-radius: 99px;
+}
+.go   .mod-badge { color: var(--green); background: var(--green-d); }
+.warn .mod-badge { color: var(--amber); background: var(--amber-d); }
+.nogo .mod-badge { color: var(--red);   background: var(--red-d); }
+.info .mod-badge { color: var(--orange); background: var(--orange-d); }
+.mod-chev { color: var(--ink-faint); font-size: 11px; transition: transform .2s; }
+.module.closed .mod-chev { transform: rotate(-90deg); }
+.mod-body { padding: 0 20px 20px; }
+.module.closed .mod-body { display: none; }
+
+/* Data cells inside modules */
+.dcells { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.dcell { background: var(--bg); border-radius: 16px; padding: 11px 14px; }
+.dcell .lbl { font-size: 9.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
+.dcell .val { font-family: var(--disp); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.dcell .val.go   { color: var(--green); }
+.dcell .val.warn { color: var(--amber); }
+.dcell .val.nogo { color: var(--red); }
+.dcell .val.blue { color: var(--orange); }
+.dcell .sub { font-size: 10px; color: var(--ink-faint); margin-top: 3px; }
+
+/* Alerts — pill-shaped, rounded left cap */
+.mod-alerts { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.malert {
+  display: flex; gap: 11px; padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 13px; line-height: 1.5; align-items: flex-start;
+}
+.malert.go   { background: var(--green-d); color: #176B50; }
+.malert.warn { background: var(--amber-d); color: #8F5A0F; }
+.malert.nogo { background: var(--red-d);   color: #9E2E2E; }
+.malert.info { background: var(--orange-d); color: #C2440F; }
+.malert-ico {
+  flex-shrink: 0;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255,255,255,.55);
+  margin-top: 1px;
+}
+
+.mod-txt { font-size: 13.5px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 12px; }
+
+/* Table — rounded container, no harsh rules */
+.mtbl { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 11.5px; margin-bottom: 12px; }
+.mtbl th { text-align: left; padding: 6px 10px; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; color: var(--ink-faint); text-transform: uppercase; }
+.mtbl td { padding: 10px 10px; vertical-align: top; word-break: break-word; font-weight: 500; background: var(--bg); }
+.mtbl tbody tr td:first-child { border-radius: 12px 0 0 12px; padding-left: 14px; }
+.mtbl tbody tr td:last-child { border-radius: 0 12px 12px 0; padding-right: 14px; }
+
+/* Source links — soft chips */
+.src-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.src-link {
+  font-size: 11px; font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--bg);
+  padding: 6px 13px;
+  border-radius: 99px;
+  text-decoration: none;
+  transition: background .15s;
+}
+.src-link:active { background: var(--stone); }
+
+/* KP gauge inside module — rounded bar */
+.kp-num { font-family: var(--disp); font-size: 40px; font-weight: 700; line-height: 1; }
+.kp-track { height: 8px; background: var(--paper); border-radius: 99px; overflow: hidden; margin: 12px 0 6px; }
+.kp-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+.kp-lbls { display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 600; color: var(--ink-faint); }
+
+/* Details bottom nav */
+.detail-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg);
+  padding: 12px 16px calc(12px + var(--safe-b));
+  display: flex; gap: 10px;
+}
+.btn-back-verdict {
+  flex: 1;
+  background: var(--paper);
+  border-radius: 20px;
+  color: var(--ink);
+  font-family: var(--disp);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 15px;
+}
+.btn-back-new {
+  flex: 1;
+  background: var(--ink);
+  border-radius: 20px;
+  color: var(--bg);
+  font-family: var(--disp);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 15px;
+}
+.btn-back-verdict:active, .btn-back-new:active { transform: scale(.98); }
+
+#utc-clock { font-variant-numeric: tabular-nums; }
+
+.mt8 { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+
+::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand"><span class="dot"></span>DroneOps</div>
+  <div class="topbar-time" id="utc-clock">--:-- UTC</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 1 — SAISIE MISSION                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-form">
+  <div class="form-scroll">
+
+    <!-- Zone de vol -->
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">📍</span>
+        <span class="section-title">Zone de vol</span>
+      </div>
+      <div class="section-body">
+        <div class="field" style="position:relative;">
+          <label>Commune</label>
+          <input type="text" id="loc-name" placeholder="Ex : Saint-Martin..." autocomplete="off"
+            oninput="onCommuneInput()" onfocus="onCommuneInput()" />
+          <div class="commune-suggestions" id="commune-suggestions"></div>
+          <span class="field-hint">Tapez 3 lettres pour voir les communes correspondantes</span>
+          <span class="geo-status" id="geo-status"></span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Altitude max (m AGL)</label>
+            <input type="number" id="altitude" value="120" min="0" max="1000" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label>Durée (min)</label>
+            <input type="number" id="duration" value="30" min="1" inputmode="numeric" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission -->
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">🎯</span>
+        <span class="section-title">Mission</span>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Système UAS (DJI)</label>
+          <select id="drone-model" onchange="updateDroneSpecs()">
+            <option value="">Sélectionner un drone...</option>
+          </select>
+          <span class="field-hint">Caractéristiques chargées automatiquement</span>
+        </div>
+        <div class="drone-specs" id="drone-specs" style="display:none"></div>
+        <div class="field-row">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="f-date" />
+          </div>
+          <div class="field">
+            <label>Heure UTC</label>
+            <input type="time" id="f-time" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">📝</span>
+        <span class="section-title">Notes opérationnelles</span>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <textarea id="notes" placeholder="Contraintes connues, contacts locaux, environnement particulier..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /form-scroll -->
+
+  <div class="cta-bar">
+    <button class="btn-analyse" id="btn-analyse" onclick="runAnalysis()">
+      Analyser la mission
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 2 — CHARGEMENT                                 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-loading">
+  <div class="spinner-ring"></div>
+  <div class="loading-label">Récupération des données en cours…</div>
+  <div class="loading-modules" id="lmods">
+    <div class="lmod" id="lm-airspace"><span class="lmod-icon">○</span> Espace aérien</div>
+    <div class="lmod" id="lm-notam"><span class="lmod-icon">○</span> NOTAM / SUP AIP</div>
+    <div class="lmod" id="lm-oaci"><span class="lmod-icon">○</span> Carte OACI</div>
+    <div class="lmod" id="lm-meteo"><span class="lmod-icon">○</span> Météo temps réel</div>
+    <div class="lmod" id="lm-traffic"><span class="lmod-icon">○</span> Trafic aérien ADS-B</div>
+    <div class="lmod" id="lm-kp"><span class="lmod-icon">○</span> Indice KP — NOAA</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 3 — VERDICT (cadran)                           -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-verdict">
+
+  <div class="dial-wrap">
+    <svg class="dial-svg" viewBox="0 0 260 260">
+      <circle class="dial-track" cx="130" cy="130" r="110" />
+      <circle class="dial-arc" id="dial-arc" cx="130" cy="130" r="110"
+        stroke-dasharray="0 691" />
+    </svg>
+    <div class="dial-center">
+      <span class="dial-icon" id="dial-icon">●</span>
+      <span class="dial-word" id="verdict-word">GO</span>
+    </div>
+  </div>
+
+  <p class="verdict-sub" id="verdict-sub">Conditions favorables — vérifications réglementaires à compléter</p>
+
+  <div class="kv-grid" id="kv-grid"></div>
+  <div class="pills-row" id="pills-row"></div>
+
+  <button class="btn-details" onclick="showScreen('screen-details')">Voir le détail de l'analyse</button>
+  <button class="btn-new" onclick="newMission()">Nouvelle mission</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 4 — DÉTAIL MODULES                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-details">
+  <div class="details-scroll" id="details-scroll"></div>
+  <div class="detail-nav">
+    <button class="btn-back-verdict" onclick="showScreen('screen-verdict')">← Verdict</button>
+    <button class="btn-back-new" onclick="newMission()">Nouvelle mission</button>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ─────────────────────────────────────────────
+function tickClock() {
+  const d = new Date();
+  document.getElementById('utc-clock').textContent =
+    d.getUTCHours().toString().padStart(2,'0') + ':' +
+    d.getUTCMinutes().toString().padStart(2,'0') + ' UTC';
+}
+tickClock(); setInterval(tickClock, 5000);
+
+// Init dates
+const now = new Date();
+document.getElementById('f-date').valueAsDate = now;
+document.getElementById('f-time').value = now.toISOString().slice(11,16);
+
+// ── NAVIGATION ────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function newMission() {
+  showScreen('screen-form');
+  document.getElementById('btn-analyse').disabled = false;
+}
+
+// ── FETCH AVEC TIMEOUT (sans AbortSignal — incompatible avec le sandbox postMessage mobile) ────
+function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Délai dépassé')), timeoutMs))
+  ]);
+}
+
+// ── AUTOCOMPLÉTION COMMUNE (API Découpage administratif — geo.api.gouv.fr) ────
+// Stocke la commune explicitement choisie dans la liste (évite toute ambiguïté entre homonymes)
+let selectedCommune = null;
+let communeDebounce = null;
+let communeHighlight = -1;
+let communeOptions = [];
+let communeReqId = 0; // garde anti-concurrence : seule la dernière requête lancée peut peindre l'écran
+
+function onCommuneInput() {
+  const val = document.getElementById('loc-name').value.trim();
+  selectedCommune = null; // toute frappe invalide la sélection précédente
+  document.getElementById('geo-status').textContent = '';
+  document.getElementById('geo-status').className = 'geo-status';
+
+  clearTimeout(communeDebounce);
+  if (val.length < 3) { closeCommuneList(); return; }
+  communeDebounce = setTimeout(() => searchCommunes(val), 250);
+}
+
+async function searchCommunes(query) {
+  const myReq = ++communeReqId;
+  // Affiche un état "recherche en cours" immédiatement, pour distinguer latence et échec réel
+  const box = document.getElementById('commune-suggestions');
+  box.innerHTML = `<div class="commune-opt-empty">Recherche…</div>`;
+  box.classList.add('open');
+
+  let list = null;
+  let errMsg = '';
+
+  // 1) Tentative principale — API Découpage administratif (geo.api.gouv.fr)
+  try {
+    const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&boost=population&fields=nom,code,codesPostaux,codeDepartement,departement,centre&limit=12`;
+    const r = await fetchWithTimeout(url, {}, 7000);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    list = await r.json();
+    if (!Array.isArray(list)) throw new Error('Réponse inattendue');
+  } catch(e) {
+    errMsg = e.message || String(e);
+    list = null;
+  }
+
+  // 2) Repli automatique — API Adresse (data.gouv.fr) si la première échoue
+  if (list === null) {
+    try {
+      const url2 = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&type=municipality&limit=12`;
+      const r2 = await fetchWithTimeout(url2, {}, 7000);
+      if (!r2.ok) throw new Error('HTTP ' + r2.status);
+      const geojson = await r2.json();
+      // Normalise au même format que geo.api.gouv.fr pour le reste du code
+      list = (geojson.features || []).map(f => ({
+        nom: f.properties.city || f.properties.name,
+        code: f.properties.citycode,
+        codesPostaux: [f.properties.postcode],
+        codeDepartement: f.properties.context?.split(',')[0]?.trim(),
+        departement: { nom: f.properties.context?.split(',')[1]?.trim() || '' },
+        centre: { coordinates: f.geometry.coordinates }
+      }));
+      errMsg = '';
+    } catch(e2) {
+      errMsg = errMsg ? `${errMsg} / repli : ${e2.message}` : e2.message;
+      list = null;
+    }
+  }
+
+  // Une requête plus récente a été lancée depuis : on n'écrase pas son résultat
+  if (myReq !== communeReqId) return;
+
+  if (list === null) {
+    renderCommuneList([], true, errMsg);
+  } else {
+    renderCommuneList(list, false);
+  }
+}
+
+function renderCommuneList(list, failed=false, errMsg='') {
+  communeOptions = list;
+  communeHighlight = -1;
+  const box = document.getElementById('commune-suggestions');
+  if (failed) {
+    box.innerHTML = `<div class="commune-opt-empty">Recherche indisponible${errMsg ? ' ('+errMsg+')' : ''}<br><span style="font-size:10px">Vérifiez la connexion, ou réessayez</span></div>`;
+    box.classList.add('open');
+    return;
+  }
+  if (!list.length) {
+    box.innerHTML = `<div class="commune-opt-empty">Aucune commune trouvée</div>`;
+    box.classList.add('open');
+    return;
+  }
+  box.innerHTML = list.map((c, i) => `
+    <div class="commune-opt" data-idx="${i}" onclick="pickCommune(${i})">
+      <span class="commune-opt-name">${c.nom}</span>
+      <span class="commune-opt-dept">${c.codesPostaux?.[0]||''} · ${c.departement?.nom||c.codeDepartement||''}</span>
+    </div>`).join('');
+  box.classList.add('open');
+}
+
+function closeCommuneList() {
+  const box = document.getElementById('commune-suggestions');
+  box.classList.remove('open');
+  box.innerHTML = '';
+  communeOptions = [];
+  communeHighlight = -1;
+}
+
+function pickCommune(idx) {
+  const c = communeOptions[idx];
+  if (!c) return;
+  selectedCommune = {
+    lat: c.centre?.coordinates?.[1],
+    lon: c.centre?.coordinates?.[0],
+    label: `${c.nom} (${c.codesPostaux?.[0]||''}) — ${c.departement?.nom||c.codeDepartement||''}`
+  };
+  const deptTag = c.codeDepartement ? ` (${c.codeDepartement})` : '';
+  document.getElementById('loc-name').value = `${c.nom}${deptTag}`;
+  document.getElementById('geo-status').textContent = '📍 ' + selectedCommune.label;
+  document.getElementById('geo-status').className = 'geo-status ok';
+  closeCommuneList();
+}
+
+// Fermeture si clic en dehors du champ / de la liste
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('loc-name');
+  const box = document.getElementById('commune-suggestions');
+  if (wrap && box && !wrap.contains(e.target) && !box.contains(e.target)) closeCommuneList();
+});
+
+// Navigation clavier (utile en usage tablette avec clavier physique)
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('loc-name');
+  if (!input) return;
+  input.addEventListener('keydown', (e) => {
+    const box = document.getElementById('commune-suggestions');
+    if (!box.classList.contains('open')) return;
+    const opts = box.querySelectorAll('.commune-opt');
+    if (e.key === 'ArrowDown') { e.preventDefault(); communeHighlight = Math.min(communeHighlight+1, opts.length-1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); communeHighlight = Math.max(communeHighlight-1, 0); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (communeHighlight>=0) pickCommune(communeHighlight); return; }
+    else if (e.key === 'Escape') { closeCommuneList(); return; }
+    else return;
+    opts.forEach((o,i)=>o.classList.toggle('highlighted', i===communeHighlight));
+    opts[communeHighlight]?.scrollIntoView({block:'nearest'});
+  });
+});
+
+// ── BASE DE DONNÉES DRONES DJI ─────────────────────────
+// Sources : fiches techniques DJI / DJI Enterprise, comparatifs spécialisés (2026)
+const DJI_DRONES = {
+  // ── Grand public — gamme Mini (< 250 g) ──
+  "mini-5-pro": {
+    group: "Grand public — Mini", name: "DJI Mini 5 Pro", classe: "C0",
+    poids: "249 g", autonomie: "36 min", vitesseMax: "18 m/s (65 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "1\" — 50 MP",
+    note: "Sous 250 g, catégorie ouverte A1. LiDAR + détection omnidirectionnelle."
+  },
+  "mini-4-pro": {
+    group: "Grand public — Mini", name: "DJI Mini 4 Pro", classe: "C0",
+    poids: "249 g", autonomie: "34 min", vitesseMax: "16 m/s (58 km/h)",
+    ventMax: "10,7 m/s (38 km/h)", altMax: "6000 m", capteur: "1/1,3\" — 48 MP",
+    note: "Sous 250 g, catégorie ouverte A1. Détection omnidirectionnelle."
+  },
+  "neo": {
+    group: "Grand public — Mini", name: "DJI Neo", classe: "C0",
+    poids: "135 g", autonomie: "18-20 min", vitesseMax: "16 m/s (58 km/h)",
+    ventMax: "≈ 5 m/s (18 km/h)", altMax: "4000 m", capteur: "1/2\" — 12 MP",
+    note: "Ultra-léger, pilotage sans télécommande possible. Sensible au vent."
+  },
+  "flip": {
+    group: "Grand public — Mini", name: "DJI Flip", classe: "C0",
+    poids: "< 249 g", autonomie: "31 min", vitesseMax: "16 m/s (58 km/h)",
+    ventMax: "10,7 m/s (38 km/h)", altMax: "4000 m", capteur: "1/1,3\" — 48 MP",
+    note: "Hélices carénées intégrales. Pas de détection omnidirectionnelle."
+  },
+  "mini-4k": {
+    group: "Grand public — Mini", name: "DJI Mini 4K", classe: "C0",
+    poids: "< 249 g", autonomie: "31 min", vitesseMax: "16 m/s (58 km/h)",
+    ventMax: "10,5 m/s (38 km/h)", altMax: "4000 m", capteur: "1/2,3\" — 12 MP",
+    note: "Modèle d'entrée de gamme. Pas de détection d'obstacles."
+  },
+
+  // ── Grand public — Air / Mavic ──
+  "mavic-4-pro": {
+    group: "Grand public — Air / Mavic", name: "DJI Mavic 4 Pro", classe: "C2",
+    poids: "1063 g", autonomie: "51 min", vitesseMax: "25 m/s (90 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 Hasselblad — 100 MP",
+    note: "Catégorie A2 — formation complémentaire requise en zone habitée. Triple caméra, LiDAR."
+  },
+  "air-3s": {
+    group: "Grand public — Air / Mavic", name: "DJI Air 3S", classe: "C1",
+    poids: "724 g", autonomie: "45 min", vitesseMax: "21 m/s (75 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "1\" + téléobjectif",
+    note: "Catégorie A1/A3. Double capteur, détection omnidirectionnelle."
+  },
+
+  // ── Entreprise ──
+  "mavic-3e": {
+    group: "Entreprise", name: "DJI Mavic 3 Enterprise (3E)", classe: "C2",
+    poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 56x",
+    note: "Cartographie, RTK disponible. IP54. Compatible nacelle Enterprise."
+  },
+  "mavic-3t": {
+    group: "Entreprise", name: "DJI Mavic 3 Enterprise Thermal (3T)", classe: "C2",
+    poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique 640×512 + zoom 56x",
+    note: "Sécurité publique, SAR, lutte incendie. Caméra thermique intégrée."
+  },
+  "matrice-4e": {
+    group: "Entreprise", name: "DJI Matrice 4E", classe: "C2/C3",
+    poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 112x + laser",
+    note: "Cartographie/géospatial. RTK intégré, télémètre laser 1800 m, IP54."
+  },
+  "matrice-4t": {
+    group: "Entreprise", name: "DJI Matrice 4T", classe: "C2/C3",
+    poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique + 3 caméras + laser",
+    note: "Énergie, secours, sécurité publique, forêt. Zoom hybride 112x, IP54."
+  },
+  "matrice-4td": {
+    group: "Entreprise", name: "DJI Matrice 4TD", classe: "C2",
+    poids: "≈ 1,85 kg", autonomie: "54 min", vitesseMax: "20 m/s (72 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique 640×512 + grand angle 48MP + télé 48MP + laser",
+    note: "Version IP55 étanche/anti-poussière du M4T, conçue pour DJI Dock 3 (vols automatisés BVLOS). Utilisable en manuel avec RC Plus 2 Enterprise. Idéal secours, sécurité publique, surveillance permanente. Plage -30°C à 50°C."
+  },
+  "matrice-350-rtk": {
+    group: "Entreprise", name: "DJI Matrice 350 RTK", classe: "C3",
+    poids: "≈ 3,8 kg (sans payload)", autonomie: "55 min", vitesseMax: "23 m/s (83 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Selon nacelle (Zenmuse)",
+    note: "Plateforme modulaire lourde. IP55, double batterie à chaud, charge utile multiple."
+  },
+  "matrice-400": {
+    group: "Entreprise", name: "DJI Matrice 400 RTK", classe: "C3",
+    poids: "≈ 4,5 kg (sans payload)", autonomie: "59 min", vitesseMax: "25 m/s (90 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Selon nacelle (H30/H30T)",
+    note: "Charge utile jusqu'à 6 kg. ADS-B In intégré, IP55, relais aérien, RTK cm."
+  },
+};
+
+function populateDroneSelect() {
+  const sel = document.getElementById('drone-model');
+  const groups = {};
+  Object.entries(DJI_DRONES).forEach(([key, d]) => {
+    if (!groups[d.group]) groups[d.group] = [];
+    groups[d.group].push([key, d]);
+  });
+  Object.entries(groups).forEach(([groupName, drones]) => {
+    const og = document.createElement('optgroup');
+    og.label = groupName;
+    drones.forEach(([key, d]) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = d.name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  const autreOpt = document.createElement('option');
+  autreOpt.value = 'autre';
+  autreOpt.textContent = 'Autre / non listé';
+  sel.appendChild(autreOpt);
+}
+populateDroneSelect();
+
+function updateDroneSpecs() {
+  const key = document.getElementById('drone-model').value;
+  const panel = document.getElementById('drone-specs');
+  if (!key || key === 'autre') { panel.style.display = 'none'; panel.innerHTML = ''; return; }
+  const d = DJI_DRONES[key];
+  if (!d) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="drone-specs-hdr">
+      <span class="drone-specs-name">${d.name}</span>
+      <span class="drone-specs-class">${d.classe}</span>
+    </div>
+    <div class="ds-grid">
+      <div class="ds-cell"><div class="ds-lbl">Poids</div><div class="ds-val">${d.poids}</div></div>
+      <div class="ds-cell"><div class="ds-lbl">Autonomie</div><div class="ds-val">${d.autonomie}</div></div>
+      <div class="ds-cell"><div class="ds-lbl">Vitesse max</div><div class="ds-val">${d.vitesseMax}</div></div>
+      <div class="ds-cell"><div class="ds-lbl">Résist. vent</div><div class="ds-val">${d.ventMax}</div></div>
+      <div class="ds-cell"><div class="ds-lbl">Altitude max</div><div class="ds-val">${d.altMax}</div></div>
+      <div class="ds-cell"><div class="ds-lbl">Capteur</div><div class="ds-val" style="font-size:11px">${d.capteur}</div></div>
+    </div>
+    <div class="ds-note">${d.note}</div>`;
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function getInputs() {
+  const droneKey = document.getElementById('drone-model').value;
+  const droneData = DJI_DRONES[droneKey] || null;
+  return {
+    locName:     document.getElementById('loc-name').value.trim(),
+    altitude:    parseInt(document.getElementById('altitude').value)||120,
+    duration:    parseInt(document.getElementById('duration').value)||30,
+    droneKey,
+    droneData,
+    fDate:       document.getElementById('f-date').value,
+    fTime:       document.getElementById('f-time').value,
+    notes:       document.getElementById('notes').value.trim()
+  };
+}
+
+function lmod(id, state) {
+  const el = document.getElementById('lm-'+id);
+  el.className = 'lmod ' + state;
+  const ico = state==='done'?'●':state==='active'?'◐':state==='fail'?'●':'○';
+  el.children[0].textContent = ico;
+}
+
+// ── REAL APIs ─────────────────────────────────────────
+async function fetchKP() {
+  try {
+    const r = await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
+    const d = await r.json();
+    const recent = [...d].reverse().find(x => x.kp_index != null);
+    const kp = recent ? parseFloat(recent.kp_index) : null;
+    let forecast = null;
+    try {
+      const rf = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json');
+      const fd = await rf.json();
+      if (fd?.length > 1) forecast = fd.slice(1,5).map(e=>({time:e[0],kp:parseFloat(e[1])})).filter(e=>!isNaN(e.kp));
+    } catch{}
+    return { kp, ts: recent?.time_tag, forecast, error:null };
+  } catch(e) { return { kp:null, ts:null, forecast:null, error:e.message }; }
+}
+
+async function fetchMeteo(lat, lon) {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,visibility` +
+      `&hourly=wind_speed_80m,wind_speed_120m&wind_speed_unit=kn&forecast_days=1&timezone=UTC`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.error) throw new Error(d.reason);
+    const c = d.current;
+    const hIdx = new Date().getUTCHours();
+    const wmoDesc = code => {
+      if (code===0) return 'Ciel dégagé';
+      if (code<=3) return 'Partiellement nuageux';
+      if (code<=9) return 'Brouillard';
+      if (code<=29) return 'Averses légères';
+      if (code<=49) return 'Bruine';
+      if (code<=59) return 'Pluie';
+      if (code<=69) return 'Neige';
+      if (code<=79) return 'Grésil';
+      if (code<=89) return 'Averses orageuses';
+      return 'Orage';
+    };
+    return {
+      windKt: c.wind_speed_10m, gustKt: c.wind_gusts_10m, windDir: c.wind_direction_10m,
+      wind80: d.hourly?.wind_speed_80m?.[hIdx] ?? null,
+      wind120: d.hourly?.wind_speed_120m?.[hIdx] ?? null,
+      vis: c.visibility, precip: c.precipitation, temp: c.temperature_2m,
+      hum: c.relative_humidity_2m, clouds: c.cloud_cover,
+      wcode: c.weather_code, desc: wmoDesc(c.weather_code), error:null
+    };
+  } catch(e) { return { error: e.message }; }
+}
+
+async function fetchOpenSky(lat, lon) {
+  try {
+    const d = 0.3;
+    const url = `https://opensky-network.org/api/states/all?lamin=${lat-d}&lomin=${lon-d}&lamax=${lat+d}&lomax=${lon+d}`;
+    const r = await fetchWithTimeout(url, {}, 8000);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const js = await r.json();
+    const ac = (js.states||[]).map(s=>({
+      icao:s[0], callsign:(s[1]||'').trim(), country:s[2],
+      alt_m: s[7]?Math.round(s[7]):null, on_ground:s[8],
+      spd_ms:s[9]
+    })).filter(a=>!a.on_ground && a.alt_m!==null);
+    return { count:ac.length, aircraft:ac, error:null };
+  } catch(e) { return { count:0, aircraft:[], error:e.message }; }
+}
+
+// ── CLAUDE ────────────────────────────────────────────
+// ── CONTENU RÉGLEMENTAIRE STATIQUE (à vérifier manuellement) ──
+// Ces 3 modules ne sont pas analysés automatiquement : ils rassemblent les bons réflexes
+// et les liens officiels pour que la vérification manuelle soit rapide.
+function getAirspaceChecklist(geo) {
+  return {
+    titre: 'Espace aérien',
+    points: [
+      'Identifiez la classe d\'espace aérien au-dessus de la zone (G, E, D, CTR, TMA…) via la carte aéronautique.',
+      'Vérifiez la présence de zones réglementées proches : CTR, ZRT, ZDI, zones P/R/D (Géoportail).',
+      'Confirmez l\'altitude maximale autorisée pour votre catégorie de vol (générique : 120 m AGL en catégorie ouverte, sauf zone spécifique).',
+      'En cas de zone contrôlée, contactez l\'autorité compétente avant le vol (DSAC, préfecture, ou unité ATS locale).'
+    ],
+    liens: [
+      {label:'Géoportail — Espaces aériens', url:'https://www.geoportail.gouv.fr/carte'},
+      {label:'SIA France', url:'https://www.sia.aviation-civile.gouv.fr'}
+    ]
+  };
+}
+function getNotamChecklist(geo) {
+  return {
+    titre: 'NOTAM & SUP AIP',
+    points: [
+      'Consultez les NOTAM actifs sur la zone et la période de vol via SOFIA Briefing.',
+      'Vérifiez les SUP AIP (suppléments à l\'AIP) qui pourraient s\'appliquer temporairement.',
+      'Portez une attention particulière aux TFR (restrictions temporaires de vol) en cas d\'événement local.',
+      'Imprimez ou capturez le briefing avant le vol, en cas de perte de connexion sur site.'
+    ],
+    liens: [
+      {label:'SOFIA Briefing (DGAC)', url:'https://sofia-briefing.aviation-civile.gouv.fr'},
+      {label:'SIA — SUP AIP', url:'https://www.sia.aviation-civile.gouv.fr'}
+    ]
+  };
+}
+function getOaciChecklist(geo) {
+  return {
+    titre: 'Carte OACI',
+    points: [
+      'Repérez les aérodromes/hélistations à proximité et leur fréquence AFIS/INFO.',
+      'Identifiez le relief significatif et les obstacles connus (pylônes, lignes HT, antennes).',
+      'Vérifiez la présence d\'axes aériens ou de couloirs de basse altitude utilisés localement.',
+      'Si un aérodrome contrôlé est proche, une coordination radio peut être nécessaire avant le vol.'
+    ],
+    liens: [
+      {label:'Géoportail — Carte OACI', url:'https://www.geoportail.gouv.fr/carte'},
+      {label:'SIA — Cartes VAC/OACI', url:'https://www.sia.aviation-civile.gouv.fr'}
+    ]
+  };
+}
+
+// ── STATUS HELPERS ────────────────────────────────────
+function meteoStatus(m) {
+  if (m.error) return 'warn';
+  if (m.windKt>20||m.gustKt>25||m.vis<1500||m.wcode>=80) return 'nogo';
+  if (m.windKt>12||m.gustKt>17||m.vis<5000||m.precip>0.5||m.wcode>=45) return 'warn';
+  return 'go';
+}
+function kpStatus(kp) {
+  if (kp===null) return 'warn';
+  if (kp>=5) return 'nogo';
+  if (kp>=4) return 'warn';
+  return 'go';
+}
+function trafficStatus(d) {
+  if (d.error) return 'warn';
+  return d.aircraft.filter(a=>a.alt_m<500).length > 0 ? 'warn' : 'go';
+}
+
+// ── MAIN ──────────────────────────────────────────────
+async function runAnalysis() {
+  const inp = getInputs();
+  if (!inp.locName) { alert('Veuillez indiquer une commune.'); return; }
+  if (!selectedCommune) {
+    alert('Veuillez sélectionner une commune dans la liste proposée, pour éviter toute confusion entre communes homonymes.');
+    document.getElementById('loc-name').focus();
+    return;
+  }
+
+  document.getElementById('btn-analyse').disabled = true;
+  showScreen('screen-loading');
+  ['airspace','notam','oaci','meteo','traffic','kp'].forEach(k=>lmod(k,'active'));
+
+  const geo = selectedCommune;
+  const lat = geo.lat ?? 48.8566;
+  const lon = geo.lon ?? 2.3522;
+
+  const results = {};
+
+  // Real APIs (météo, KP, trafic — fonctionnent en hébergement web indépendant)
+  const [kpData, meteoData, skyData] = await Promise.all([
+    fetchKP().then(d=>{ results.kp=d; lmod('kp', d.error?'fail':'done'); return d; }),
+    geo ? fetchMeteo(lat,lon).then(d=>{ results.meteo=d; lmod('meteo', d.error?'fail':'done'); return d; }) : Promise.resolve({error:'Commune non localisée'}).then(d=>{results.meteo=d;lmod('meteo','fail');return d;}),
+    geo ? fetchOpenSky(lat,lon).then(d=>{ results.traffic=d; lmod('traffic', d.error?'fail':'done'); return d; }) : Promise.resolve({count:0,aircraft:[],error:'Commune non localisée'}).then(d=>{results.traffic=d;lmod('traffic','fail');return d;}),
+  ]);
+
+  // Checklists réglementaires statiques (pas d'analyse automatique — vérification manuelle requise)
+  results.airspace = getAirspaceChecklist(geo);
+  results.notam = getNotamChecklist(geo);
+  results.oaci = getOaciChecklist(geo);
+  lmod('airspace','done'); lmod('notam','done'); lmod('oaci','done');
+
+  // Compute statuses — les 3 modules réglementaires sont neutres ("info", à vérifier), pas go/nogo automatique
+  const statuses = {
+    airspace: 'info',
+    notam:    'info',
+    oaci:     'info',
+    meteo:    meteoStatus(meteoData),
+    traffic:  trafficStatus(skyData),
+    kp:       kpStatus(kpData.kp)
+  };
+
+  // Fix lmod colors — les modules 'info' restent affichés comme terminés (vert), pas comme un échec
+  Object.entries(statuses).forEach(([k,v]) => {
+    if (v==='info') return; // déjà posé à 'done' juste au-dessus, on n'y touche pas
+    lmod(k, v==='go'?'done':v==='nogo'?'fail':'fail');
+  });
+
+  // Global — seuls les modules à donnée réelle (météo, trafic, KP) déterminent le verdict GO/WARN/NO-GO ;
+  // les 3 modules réglementaires sont informatifs et nécessitent toujours une vérification manuelle.
+  let global = 'go';
+  Object.entries(statuses).forEach(([k,s]) => {
+    if (s==='info') return;
+    if (s==='nogo') global='nogo';
+    else if (s==='warn' && global!=='nogo') global='warn';
+  });
+
+  // Small delay to let user see the loading states
+  await new Promise(r => setTimeout(r, 600));
+
+  // Build verdict
+  renderVerdict(global, statuses, results);
+  renderDetails(results, statuses, inp);
+  showScreen('screen-verdict');
+}
+
+// ── VERDICT ───────────────────────────────────────────
+function renderVerdict(global, statuses, results) {
+  // ── Dial (cadran circulaire) ──
+  const CIRC = 2 * Math.PI * 110; // ≈ 691.15
+  const dialArc = document.getElementById('dial-arc');
+  const dialWord = document.getElementById('verdict-word');
+  const dialIcon = document.getElementById('dial-icon');
+
+  dialArc.classList.remove('go','warn','nogo');
+  dialArc.classList.add(global);
+  // Fraction of the ring filled depends on verdict severity — full ring for clear go, partial for warn/nogo to feel like a gauge
+  const frac = global==='go' ? 0.92 : global==='warn' ? 0.62 : 0.34;
+  requestAnimationFrame(() => {
+    dialArc.style.strokeDasharray = `${CIRC*frac} ${CIRC}`;
+  });
+
+  dialWord.className = 'dial-word ' + global;
+  dialWord.textContent = global==='go'?'GO':global==='warn'?'VÉRIF.':'NO-GO';
+  dialIcon.textContent = global==='go'?'✓':global==='warn'?'!':'✕';
+
+  const subs = {
+    go:   'Conditions favorables — vérifications réglementaires à compléter',
+    warn: 'Points de vigilance identifiés — consulter le détail avant décollage',
+    nogo: 'Restriction détectée — vol non recommandé en l\'état'
+  };
+  document.getElementById('verdict-sub').textContent = subs[global];
+
+  const labels = { airspace:'Espace aérien', notam:'NOTAM/SUP AIP', oaci:'Carte OACI', meteo:'Météo', traffic:'Trafic ADS-B', kp:'Indice KP' };
+  const pills = Object.entries(statuses).map(([k,v]) =>
+    `<div class="pill ${v}">${labels[k]}</div>`).join('');
+  document.getElementById('pills-row').innerHTML = pills;
+
+  // ── Key values snapshot — give the pilot the actual numbers at a glance ──
+  const m = results.meteo || {};
+  const kpD = results.kp || {};
+  const tr = results.traffic || {};
+
+  const cells = [];
+
+  // Wind
+  if (!m.error) {
+    const wSt = m.windKt>20?'nogo':m.windKt>12?'warn':'go';
+    cells.push({ icon:'💨', val:`${m.windKt} kt`, lbl:'Vent surface', sub:`Rafales ${m.gustKt} kt`, st:wSt });
+  } else {
+    cells.push({ icon:'💨', val:'N/D', lbl:'Vent surface', sub:'', st:'warn' });
+  }
+
+  // Visibility
+  if (!m.error) {
+    const visLabel = m.vis>=10000?'>10 km':(m.vis/1000).toFixed(1)+' km';
+    const vSt = m.vis<1500?'nogo':m.vis<5000?'warn':'go';
+    cells.push({ icon:'👁', val:visLabel, lbl:'Visibilité', sub:'Mini 1500 m', st:vSt });
+  } else {
+    cells.push({ icon:'👁', val:'N/D', lbl:'Visibilité', sub:'', st:'warn' });
+  }
+
+  // Precipitation / conditions
+  if (!m.error) {
+    const pSt = m.precip>1?'nogo':m.precip>0.3?'warn':'go';
+    cells.push({ icon:'🌧', val:`${m.precip} mm/h`, lbl:'Précipitations', sub:m.desc||'', st:pSt });
+  } else {
+    cells.push({ icon:'🌧', val:'N/D', lbl:'Précipitations', sub:'', st:'warn' });
+  }
+
+  // KP index
+  const kpVal = kpD.kp;
+  if (kpVal !== null && kpVal !== undefined) {
+    const kSt = kpVal>=5?'nogo':kpVal>=4?'warn':'go';
+    cells.push({ icon:'🛰', val:kpVal.toFixed(1), lbl:'Indice KP', sub:'Impact GNSS', st:kSt });
+  } else {
+    cells.push({ icon:'🛰', val:'N/D', lbl:'Indice KP', sub:'', st:'warn' });
+  }
+
+  // Traffic
+  if (!tr.error) {
+    const low = (tr.aircraft||[]).filter(a=>a.alt_m<500).length;
+    const tSt = low>0?'warn':'go';
+    cells.push({ icon:'✈', val:tr.count ?? 0, lbl:'Aéronefs ~30km', sub: low>0?`${low} sous 500m`:'', st:tSt });
+  } else {
+    cells.push({ icon:'✈', val:'N/D', lbl:'Trafic ADS-B', sub:'', st:'warn' });
+  }
+
+  // Temperature (extra context, neutral)
+  if (!m.error) {
+    cells.push({ icon:'🌡', val:`${m.temp}°C`, lbl:'Température', sub:`Humidité ${m.hum}%`, st:'go' });
+  }
+
+  document.getElementById('kv-grid').innerHTML = cells.map(c => `
+    <div class="kv-cell ${c.st}">
+      <span class="kv-icon-ring">${c.icon}</span>
+      <span class="kv-val ${c.st}">${c.val}</span>
+      <span class="kv-lbl">${c.lbl}</span>
+      ${c.sub ? `<span class="kv-sub">${c.sub}</span>` : ''}
+    </div>`).join('');
+}
+
+// ── DETAILS ───────────────────────────────────────────
+function renderDetails(results, statuses, inp) {
+  const ds = document.getElementById('details-scroll');
+  ds.innerHTML = '';
+
+  const modules = [
+    buildAirspace(results.airspace, statuses.airspace),
+    buildNotam(results.notam, statuses.notam),
+    buildOaci(results.oaci, statuses.oaci),
+    buildMeteo(results.meteo, statuses.meteo, inp.altitude, inp.droneData),
+    buildTraffic(results.traffic, statuses.traffic),
+    buildKP(results.kp, statuses.kp),
+  ];
+  modules.forEach(m => ds.insertAdjacentHTML('beforeend', m));
+}
+
+function modWrap(id, title, status, badge, body) {
+  return `<div class="module ${status}" id="mod-${id}">
+    <div class="mod-hdr" onclick="toggleMod('${id}')">
+      <div class="mod-dot-ring"><div class="mod-dot"></div></div>
+      <div class="mod-title">${title}</div>
+      <div class="mod-badge">${badge}</div>
+      <div class="mod-chev">▼</div>
+    </div>
+    <div class="mod-body">${body}</div>
+  </div>`;
+}
+function toggleMod(id) { document.getElementById('mod-'+id).classList.toggle('closed'); }
+
+function dc(lbl, val, cls='', sub='') {
+  return `<div class="dcell"><div class="lbl">${lbl}</div><div class="val ${cls}">${val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+}
+function alerts(arr) {
+  if (!arr?.length) return '';
+  return `<div class="mod-alerts">${arr.map(a=>`<div class="malert ${a.niveau}"><span class="malert-ico">${a.niveau==='go'?'✓':a.niveau==='warn'?'⚠':'✕'}</span><span>${a.message}</span></div>`).join('')}</div>`;
+}
+function srcLinks(links) {
+  return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank">${l.label}</a>`).join('')}</div>`;
+}
+
+function buildAirspace(r, s) {
+  return modWrap('airspace','Espace aérien', s, 'À VÉRIFIER', `
+    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+    ${srcLinks(r.liens)}`);
+}
+
+function buildNotam(r, s) {
+  return modWrap('notam','NOTAM & SUP AIP', s, 'À VÉRIFIER', `
+    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+    ${srcLinks(r.liens)}`);
+}
+
+function buildOaci(r, s) {
+  return modWrap('oaci','Carte OACI', s, 'À VÉRIFIER', `
+    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+    ${srcLinks(r.liens)}`);
+}
+
+function buildMeteo(m, s, altMax, droneData) {
+  if (m.error) return modWrap('meteo','Météo temps réel',s,'INDISPONIBLE',`
+    <div class="malert warn"><span class="malert-ico">⚠</span><span>Données indisponibles : ${m.error}</span></div>
+    ${srcLinks([{label:'Météo-France Aviation',url:'https://aviation.meteo.fr'},{label:'SOFIA — METAR/TAF',url:'https://sofia-briefing.aviation-civile.gouv.fr'}])}`);
+
+  const dir = m.windDir||0;
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+  const wdLabel = dirs[Math.round(dir/22.5)%16];
+  const wSt = m.windKt>20?'nogo':m.windKt>12?'warn':'go';
+  const gSt = m.gustKt>25?'nogo':m.gustKt>17?'warn':'go';
+  const vSt = m.vis<1500?'nogo':m.vis<5000?'warn':'go';
+  const visLabel = m.vis>=10000?'>10 km':(m.vis/1000).toFixed(1)+' km';
+
+  const modAlerts = [];
+  if (m.windKt>20) modAlerts.push({niveau:'nogo',message:`Vent ${m.windKt} kt — Dépasse seuil opérationnel (20 kt)`});
+  else if (m.windKt>12) modAlerts.push({niveau:'warn',message:`Vent ${m.windKt} kt — Risque de dérive, surveiller`});
+  if (m.gustKt>25) modAlerts.push({niveau:'nogo',message:`Rafales ${m.gustKt} kt — Risque de perte de contrôle`});
+  else if (m.gustKt>17) modAlerts.push({niveau:'warn',message:`Rafales ${m.gustKt} kt — Attention aux pics`});
+  if (m.vis<5000) modAlerts.push({niveau:m.vis<1500?'nogo':'warn',message:`Visibilité ${visLabel} — ${m.vis<1500?'En dessous du minimum légal VLOS (1500 m)':'VLOS dégradé'}`});
+  if (m.precip>0) modAlerts.push({niveau:m.precip>1?'nogo':'warn',message:`Précipitations ${m.precip} mm/h — Risque pour équipements`});
+  if (m.wcode>=80) modAlerts.push({niveau:'nogo',message:`${m.desc} — Conditions incompatibles avec le vol`});
+
+  // Comparaison avec la résistance au vent constructeur du drone sélectionné
+  if (droneData) {
+    const droneVentMatch = droneData.ventMax.match(/([\d,.]+)\s*m\/s/);
+    if (droneVentMatch) {
+      const droneVentMs = parseFloat(droneVentMatch[1].replace(',','.'));
+      const droneVentKt = Math.round(droneVentMs * 1.944);
+      const gustMs = m.gustKt / 1.944;
+      if (gustMs >= droneVentMs) {
+        modAlerts.unshift({niveau:'nogo',message:`Rafales (${m.gustKt} kt) ≥ résistance au vent du ${droneData.name} (${droneData.ventMax} ≈ ${droneVentKt} kt) — Risque de perte de contrôle`});
+      } else if (gustMs >= droneVentMs * 0.8) {
+        modAlerts.unshift({niveau:'warn',message:`Rafales proches de la limite constructeur du ${droneData.name} (${droneData.ventMax} ≈ ${droneVentKt} kt)`});
+      }
+    }
+  }
+
+  return modWrap('meteo','Météo temps réel',s, s==='go'?'FAVORABLE':s==='nogo'?'DÉFAVORABLE':'CONSULTER', `
+    <div class="dcells">
+      ${dc('Vent surface', `${m.windKt} kt`, wSt, `${wdLabel} (${dir}°)`)}
+      ${dc('Rafales', `${m.gustKt} kt`, gSt, droneData?`Limite drone : ${droneData.ventMax}`:'')}
+      ${m.wind80!==null ? dc(`Vent 80 m`, `${m.wind80} kt`, m.wind80>15?'warn':'go') : ''}
+      ${m.wind120!==null ? dc(`Vent 120 m`, `${m.wind120} kt`, m.wind120>18?'warn':'go') : ''}
+      ${dc('Visibilité', visLabel, vSt, 'Mini VLOS : 1500 m')}
+      ${dc('Précipitations', `${m.precip} mm/h`, m.precip>0?'warn':'go')}
+      ${dc('Conditions', m.desc, m.wcode>=80?'nogo':m.wcode>=45?'warn':'go')}
+      ${dc('Température', `${m.temp}°C`)}
+      ${dc('Humidité', `${m.hum}%`, m.hum>90?'warn':'go')}
+      ${dc('Nébulosité', `${m.clouds}%`)}
+    </div>
+    ${alerts(modAlerts)}
+    ${srcLinks([{label:'Open-Meteo',url:'https://open-meteo.com'},{label:'Météo-France Aviation',url:'https://aviation.meteo.fr'},{label:'SOFIA METAR/TAF',url:'https://sofia-briefing.aviation-civile.gouv.fr'},{label:'Windy',url:'https://www.windy.com'}])}`);
+}
+
+function buildTraffic(d, s) {
+  if (d.error) return modWrap('traffic','Trafic aérien ADS-B',s,'DONNÉES N/D',`
+    <div class="malert warn"><span class="malert-ico">⚠</span><span>OpenSky indisponible : ${d.error} — Vérifier via SOFIA ou contacter ATS local</span></div>`);
+
+  const low = d.aircraft.filter(a=>a.alt_m<500);
+  return modWrap('traffic','Trafic aérien ADS-B',s, d.count===0?'DÉGAGÉ':low.length>0?'ACTIVITÉ BASSE':'ACTIVITÉ', `
+    <div class="dcells">
+      ${dc('Aéronefs détectés', d.count, d.count>3?'warn':'go', '~30 km autour du point')}
+      ${dc('< 500 m sol', low.length, low.length>0?'warn':'go', 'Zone de vol')}
+    </div>
+    ${d.count>0 ? `<table class="mtbl">
+      <thead><tr><th>Callsign</th><th>Alt.</th><th>Vitesse</th><th>Pays</th></tr></thead>
+      <tbody>${d.aircraft.slice(0,8).map(a=>`<tr>
+        <td style="font-weight:700">${a.callsign||a.icao}</td>
+        <td style="color:${a.alt_m<300?'var(--amber)':'inherit'}">${a.alt_m} m</td>
+        <td>${a.spd_ms?Math.round(a.spd_ms*1.944)+' kt':'—'}</td>
+        <td>${a.country}</td>
+      </tr>`).join('')}
+      ${d.count>8?`<tr><td colspan="4" style="color:var(--t3)">… +${d.count-8} aéronef(s)</td></tr>`:''}
+      </tbody>
+    </table>` : `<div class="malert go"><span class="malert-ico">✓</span><span>Aucun aéronef détecté dans le rayon (~30 km)</span></div>`}
+    ${low.length>0?`<div class="malert warn mt8"><span class="malert-ico">⚠</span><span>${low.length} aéronef(s) sous 500 m — Communication radio recommandée</span></div>`:''}
+    ${srcLinks([{label:'OpenSky Network',url:'https://opensky-network.org'}])}`);
+}
+
+function buildKP(d, s) {
+  const kp = d.kp;
+  const kpStr = kp!==null ? kp.toFixed(1) : '—';
+  const kpCol = kp===null?'var(--t3)':kp<4?'var(--green)':kp<5?'var(--amber)':'var(--red)';
+  const kpPct = kp!==null ? Math.min((kp/9)*100,100) : 0;
+  const levels = [{max:1,l:'Calme'},{max:2,l:'Très calme'},{max:3,l:'Légèrement actif'},{max:4,l:'Actif'},{max:5,l:'Tempête mineure G1'},{max:7,l:'Tempête modérée G2-G3'},{max:9,l:'Tempête sévère G4-G5'}];
+  const lvl = kp!==null ? levels.find(x=>kp<=x.max)||levels[levels.length-1] : null;
+  const gnssImpact = kp===null?'—':kp<4?'Nul':kp<5?'Négligeable':kp<6?'Possible':'Probable';
+  const gnSt = kp===null?'':kp<5?'go':kp<6?'warn':'nogo';
+
+  const modAlerts = [];
+  if (kp===null||d.error) modAlerts.push({niveau:'warn',message:`Données NOAA indisponibles${d.error?' : '+d.error:''}`});
+  else if (kp>=5) modAlerts.push({niveau:'nogo',message:`KP ${kpStr} — Tempête géomagnétique : signal GNSS/RTK potentiellement dégradé`});
+  else if (kp>=4) modAlerts.push({niveau:'warn',message:`KP ${kpStr} — Activité accrue : vérifier précision GPS avant décollage`});
+  else modAlerts.push({niveau:'go',message:`KP ${kpStr} — Conditions géomagnétiques calmes, aucun impact GNSS attendu`});
+
+  const tsLabel = d.ts ? new Date(d.ts).toUTCString().slice(5,22)+' UTC' : '—';
+
+  return modWrap('kp','Indice KP — Géomagnétisme',s, s==='go'?'NOMINAL':s==='nogo'?'PERTURBÉ':'MODÉRÉ', `
+    <div class="dcells">
+      <div class="dcell" style="grid-column:span 2">
+        <div class="lbl">Indice KP (NOAA SWPC)</div>
+        <div class="kp-num" style="color:${kpCol}">${kpStr}</div>
+        <div class="sub">${lvl?.l||'—'}</div>
+        <div class="kp-track mt12"><div class="kp-fill" style="width:${kpPct}%;background:${kpCol}"></div></div>
+        <div class="kp-lbls"><span>0 Calme</span><span>3</span><span>5 G1</span><span>7 G3</span><span>9</span></div>
+      </div>
+      ${dc('Impact GNSS', gnssImpact, gnSt)}
+      ${dc('Horodatage', tsLabel, 'blue')}
+    </div>
+    ${d.forecast?.length ? `<table class="mtbl mt12">
+      <thead><tr><th>Prévision UTC</th><th>KP prévu</th><th>Niveau</th></tr></thead>
+      <tbody>${d.forecast.map(f=>{
+        const fl = levels.find(x=>f.kp<=x.max)||levels[levels.length-1];
+        return `<tr><td>${f.time?new Date(f.time).toUTCString().slice(17,22)+' UTC':'—'}</td>
+          <td style="font-weight:700;color:${f.kp<4?'var(--green)':f.kp<5?'var(--amber)':'var(--red)'}">${f.kp.toFixed(1)}</td>
+          <td>${fl.l}</td></tr>`;}).join('')}
+      </tbody>
+    </table>` : ''}
+    ${alerts(modAlerts)}
+    ${srcLinks([{label:'NOAA SWPC',url:'https://www.swpc.noaa.gov/products/planetary-k-index'},{label:'SpaceWeatherLive',url:'https://www.spaceweatherlive.com/fr/actualite-solaire/indice-kp.html'}])}`);
+}
+</script>
+</body>
+</html>
