@@ -680,9 +680,8 @@ a { color: var(--orange); }
   <div class="spinner-ring"></div>
   <div class="loading-label">Récupération des données en cours…</div>
   <div class="loading-modules" id="lmods">
-    <div class="lmod" id="lm-airspace"><span class="lmod-icon">○</span> Espace aérien</div>
+    <div class="lmod" id="lm-oaci"><span class="lmod-icon">○</span> Espace aérien & zones</div>
     <div class="lmod" id="lm-notam"><span class="lmod-icon">○</span> NOTAM / SUP AIP</div>
-    <div class="lmod" id="lm-oaci"><span class="lmod-icon">○</span> Zones & Carte OACI</div>
     <div class="lmod" id="lm-meteo"><span class="lmod-icon">○</span> Météo temps réel</div>
     <div class="lmod" id="lm-traffic"><span class="lmod-icon">○</span> Trafic aérien ADS-B</div>
     <div class="lmod" id="lm-kp"><span class="lmod-icon">○</span> Indice KP — NOAA</div>
@@ -1245,7 +1244,7 @@ async function runAnalysis() {
 
   document.getElementById('btn-analyse').disabled = true;
   showScreen('screen-loading');
-  ['airspace','notam','oaci','meteo','traffic','kp'].forEach(k=>lmod(k,'active'));
+  ['notam','oaci','meteo','traffic','kp'].forEach(k=>lmod(k,'active'));
 
   const geo = selectedCommune;
   const lat = geo.lat ?? 48.8566;
@@ -1261,14 +1260,14 @@ async function runAnalysis() {
     geo ? fetchZonesDrone(lat,lon).then(d=>{ results.zones=d; lmod('oaci', d.error?'fail':'done'); return d; }) : Promise.resolve({zones:[],count:0,error:'Commune non localisée'}).then(d=>{results.zones=d;lmod('oaci','fail');return d;}),
   ]);
 
-  // Checklists réglementaires statiques (espace aérien, NOTAM = vérification manuelle requise)
-  results.airspace = getAirspaceChecklist(geo);
+  // Checklist NOTAM (vérification manuelle requise) + checklist complémentaire fusionnée dans le module zones
   results.notam = getNotamChecklist(geo);
-  results.oaci = getOaciChecklist(geo); // checklist OACI conservée en complément des zones
-  lmod('airspace','done'); lmod('notam','done');
+  results.oaci = getOaciChecklist(geo);
+  results.airspaceChecklist = getAirspaceChecklist(geo); // fusionnée dans le module Espace aérien & zones
+  lmod('notam','done');
 
 
-  // Statut du module OACI/zones basé sur les données réelles de restriction
+  // Statut du module fusionné Espace aérien & zones, basé sur les données réelles de restriction
   function zonesStatus(zd) {
     if (!zd || zd.error) return 'info';
     const inside = zd.zones.filter(z => z.distance_m === 0);
@@ -1276,9 +1275,8 @@ async function runAnalysis() {
     return 'info';
   }
 
-  // Compute statuses — espace aérien et NOTAM restent informatifs ; OACI/zones reflète les données réelles
+  // Compute statuses — NOTAM reste informatif ; le module fusionné OACI/zones reflète les données réelles
   const statuses = {
-    airspace: 'info',
     notam:    'info',
     oaci:     zonesStatus(zonesData),
     meteo:    meteoStatus(meteoData),
@@ -1337,7 +1335,7 @@ function renderVerdict(global, statuses, results) {
   };
   document.getElementById('verdict-sub').textContent = subs[global];
 
-  const labels = { airspace:'Espace aérien', notam:'NOTAM/SUP AIP', oaci:'Zones & OACI', meteo:'Météo', traffic:'Trafic ADS-B', kp:'Indice KP' };
+  const labels = { notam:'NOTAM/SUP AIP', oaci:'Espace aérien & zones', meteo:'Météo', traffic:'Trafic ADS-B', kp:'Indice KP' };
   const pills = Object.entries(statuses).map(([k,v]) =>
     `<div class="pill ${v}">${labels[k]}</div>`).join('');
   document.getElementById('pills-row').innerHTML = pills;
@@ -1412,8 +1410,7 @@ function renderDetails(results, statuses, inp) {
   ds.innerHTML = '';
 
   const modules = [
-    buildAirspace(results.airspace, statuses.airspace),
-    buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude),
+    buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist),
     buildNotam(results.notam, statuses.notam),
     buildMeteo(results.meteo, statuses.meteo, inp.altitude, inp.droneData),
     buildTraffic(results.traffic, statuses.traffic),
@@ -1446,28 +1443,30 @@ function srcLinks(links) {
   return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank">${l.label}</a>`).join('')}</div>`;
 }
 
-function buildAirspace(r, s) {
-  return modWrap('airspace','Espace aérien', s, 'À VÉRIFIER', `
-    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
-    ${srcLinks(r.liens)}`);
-}
-
 function buildNotam(r, s) {
   return modWrap('notam','NOTAM & SUP AIP', s, 'À VÉRIFIER', `
     <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
     ${srcLinks(r.liens)}`);
 }
 
-function buildOaci(r, s, zonesData, altMax) {
-  // r = checklist OACI statique ; zonesData = zones réelles de restriction
+function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
+  // r = checklist OACI ; airspaceChecklist = checklist espace aérien ; zonesData = zones réelles de restriction
+  const TITRE = 'Espace aérien & zones';
   const badge = (zonesData && !zonesData.error && zonesData.zones.some(z=>z.distance_m===0)) ? 'ZONE PRÉSENTE' : 'À VÉRIFIER';
 
-  // Cas erreur API
+  // Fusion des points de vérification (espace aérien + OACI), sans doublon
+  const allPoints = [...(airspaceChecklist?.points||[]), ...(r?.points||[])];
+  // Fusion des liens, dédoublonnés par URL
+  const linkMap = {};
+  [...(airspaceChecklist?.liens||[]), ...(r?.liens||[])].forEach(l => { linkMap[l.url] = l; });
+  const allLinks = Object.values(linkMap);
+
+  // Cas erreur API zones
   if (!zonesData || zonesData.error) {
-    return modWrap('oaci','Zones & Carte OACI', s, 'À VÉRIFIER', `
+    return modWrap('oaci', TITRE, s, 'À VÉRIFIER', `
       <div class="malert warn"><span class="malert-ico">⚠</span><span>Zones de restriction indisponibles${zonesData?.error?' : '+zonesData.error:''} — vérifiez directement sur Géoportail.</span></div>
-      <div class="mod-alerts mt8">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
-      ${srcLinks(r.liens)}`);
+      <div class="mod-alerts mt8">${allPoints.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+      ${srcLinks(allLinks)}`);
   }
 
   const inside = zonesData.zones.filter(z => z.distance_m === 0);
@@ -1495,7 +1494,7 @@ function buildOaci(r, s, zonesData, altMax) {
   let nearbyHtml = '';
   if (nearby.length > 0) {
     nearbyHtml = `
-      <div class="s-label" style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zones à proximité</div>
+      <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zones à proximité</div>
       <table class="mtbl">
         <thead><tr><th>Zone</th><th>Dist.</th><th>Cap</th><th>Plafond</th></tr></thead>
         <tbody>${nearby.map(z=>`<tr>
@@ -1507,12 +1506,13 @@ function buildOaci(r, s, zonesData, altMax) {
       </table>`;
   }
 
-  return modWrap('oaci','Zones & Carte OACI', s, badge, `
+  return modWrap('oaci', TITRE, s, badge, `
     ${insideHtml}
     ${nearbyHtml}
     <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Données de zonage drone (source SIA/DGAC, millésime 2021) — <strong>indicatives</strong>, hors interdictions temporaires et établies pour le vol de loisir. Votre statut étatique peut modifier les autorisations applicables.</span></div>
-    <div class="mod-alerts mt8">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
-    ${srcLinks(r.liens)}`);
+    <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Points à vérifier</div>
+    <div class="mod-alerts">${allPoints.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+    ${srcLinks(allLinks)}`);
 }
 
 function buildMeteo(m, s, altMax, droneData) {
