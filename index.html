@@ -1667,7 +1667,6 @@ function buildSunCard(li) {
       ${dc('Aube aéro (−30 min)', fmtUTC(li.aubeAero), 'blue')}
       ${dc('Crépuscule aéro (+30 min)', fmtUTC(li.crepAero), 'blue')}
       ${dc('Phase au créneau', phaseLbl, li.phase==='jour'?'go':'warn')}
-      ${dc('Soleil', li.elevation!=null?`${li.elevation>0?'+':''}${li.elevation.toFixed(0)}° / ${compassLabel(li.azimuth)}`:'—', li.elevation>0?'go':'')}
     </div>
     ${alerts(a)}
     <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Heures en UTC. Nuit aéronautique = du coucher +30 min au lever −30 min (indicatif).</span></div>`);
@@ -1911,9 +1910,7 @@ function buildMeteo(m, s, altMax, droneData, metar) {
       ${wAlt!=null ? dc(`Vent ~${altMax} m (est.)`, `${Math.round(wAlt)} kt`, wAlt>25?'nogo':wAlt>18?'warn':'go', 'Interpolé') : ''}
       ${dc('Précipitations', `${eff.precip} mm/h`, eff.precip>0?'warn':'go', eff.precipProb!=null?`Prob. ${eff.precipProb}%`:'')}
       ${eff.cape!=null ? dc('Instabilité (CAPE)', `${Math.round(eff.cape)} J/kg`, eff.cape>=2000?'nogo':eff.cape>=800?'warn':'go', 'Risque orageux') : ''}
-      ${eff.freezing!=null ? dc('Isotherme 0 °C', `${Math.round(eff.freezing)} m`, eff.freezing<300?'warn':'go', 'Givrage') : ''}
       ${dc('Conditions', eff.desc, eff.wcode>=80?'nogo':eff.wcode>=45?'warn':'go')}
-      ${dc('Température', `${eff.temp}°C`)}
       ${dc('Humidité', `${eff.hum}%`, eff.hum>90?'warn':'go')}
     </div>
     ${alerts(modAlerts)}
