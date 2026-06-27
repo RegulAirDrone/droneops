@@ -151,6 +151,9 @@ a { color: var(--orange); }
   border: 1px solid var(--stone-2);
   box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
+/* Carte contenant l'autocomplétion commune : ne pas rogner la liste de suggestions
+   (sinon overflow:hidden la coupe et elle semble cachée derrière les blocs suivants). */
+.section-card--locate { overflow: visible; position: relative; z-index: 5; }
 .section-head {
   padding: 18px 22px 8px;
   display: flex;
@@ -667,7 +670,7 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 <div class="topbar">
   <div class="topbar-brand"><span class="dot"></span>DroneOps</div>
   <div class="topbar-right">
-    <div class="topbar-time" id="utc-clock">--:-- UTC</div>
+    <div class="topbar-time" id="utc-clock">--:-- Paris</div>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Basculer jour/nuit" title="Basculer jour/nuit">☀️</button>
   </div>
 </div>
@@ -679,7 +682,7 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
   <div class="form-scroll">
 
     <!-- Zone de vol -->
-    <div class="section-card">
+    <div class="section-card section-card--locate">
       <div class="section-head">
         <span class="section-icon">📍</span>
         <span class="section-title">Zone de vol</span>
@@ -727,7 +730,7 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
             <input type="date" id="f-date" />
           </div>
           <div class="field">
-            <label>Heure UTC</label>
+            <label>Heure (Paris)</label>
             <input type="time" id="f-time" />
           </div>
         </div>
@@ -809,9 +812,10 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
   <div class="wiz-scroll">
     <div id="carto-map"></div>
     <div class="carto-legend">
-      <b>Couche officielle « Restrictions drone » (DGAC/SIA)</b> superposée au fond IGN. Les zones colorées matérialisent les restrictions autour des aéroports et aérodromes.
+      <b>Restrictions drone (DGAC/SIA)</b> + <b>carte aéronautique OACI (SIA/IGN)</b> superposées au fond IGN. La carte OACI permet d'identifier l'aérodrome/espace aérien de rattachement (CTR, ATZ, fréquences). Utilisez le <b>sélecteur de couches</b> (en haut à droite de la carte) pour afficher/masquer chaque couche.
       <div class="lgd-row"><span class="lgd-sw" style="background:#e0512f"></span> Point de vol analysé</div>
       <div class="lgd-row"><span class="lgd-sw" style="background:#2b6cb0;opacity:.25"></span> Rayon d'analyse (8 km)</div>
+      <div class="lgd-row" style="margin-top:8px;font-size:10px;color:var(--ink-faint)">Carte OACI servie via l'endpoint Géoportail IGN. Si les tuiles ne s'affichent pas, désactivez/réactivez la couche — le reste de la carte reste fonctionnel.</div>
     </div>
     <div id="wiz-carto"></div>
   </div>
@@ -858,17 +862,14 @@ function toggleTheme() {
 
 // ── CLOCK ─────────────────────────────────────────────
 function tickClock() {
-  const d = new Date();
-  document.getElementById('utc-clock').textContent =
-    d.getUTCHours().toString().padStart(2,'0') + ':' +
-    d.getUTCMinutes().toString().padStart(2,'0') + ' UTC';
+  document.getElementById('utc-clock').textContent = fmtParis(new Date()) + ' Paris';
 }
 tickClock(); setInterval(tickClock, 5000);
 
-// Init dates
-const now = new Date();
-document.getElementById('f-date').valueAsDate = now;
-document.getElementById('f-time').value = now.toISOString().slice(11,16);
+// Init dates — préremplissage en date/heure de Paris
+const _pnow = parisNowParts();
+document.getElementById('f-date').value = _pnow.date;
+document.getElementById('f-time').value = _pnow.time;
 
 // ── NAVIGATION ────────────────────────────────────────
 function showScreen(id) {
@@ -1208,7 +1209,10 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 function getFlightDateTime(inp) {
   if (!inp.fDate || !inp.fTime) return null;
-  const iso = `${inp.fDate}T${inp.fTime}`;
+  // Le pilote saisit l'heure de Paris ; on la convertit en ISO UTC pour tout l'interne
+  // (matching du créneau Open-Meteo en UTC, calcul solaire par instant).
+  const iso = parisWallToUTCISO(inp.fDate, inp.fTime);
+  if (!iso) return null;
   const d = new Date(iso + ':00Z');
   if (isNaN(d.getTime())) return null;
   return { date: d, iso };
@@ -1244,9 +1248,54 @@ function droneTempMin(droneData) {
   if (name.includes('matrice')) return -20;
   return 0;
 }
+// ── HEURE DE PARIS (Europe/Paris, CET/CEST auto via Intl) ──
+// Tout l'interne reste en UTC ; ces helpers ne servent QU'À l'affichage.
+const PARIS_TZ = 'Europe/Paris';
+function _toDate(v) {
+  if (v == null) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  let t = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(t)) t = t.replace(' ', 'T'); // NOAA "YYYY-MM-DD HH:MM:SS"
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t)) t += ':00';
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(t)) t += 'Z'; // sans fuseau ⇒ UTC (cas Open-Meteo/NOAA)
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? null : d;
+}
+// "HH:MM" en heure de Paris
+function fmtParis(v) {
+  const d = _toDate(v); if (!d) return '—';
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: PARIS_TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+}
+// "JJ mois HH:MM" en heure de Paris
+function fmtParisDateTime(v) {
+  const d = _toDate(v); if (!d) return '—';
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: PARIS_TZ, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(d).replace(',', '');
+}
+// Décalage Europe/Paris ↔ UTC (minutes) à un instant donné — gère CET (+60) / CEST (+120)
+function parisOffsetMinutes(date) {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: PARIS_TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    .formatToParts(date).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +(p.hour % 24), +p.minute, +p.second);
+  return (asUTC - date.getTime()) / 60000;
+}
+// Heure murale de Paris (JJ + HH:MM saisis par le pilote) → ISO UTC "YYYY-MM-DDTHH:MM"
+function parisWallToUTCISO(dateStr, timeStr) {
+  const naive = new Date(`${dateStr}T${timeStr}:00Z`); // on lit l'heure murale comme si c'était UTC
+  if (isNaN(naive.getTime())) return null;
+  const off = parisOffsetMinutes(naive);              // décalage Paris à cet instant
+  const utc = new Date(naive.getTime() - off * 60000); // UTC réel = mur − décalage
+  return utc.toISOString().slice(0, 16);
+}
+// Date + heure courantes à Paris (pour préremplir le formulaire)
+function parisNowParts() {
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: PARIS_TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    .formatToParts(new Date()).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${(p.minute)}` };
+}
+// Conservé pour compatibilité : renvoie désormais l'heure de Paris (sans suffixe)
 function fmtUTC(d) {
   if (!d || typeof d.getTime !== 'function' || isNaN(d.getTime())) return '—';
-  return d.getUTCHours().toString().padStart(2,'0')+':'+d.getUTCMinutes().toString().padStart(2,'0')+' UTC';
+  return fmtParis(d);
 }
 function windAtAlt(alt, w10, w80, w120, w180) {
   const pts = [[10,w10],[80,w80],[120,w120],[180,w180]].filter(p=>p[1]!=null && !isNaN(p[1]));
@@ -1669,29 +1718,43 @@ function buildSunCard(li) {
       ${dc('Phase au créneau', phaseLbl, li.phase==='jour'?'go':'warn')}
     </div>
     ${alerts(a)}
-    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Heures en UTC. Nuit aéronautique = du coucher +30 min au lever −30 min (indicatif).</span></div>`);
+    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Heures en <strong>heure de Paris</strong> (CET/CEST). Nuit aéronautique = du coucher +30 min au lever −30 min (indicatif).</span></div>`);
 }
 
-// Carte Leaflet — fond IGN + couche officielle « Restrictions drone » (DGAC/SIA), point + rayon
+// Carte Leaflet — fond IGN + couche « Restrictions drone » (DGAC/SIA) + surimpression carte OACI (SIA/IGN), point + rayon
 let _cartoMap = null, _cartoOverlay = null;
 function ensureCartoMap() {
   if (typeof L === 'undefined') return;
   const mis = window._mission || {};
   const lat = mis.lat ?? 48.8566, lon = mis.lon ?? 2.3522, radius = 8000;
-  const WMTS = (layer, fmt) => `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=${fmt}`;
+  // prefix = base URL (avec éventuel apikey) ; sep = '?' ou '&' selon que des params soient déjà présents
+  const tile = (prefix, layer, fmt, sep) => `${prefix}${sep}SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=${fmt}`;
+  const PUB = 'https://data.geopf.fr/wmts';                              // endpoint public libre
+  const OACI = 'https://data.geopf.fr/private/wmts?apikey=ign_scan_ws';  // endpoint Géoportail (clé publique fixe)
   if (!_cartoMap) {
-    _cartoMap = L.map('carto-map', { zoomControl: true, attributionControl: true }).setView([lat, lon], 12);
-    L.tileLayer(WMTS('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2','image/png'),
+    _cartoMap = L.map('carto-map', { zoomControl: true, attributionControl: true }).setView([lat, lon], 11);
+    // 1) Fond cartographique (base)
+    const planLayer = L.tileLayer(tile(PUB, 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png', '?'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 18, attribution: '© IGN / Géoplateforme' }).addTo(_cartoMap);
-    L.tileLayer(WMTS('TRANSPORTS.DRONES.RESTRICTIONS','image/png'),
+    // 2) Restrictions drone DGAC (surimpression, libre)
+    const droneLayer = L.tileLayer(tile(PUB, 'TRANSPORTS.DRONES.RESTRICTIONS', 'image/png', '?'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 16, opacity: 0.7, attribution: 'Restrictions drone © DGAC/SIA' }).addTo(_cartoMap);
-    _cartoOverlay = L.layerGroup().addTo(_cartoMap);
+    // 3) Carte aéronautique OACI SIA/IGN (surimpression semi-transparente, par-dessus) — pour identifier l'aérodrome de rattachement
+    const oaciLayer = L.tileLayer(tile(OACI, 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN-OACI', 'image/jpeg', '&'),
+      { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.55, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
+    // Contrôle de couches : activer/désactiver chaque surimpression
+    L.control.layers(
+      { 'Plan IGN': planLayer },
+      { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer },
+      { collapsed: true }
+    ).addTo(_cartoMap);
+    _cartoOverlay = L.layerGroup().addTo(_cartoMap); // marqueur + rayon : toujours au-dessus (overlayPane)
   }
   _cartoOverlay.clearLayers();
   L.circle([lat, lon], { radius, color: '#2b6cb0', weight: 1.5, fillColor: '#2b6cb0', fillOpacity: 0.06 }).addTo(_cartoOverlay);
   L.circleMarker([lat, lon], { radius: 8, color: '#fff', weight: 2, fillColor: '#e0512f', fillOpacity: 1 })
     .addTo(_cartoOverlay).bindPopup('Point de vol analysé');
-  _cartoMap.setView([lat, lon], 12);
+  _cartoMap.setView([lat, lon], 11);
   setTimeout(() => _cartoMap.invalidateSize(), 150);
 }
 
@@ -1832,7 +1895,7 @@ function buildMeteo(m, s, altMax, droneData, metar) {
 
   const eff = m.win || m;
   const isWin = !!m.win;
-  const whenLbl = isWin ? (m.win.time||'').slice(11,16)+' UTC' : 'maintenant';
+  const whenLbl = isWin ? fmtParis(m.win.time)+' (Paris)' : 'maintenant';
 
   const dir = eff.windDir||0;
   const wdLabel = compassLabel(dir);
@@ -1881,7 +1944,8 @@ function buildMeteo(m, s, altMax, droneData, metar) {
     metarHtml = `
       <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">METAR / TAF — ${metar.station}${metar.name?' · '+metar.name:''} · ${metar.dist_km} km</div>
       <div style="${monoStyle}">${metar.raw}</div>
-      ${metar.taf ? `<div style="${monoStyle}">${metar.taf}</div>` : `<div class="malert info"><span class="malert-ico">ℹ</span><span>TAF non publié pour ce terrain.</span></div>`}`;
+      ${metar.taf ? `<div style="${monoStyle}">${metar.taf}</div>` : `<div class="malert info"><span class="malert-ico">ℹ</span><span>TAF non publié pour ce terrain.</span></div>`}
+      <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Codes METAR/TAF horodatés en <strong>Zulu (UTC)</strong> par convention aéronautique — ex. « 281150Z » = 11:50 UTC. Le reste de l'application est en heure de Paris.</span></div>`;
   } else {
     metarHtml = `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>METAR/TAF temps réel indisponible${metar&&metar.error?' ('+metar.error+')':''} — consultez le briefing officiel SOFIA.</span></div>`;
   }
@@ -1893,10 +1957,11 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   // Bannière source : modèle utilisé (AROME HD vs global) + heure de fraîcheur des données
   const isArome = m.modelCode === 'arome';
   const modelName = m.model || (isArome ? 'AROME HD (Météo-France)' : 'Modèle global');
-  const obsLbl = m.obsTime ? (m.obsTime.slice(11,16)+' UTC') : null;
-  const fetchLbl = m.fetchedAt ? fmtUTC(new Date(m.fetchedAt)) : null;
+  const obsLbl = m.obsTime ? fmtParis(m.obsTime) : null;
+  const fetchLbl = m.fetchedAt ? fmtParis(m.fetchedAt) : null;
   const freshTxt = [obsLbl?`données à ${obsLbl}`:null, fetchLbl?`récupéré ${fetchLbl}`:null].filter(Boolean).join(' · ');
-  const modelBanner = `<div class="malert ${isArome?'go':'info'}" style="margin-bottom:10px"><span class="malert-ico">${isArome?'🛰':'🌍'}</span><span>Modèle : <strong>${modelName}</strong>${isArome?' — haute résolution France':' — repli (créneau hors portée AROME ou hors France métro)'}${freshTxt?` · ${freshTxt}`:''}</span></div>`;
+  const freshTz = freshTxt ? freshTxt + ' · heure de Paris' : '';
+  const modelBanner = `<div class="malert ${isArome?'go':'info'}" style="margin-bottom:10px"><span class="malert-ico">${isArome?'🛰':'🌍'}</span><span>Modèle : <strong>${modelName}</strong>${isArome?' — haute résolution France':' — repli (créneau hors portée AROME ou hors France métro)'}${freshTz?` · ${freshTz}`:''}</span></div>`;
 
   return modWrap('meteo','Météo temps réel',s, s==='go'?'FAVORABLE':s==='nogo'?'DÉFAVORABLE':'CONSULTER', `
     ${winNote}
@@ -1993,7 +2058,7 @@ function buildKP(d, s) {
   else if (kp>=4) modAlerts.push({niveau:'warn',message:`KP ${kpStr} — Activité accrue : vérifier précision GPS avant décollage`});
   else modAlerts.push({niveau:'go',message:`KP ${kpStr} — Conditions géomagnétiques calmes, aucun impact GNSS attendu`});
 
-  const tsLabel = d.ts ? new Date(d.ts).toUTCString().slice(5,22)+' UTC' : '—';
+  const tsLabel = d.ts ? fmtParisDateTime(d.ts)+' (Paris)' : '—';
 
   return modWrap('kp','Indice KP — Géomagnétisme',s, s==='go'?'NOMINAL':s==='nogo'?'PERTURBÉ':'MODÉRÉ', `
     <div class="dcells">
@@ -2008,10 +2073,10 @@ function buildKP(d, s) {
       ${dc('Horodatage', tsLabel, 'blue')}
     </div>
     ${d.forecast?.length ? `<table class="mtbl mt12">
-      <thead><tr><th>Prévision UTC</th><th>KP prévu</th><th>Niveau</th></tr></thead>
+      <thead><tr><th>Prévision (Paris)</th><th>KP prévu</th><th>Niveau</th></tr></thead>
       <tbody>${d.forecast.map(f=>{
         const fl = levels.find(x=>f.kp<=x.max)||levels[levels.length-1];
-        return `<tr><td>${f.time?new Date(f.time).toUTCString().slice(17,22)+' UTC':'—'}</td>
+        return `<tr><td>${f.time?fmtParis(f.time):'—'}</td>
           <td style="font-weight:700;color:${f.kp<4?'var(--green)':f.kp<5?'var(--amber)':'var(--red)'}">${f.kp.toFixed(1)}</td>
           <td>${fl.l}</td></tr>`;}).join('')}
       </tbody>
