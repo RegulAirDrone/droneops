@@ -812,7 +812,7 @@ body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
           </div>
           <div class="field">
             <label>Heure (Paris)</label>
-            <input type="time" id="f-time" />
+            <input type="text" id="f-time" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" oninput="onTimeInput(this)" />
           </div>
         </div>
       </div>
@@ -1318,14 +1318,16 @@ function haversine(lat1, lon1, lat2, lon2) {
   return 2*R*Math.asin(Math.sqrt(a));
 }
 function getFlightDateTime(inp) {
-  if (!inp.fDate || !inp.fTime) return null;
-  // Le pilote saisit l'heure de Paris ; on la convertit en ISO UTC pour tout l'interne
-  // (matching du créneau Open-Meteo en UTC, calcul solaire par instant).
-  const iso = parisWallToUTCISO(inp.fDate, inp.fTime);
-  if (!iso) return null;
-  const d = new Date(iso + ':00Z');
-  if (isNaN(d.getTime())) return null;
-  return { date: d, iso };
+  try {
+    if (!inp || !inp.fDate || !inp.fTime) return null;
+    // Le pilote saisit l'heure de Paris ; on la convertit en ISO UTC pour tout l'interne
+    // (matching du créneau Open-Meteo en UTC, calcul solaire par instant).
+    const iso = parisWallToUTCISO(inp.fDate, inp.fTime);
+    if (!iso) return null;
+    const d = new Date(iso + ':00Z');
+    if (isNaN(d.getTime())) return null;
+    return { date: d, iso };
+  } catch (e) { return null; }
 }
 // Position solaire (algorithme basse précision NOAA, suffisant pour l'aéronautique)
 function solarPosition(lat, lon, date) {
@@ -1385,24 +1387,51 @@ function fmtParisDateTime(v) {
 }
 // Décalage Europe/Paris ↔ UTC (minutes) à un instant donné — gère CET (+60) / CEST (+120)
 function parisOffsetMinutes(date) {
-  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    .formatToParts(date).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
-  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +(p.hour % 24), +p.minute, +p.second);
-  return (asUTC - date.getTime()) / 60000;
+  try {
+    if (!(date instanceof Date) || isNaN(date.getTime())) return 0;
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      .formatToParts(date).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
+    const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +(p.hour % 24), +p.minute, +p.second);
+    const off = (asUTC - date.getTime()) / 60000;
+    return isNaN(off) ? 0 : off;
+  } catch (e) { return 0; }
 }
-// Heure murale de Paris (JJ + HH:MM saisis par le pilote) → ISO UTC "YYYY-MM-DDTHH:MM"
+// Heure murale de Paris (JJ + HH:MM saisis par le pilote) → ISO UTC "YYYY-MM-DDTHH:MM".
+// Validation stricte : toute valeur vide/partielle/invalide renvoie null SANS jamais lever d'exception.
 function parisWallToUTCISO(dateStr, timeStr) {
-  const naive = new Date(`${dateStr}T${timeStr}:00Z`); // on lit l'heure murale comme si c'était UTC
-  if (isNaN(naive.getTime())) return null;
-  const off = parisOffsetMinutes(naive);              // décalage Paris à cet instant
-  const utc = new Date(naive.getTime() - off * 60000); // UTC réel = mur − décalage
-  return utc.toISOString().slice(0, 16);
+  try {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) return null;
+    const tm = String(timeStr || '').match(/^(\d{1,2}):(\d{2})$/);
+    if (!tm) return null;                          // "8", "08", "08:", "08:3", "" ⇒ null (pas de crash)
+    const hh = tm[1].padStart(2, '0'), mm = tm[2];
+    if (+hh > 23 || +mm > 59) return null;
+    const naive = new Date(`${dateStr}T${hh}:${mm}:00Z`); // heure murale lue comme si UTC
+    if (isNaN(naive.getTime())) return null;
+    const off = parisOffsetMinutes(naive);               // décalage Paris à cet instant
+    const utc = new Date(naive.getTime() - off * 60000); // UTC réel = mur − décalage
+    if (isNaN(utc.getTime())) return null;
+    return utc.toISOString().slice(0, 16);
+  } catch (e) { return null; }
 }
 // Date + heure courantes à Paris (pour préremplir le formulaire)
 function parisNowParts() {
-  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    .formatToParts(new Date()).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
-  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${(p.minute)}` };
+  try {
+    const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      .formatToParts(new Date()).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
+    let hh = String(p.hour); if (hh === '24') hh = '00'; hh = hh.padStart(2, '0');
+    return { date: `${p.year}-${p.month}-${p.day}`, time: `${hh}:${p.minute}` };
+  } catch (e) {
+    const d = new Date(), pad = n => String(n).padStart(2, '0');
+    return { date: `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`, time: `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}` };
+  }
+}
+// Saisie de l'heure : formatage doux HH:MM (sans picker natif), 100% anti-crash (jamais d'exception)
+function onTimeInput(el) {
+  try {
+    if (!el) return;
+    const digits = String(el.value || '').replace(/\D/g, '').slice(0, 4);
+    el.value = digits.length >= 3 ? digits.slice(0, 2) + ':' + digits.slice(2) : digits;
+  } catch (e) { /* la saisie de l'heure ne doit jamais planter */ }
 }
 // Conservé pour compatibilité : renvoie désormais l'heure de Paris (sans suffixe)
 function fmtUTC(d) {
@@ -1631,28 +1660,80 @@ async function fetchMetar(lat, lon) {
   } catch(e) { return { error: e.message }; }
 }
 
-// ── ZONES DE RESTRICTION DRONE (API cquest — source SIA/DGAC, millésime 2021-01) ──
-// Renvoie les zones (interdites, réglementées, etc.) autour du point, triées par distance.
-// distance_m = 0 → on est DANS la zone. limite_alti_m = hauteur de vol max autorisée.
+// ── ZONES DE RESTRICTION DRONE (WFS officiel IGN/Géoplateforme — couche SIA/DGAC, CORS-friendly, sans clé) ──
+// Source : data.geopf.fr/wfs/ows · TYPENAMES=TRANSPORTS.DRONES.RESTRICTIONS:carte_restriction_drones_lf
+// La couche est en EPSG:3857 (mètres) ⇒ BBOX en 3857, sortie reprojetée en EPSG:4326 (lon/lat).
+// distance_m = 0 → on est DANS la zone. limite_alti_m = plafond drone (0 = vol interdit).
+function _merc(la, lo) {
+  const x = lo * 20037508.34 / 180;
+  let y = Math.log(Math.tan((90 + la) * Math.PI / 360)) / (Math.PI / 180);
+  y = y * 20037508.34 / 180;
+  return [x, y];
+}
+function _eachExterior(g) {
+  const out = [];
+  if (!g) return out;
+  if (g.type === 'Polygon') { if (g.coordinates[0]) out.push(g.coordinates[0]); }
+  else if (g.type === 'MultiPolygon') { for (const poly of g.coordinates) if (poly[0]) out.push(poly[0]); }
+  return out;
+}
+function _pointInRing(x, y, ring) { // x=lon, y=lat
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function _bearingDeg(la1, lo1, la2, lo2) {
+  const r = Math.PI / 180;
+  const y = Math.sin((lo2 - lo1) * r) * Math.cos(la2 * r);
+  const x = Math.cos(la1 * r) * Math.sin(la2 * r) - Math.sin(la1 * r) * Math.cos(la2 * r) * Math.cos((lo2 - lo1) * r);
+  return (Math.atan2(y, x) / r + 360) % 360;
+}
+function _nearestVertex(lat, lon, rings) {
+  let best = Infinity, blat = null, blon = null;
+  for (const ring of rings) for (const c of ring) {
+    const dd = haversine(lat, lon, c[1], c[0]);
+    if (dd < best) { best = dd; blat = c[1]; blon = c[0]; }
+  }
+  return { dist: best === Infinity ? null : best, bearing: blat == null ? null : _bearingDeg(lat, lon, blat, blon) };
+}
+function _parseLimite(s) {
+  if (s == null) return { alt: null, label: 'Restriction' };
+  const t = String(s);
+  if (/interdit/i.test(t)) return { alt: 0, label: 'Vol interdit' };
+  const m = t.match(/(\d+)\s*m/i);
+  if (m) return { alt: parseInt(m[1], 10), label: `Plafond ${m[1]} m` };
+  return { alt: null, label: t.slice(0, 40) };
+}
 async function fetchZonesDrone(lat, lon, rayon = 8000) {
   try {
-    const url = `https://api.cquest.org/drone?lat=${lat}&lon=${lon}&rayon=${rayon}`;
-    const r = await fetchWithTimeout(url, {}, 8000);
+    const [cx, cy] = _merc(lat, lon);
+    const bbox = `${Math.round(cx - rayon)},${Math.round(cy - rayon)},${Math.round(cx + rayon)},${Math.round(cy + rayon)},EPSG:3857`;
+    const url = `https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature` +
+      `&TYPENAMES=TRANSPORTS.DRONES.RESTRICTIONS:carte_restriction_drones_lf` +
+      `&BBOX=${bbox}&SRSNAME=EPSG:4326&OUTPUTFORMAT=application/json&COUNT=60`;
+    const r = await fetchWithTimeout(url, {}, 9000);
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    const geojson = await r.json();
-    const zones = (geojson.features || []).map(f => {
+    const d = await r.json();
+    const zones = (d.features || []).map(f => {
       const p = f.properties || {};
+      const pl = _parseLimite(p.limite);
+      const exts = _eachExterior(f.geometry);
+      const inside = exts.some(ring => _pointInRing(lon, lat, ring));
+      let dist = 0, capDeg = null;
+      if (!inside) { const nv = _nearestVertex(lat, lon, exts); dist = nv.dist ?? null; capDeg = nv.bearing; }
       return {
-        nom: p.nom || p.name || p.zone || 'Zone non nommée',
-        type: p.type || p.nature || '',
-        limite_alti_m: (p.limite_alti_m !== undefined ? p.limite_alti_m : null),
-        distance_m: (p.distance_m !== undefined ? p.distance_m : null),
-        cap_deg: (p.cap_deg !== undefined ? p.cap_deg : null),
+        nom: pl.label,
+        type: p.remarque ? String(p.remarque).slice(0, 90) : (p.limite || ''),
+        limite_alti_m: pl.alt,
+        distance_m: inside ? 0 : (dist != null ? Math.round(dist) : null),
+        cap_deg: capDeg,
         raw: p
       };
     });
-    // Tri par distance croissante (l'API le fait déjà, mais on sécurise)
-    zones.sort((a,b) => (a.distance_m ?? 1e12) - (b.distance_m ?? 1e12));
+    zones.sort((a, b) => (a.distance_m ?? 1e12) - (b.distance_m ?? 1e12));
     return { zones, count: zones.length, error: null };
   } catch(e) {
     return { zones: [], count: 0, error: e.message };
@@ -1872,9 +1953,10 @@ function buildAirspaceAttachment(aeroData, zonesData) {
   if (insideZones.length) {
     const z0 = insideZones.slice().sort((a, b) => (a.limite_alti_m ?? 9999) - (b.limite_alti_m ?? 9999))[0];
     const lim = z0.limite_alti_m;
-    const txt = lim === 0 ? `Survol drone interdit sans dérogation dans « ${z0.nom} » (cœur de zone / proximité piste).`
-      : lim != null ? `Point situé dans « ${z0.nom} » : vol drone limité à ${lim} m sans accord préalable.`
-      : `Point situé dans « ${z0.nom} » : conditions spécifiques — voir l'AIP.`;
+    const rem = z0.type ? ` — ${z0.type}` : '';
+    const txt = lim === 0 ? `Zone de restriction sur le point de vol : survol drone interdit sans dérogation${rem}.`
+      : lim != null ? `Zone de restriction sur le point : vol drone limité à ${lim} m sans accord préalable${rem}.`
+      : `Zone de restriction sur le point : conditions spécifiques${rem} — voir l'AIP.`;
     limBlock = `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">${lim === 0 ? '✕' : '⚑'}</span><span>${txt}</span></div>`;
   }
 
