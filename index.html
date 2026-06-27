@@ -1250,7 +1250,9 @@ function droneTempMin(droneData) {
 }
 // ── HEURE DE PARIS (Europe/Paris, CET/CEST auto via Intl) ──
 // Tout l'interne reste en UTC ; ces helpers ne servent QU'À l'affichage.
-const PARIS_TZ = 'Europe/Paris';
+// NB : 'Europe/Paris' est inliné dans chaque helper (et non via une const)
+// pour rester appelable depuis le code top-level exécuté plus haut (horloge/init),
+// sans dépendre de l'ordre de déclaration (évite une ReferenceError TDZ au chargement).
 function _toDate(v) {
   if (v == null) return null;
   if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
@@ -1264,16 +1266,16 @@ function _toDate(v) {
 // "HH:MM" en heure de Paris
 function fmtParis(v) {
   const d = _toDate(v); if (!d) return '—';
-  return new Intl.DateTimeFormat('fr-FR', { timeZone: PARIS_TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
 }
 // "JJ mois HH:MM" en heure de Paris
 function fmtParisDateTime(v) {
   const d = _toDate(v); if (!d) return '—';
-  return new Intl.DateTimeFormat('fr-FR', { timeZone: PARIS_TZ, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(d).replace(',', '');
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(d).replace(',', '');
 }
 // Décalage Europe/Paris ↔ UTC (minutes) à un instant donné — gère CET (+60) / CEST (+120)
 function parisOffsetMinutes(date) {
-  const p = new Intl.DateTimeFormat('en-US', { timeZone: PARIS_TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
     .formatToParts(date).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
   const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +(p.hour % 24), +p.minute, +p.second);
   return (asUTC - date.getTime()) / 60000;
@@ -1288,7 +1290,7 @@ function parisWallToUTCISO(dateStr, timeStr) {
 }
 // Date + heure courantes à Paris (pour préremplir le formulaire)
 function parisNowParts() {
-  const p = new Intl.DateTimeFormat('en-CA', { timeZone: PARIS_TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     .formatToParts(new Date()).reduce((a, x) => { a[x.type] = x.value; return a; }, {});
   return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${(p.minute)}` };
 }
