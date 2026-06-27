@@ -139,7 +139,17 @@ a { color: var(--orange); }
 
 /* ── SCREENS ──────────────────────────────────────────── */
 .screen { display: none; flex-direction: column; flex: 1; }
-.screen.active { display: flex; }
+.screen.active { display: flex; animation: scrFade .28s ease both; }
+/* Transitions entre pages — fondu + glissement directionnel (un seul écran affiché à la fois) */
+.screen.active.enter-fwd  { animation: scrFwd  .32s cubic-bezier(.4,0,.2,1) both; }
+.screen.active.enter-back { animation: scrBack .32s cubic-bezier(.4,0,.2,1) both; }
+@keyframes scrFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scrFwd  { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+@keyframes scrBack { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  /* On retire le glissement ; on conserve un simple fondu court */
+  .screen.active, .screen.active.enter-fwd, .screen.active.enter-back { animation: scrFade .18s ease both; }
+}
 
 /* ── SCREEN 1 — FORM ──────────────────────────────────── */
 .form-scroll { flex: 1; overflow-y: auto; padding: 8px 18px calc(18px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; }
@@ -256,6 +266,31 @@ a { color: var(--orange); }
 }
 .geo-status.ok { color: var(--green); }
 .geo-status.fail { color: var(--amber); }
+
+/* Bouton « Utiliser ma position » (géolocalisation) */
+.btn-geoloc {
+  margin-top: 4px;
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--stone);
+  border: 1px solid var(--stone-2);
+  color: var(--ink);
+  font-family: var(--disp);
+  font-size: 12.5px; font-weight: 600;
+  padding: 9px 14px;
+  border-radius: 14px;
+  transition: background .15s, transform .12s, opacity .15s;
+}
+.btn-geoloc:active { transform: scale(.97); }
+.btn-geoloc:disabled { opacity: .6; cursor: default; }
+.btn-geoloc.loading { position: relative; color: transparent; }
+.btn-geoloc.loading::after {
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 16px; height: 16px;
+  border: 2px solid var(--ink-faint); border-top-color: var(--orange);
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@media (hover: hover) { .btn-geoloc:hover:not(:disabled) { background: var(--stone-2); } }
 
 /* Drone specs panel — rounded pebble cluster */
 .drone-specs {
@@ -704,9 +739,10 @@ body.night .btn-analyse { box-shadow: 0 0 0 1px rgba(78,200,182,.28), 0 8px 24px
 :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 .btn-analyse:focus-visible, .btn-suivant:focus-visible, .btn-prev:focus-visible, .btn-back-new:focus-visible, .btn-back-verdict:focus-visible, .theme-toggle:focus-visible { outline-offset: 3px; border-radius: 22px; }
 
-/* Accents harmonisés — pastilles d'étape & puces */
-.step-dots i { transition: background .3s ease, box-shadow .3s ease; }
-.step-dots i.on { background: var(--orange); }
+/* Accents harmonisés — barre de progression segmentée (4 étapes) */
+.step-dots i { width: 22px; height: 5px; border-radius: 3px; transition: width .32s cubic-bezier(.4,0,.2,1), background .32s ease, opacity .32s ease, box-shadow .3s ease; }
+.step-dots i.done { background: var(--orange); opacity: .5; }          /* étape franchie */
+.step-dots i.on   { background: var(--orange); opacity: 1; width: 34px; } /* étape courante, mise en avant */
 body.night .step-dots i.on { box-shadow: var(--glow) var(--orange); }
 
 /* ════════ ÉCRAN DE CHARGEMENT — drone en vol stationnaire (pur SVG/CSS) ════════ */
@@ -884,7 +920,8 @@ body.night .cv-paper { fill: var(--stone); }
           <input type="text" id="loc-name" placeholder="Ex : Saint-Martin..." autocomplete="off"
             oninput="onCommuneInput()" onfocus="onCommuneInput()" />
           <div class="commune-suggestions" id="commune-suggestions"></div>
-          <span class="field-hint">Tapez 3 lettres pour voir les communes correspondantes</span>
+          <span class="field-hint">Tapez 3 lettres, ou utilisez votre position GPS</span>
+          <button type="button" class="btn-geoloc" id="btn-geoloc" onclick="useMyLocation()">📍 Utiliser ma position</button>
           <span class="geo-status" id="geo-status"></span>
         </div>
         <div class="field-row">
@@ -1013,7 +1050,7 @@ body.night .cv-paper { fill: var(--stone); }
   <div class="step-head">
     <div class="step-eyebrow">Étape 2 / 4</div>
     <div class="step-title">Indice KP — géomagnétisme</div>
-    <div class="step-dots"><i></i><i class="on"></i><i></i><i></i></div>
+    <div class="step-dots"><i class="done"></i><i class="on"></i><i></i><i></i></div>
   </div>
   <div class="wiz-scroll" id="wiz-kp"></div>
   <div class="detail-nav">
@@ -1027,7 +1064,7 @@ body.night .cv-paper { fill: var(--stone); }
   <div class="step-head">
     <div class="step-eyebrow">Étape 3 / 4</div>
     <div class="step-title">Espace aérien & aérodromes</div>
-    <div class="step-dots"><i></i><i></i><i class="on"></i><i></i></div>
+    <div class="step-dots"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
   </div>
   <div class="wiz-scroll">
     <div id="carto-map"></div>
@@ -1050,7 +1087,7 @@ body.night .cv-paper { fill: var(--stone); }
   <div class="step-head">
     <div class="step-eyebrow">Étape 4 / 4</div>
     <div class="step-title">SUP AIP & NOTAM de la zone</div>
-    <div class="step-dots"><i></i><i></i><i></i><i class="on"></i></div>
+    <div class="step-dots"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div>
   </div>
   <div class="wiz-scroll" id="wiz-supaip"></div>
   <div class="detail-nav">
@@ -1092,9 +1129,14 @@ document.getElementById('f-date').value = _pnow.date;
 document.getElementById('f-time').value = _pnow.time;
 
 // ── NAVIGATION ────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function showScreen(id, dir) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  // Un seul écran visible à la fois (display:none sur les autres ⇒ aucune superposition pendant la transition)
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'enter-fwd', 'enter-back'));
+  if (dir === 'fwd') target.classList.add('enter-fwd');
+  else if (dir === 'back') target.classList.add('enter-back');
+  target.classList.add('active');
   window.scrollTo(0,0);
 }
 
@@ -1241,6 +1283,80 @@ function pickCommune(idx) {
   document.getElementById('geo-status').textContent = '📍 ' + selectedCommune.label;
   document.getElementById('geo-status').className = 'geo-status ok';
   closeCommuneList();
+}
+
+// ── GÉOLOCALISATION « Utiliser ma position » ──────────
+function setGeoStatus(text, cls) {
+  const el = document.getElementById('geo-status');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'geo-status' + (cls ? ' ' + cls : '');
+}
+function _deptFromInsee(insee) {
+  insee = String(insee || '');
+  if (!insee) return '';
+  return /^(2A|2B)/i.test(insee) ? insee.slice(0, 2).toUpperCase()
+       : /^9[78]/.test(insee) ? insee.slice(0, 3)
+       : insee.slice(0, 2);
+}
+function useMyLocation() {
+  const btn = document.getElementById('btn-geoloc');
+  if (!navigator.geolocation) {
+    setGeoStatus('Géolocalisation non disponible sur cet appareil — saisis une commune.', 'fail');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.classList.add('loading'); }
+  setGeoStatus('Acquisition de la position…', '');
+  const done = () => { if (btn) { btn.disabled = false; btn.classList.remove('loading'); } };
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      // Reverse-geocoding officiel (best-effort) — on garde TOUJOURS les coords GPS comme point de vol.
+      const finalize = (info) => {
+        selectedCommune = {
+          lat, lon, gps: true,
+          nom: info.nom || 'Position GPS',
+          cp: info.cp || '',
+          dept: info.dept || '',
+          deptNom: info.deptNom || '',
+          insee: info.insee || '',
+          label: info.nom
+            ? `${info.nom}${info.cp ? ' (' + info.cp + ')' : ''}${info.deptNom ? ' — ' + info.deptNom : ''}`
+            : `Position GPS (${lat.toFixed(4)}, ${lon.toFixed(4)})`
+        };
+        const locInput = document.getElementById('loc-name');
+        if (locInput) locInput.value = info.nom ? `${info.nom}${info.dept ? ' (' + info.dept + ')' : ''}` : `Ma position (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+        closeCommuneList();
+        setGeoStatus(info.nom ? `📍 ${selectedCommune.label} · point GPS exact` : `📍 Position GPS utilisée (commune non identifiée)`, 'ok');
+        done();
+      };
+      fetchWithTimeout(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`, {}, 7000)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(d => {
+          const p = (d.features && d.features[0] && d.features[0].properties) || {};
+          const ctx = String(p.context || '').split(',').map(s => s.trim());
+          const insee = p.citycode || '';
+          finalize({
+            nom: p.city || p.name || '',
+            cp: p.postcode || '',
+            insee,
+            dept: ctx[0] || _deptFromInsee(insee),
+            deptNom: ctx[1] || ''
+          });
+        })
+        .catch(() => finalize({})); // reverse KO → on utilise quand même le point GPS brut
+    },
+    (err) => {
+      done();
+      const msg = err && err.code === 1 ? 'Autorisation refusée'
+                : err && err.code === 2 ? 'Position indisponible'
+                : err && err.code === 3 ? 'Délai dépassé'
+                : 'Échec de la localisation';
+      setGeoStatus(`${msg} — saisis une commune à la place.`, 'fail');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
 }
 
 // Fermeture si clic en dehors du champ / de la liste
@@ -2036,7 +2152,11 @@ async function runAnalysis() {
 // ── PARCOURS RÉSULTATS ────────────────────────────────
 const WIZ_STEPS = ['meteo','kp','carto','supaip'];
 function goStep(name) {
-  showScreen('screen-' + name);
+  // Sens de transition : glissement vers la gauche en avançant, vers la droite en reculant
+  const cur = WIZ_STEPS.findIndex(s => { const el = document.getElementById('screen-' + s); return el && el.classList.contains('active'); });
+  const next = WIZ_STEPS.indexOf(name);
+  const dir = (cur >= 0 && next >= 0 && next !== cur) ? (next > cur ? 'fwd' : 'back') : null;
+  showScreen('screen-' + name, dir);
   if (name === 'carto') {
     // Leaflet doit être initialisé container visible — léger délai + invalidateSize
     setTimeout(() => { try { ensureCartoMap(); } catch(e) { console.warn('Carte indisponible :', e); } }, 60);
