@@ -1743,7 +1743,7 @@ function ensureCartoMap() {
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 16, opacity: 0.7, attribution: 'Restrictions drone © DGAC/SIA' }).addTo(_cartoMap);
     // 3) Carte aéronautique OACI SIA/IGN (surimpression semi-transparente, par-dessus) — pour identifier l'aérodrome de rattachement
     const oaciLayer = L.tileLayer(tile(OACI, 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN-OACI', 'image/jpeg', '&'),
-      { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.55, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
+      { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
     // Contrôle de couches : activer/désactiver chaque surimpression
     L.control.layers(
       { 'Plan IGN': planLayer },
