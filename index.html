@@ -742,6 +742,35 @@ body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
   .drone-float { transform: translateY(-1px); }
 }
 
+/* ════════ PAGE DE GARDE (écran d'accueil) ════════ */
+#screen-cover { align-items: center; justify-content: center; padding: 14px 20px calc(18px + var(--safe-b)); overflow-y: auto; }
+.cover-inner { width: 100%; max-width: 440px; margin: auto 0; display: flex; flex-direction: column; gap: 18px; }
+.cover-warn { background: var(--amber-d); border: 1px solid var(--stone-2); border-left: 3px solid var(--amber); border-radius: 18px; padding: 15px 17px; }
+.cover-warn-hd { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.cover-warn-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--amber-d); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.cover-warn-ttl { font-family: var(--disp); font-size: 12px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; color: var(--amber); }
+.cover-warn-tx { font-size: 13px; line-height: 1.62; color: var(--ink-soft); }
+.cover-warn-tx strong { color: var(--ink); font-weight: 700; }
+.cover-scene { width: 100%; display: flex; justify-content: center; }
+.cover-svg { width: 100%; max-width: 420px; height: auto; display: block; overflow: visible; max-height: 36vh; }
+.cover-title { text-align: center; }
+.cover-title h1 { font-family: var(--disp); font-size: 22px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+.cover-title p { font-size: 12.5px; color: var(--ink-faint); margin-top: 4px; }
+.cover-cta { width: 100%; background: var(--orange); color: var(--btn-text); font-family: var(--disp); font-size: 15px; font-weight: 700; padding: 18px; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 18px var(--orange-d); transition: transform .14s, filter .18s; }
+.cover-cta:active { transform: scale(.98); }
+body.night .cover-cta { box-shadow: 0 0 0 1px rgba(78,200,182,.28), 0 8px 24px rgba(78,200,182,.20); }
+@media (hover: hover) { .cover-cta:hover { filter: brightness(1.06); transform: translateY(-1px); } }
+/* éléments de l'illustration */
+.cv-ground { stroke: var(--stone-2); stroke-width: 2; stroke-linecap: round; }
+.cv-shadow { fill: var(--ink); opacity: .10; }
+.cv-fill   { fill: var(--ink-soft); }
+.cv-paper  { fill: var(--paper); stroke: var(--stone-2); stroke-width: 2.5; }
+.cv-stroke { fill: none; stroke: var(--ink-soft); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.cv-accent { fill: var(--orange); }
+.cv-los    { fill: none; stroke: var(--orange); stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; opacity: .7; }
+.cv-star   { fill: var(--ink-faint); }
+body.night .cv-paper { fill: var(--stone); }
+
 ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -757,9 +786,90 @@ body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
 </div>
 
 <!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 0 — PAGE DE GARDE (accueil)                    -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-cover">
+  <div class="cover-inner">
+    <div class="cover-warn">
+      <div class="cover-warn-hd"><span class="cover-warn-ic">⚠️</span><span class="cover-warn-ttl">Avertissement</span></div>
+      <div class="cover-warn-tx">Cette application est une <strong>aide</strong> à la préparation de vol. Elle ne saurait en aucun cas être tenue responsable d'une inattention, d'une erreur d'appréciation ou d'un manquement du télépilote. Elle <strong>ne se substitue à aucune vérification manuelle</strong> ni aux <strong>publications officielles</strong> (SIA, NOTAM, etc.). Le télépilote reste <strong>seul responsable</strong> de la conformité et de la sécurité de son vol.</div>
+    </div>
+
+    <div class="cover-scene">
+      <svg class="cover-svg drone-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un télépilote au sol observe son drone en vol">
+        <circle class="cv-star" cx="68" cy="54" r="2"/>
+        <circle class="cv-star" cx="108" cy="36" r="1.4"/>
+        <circle class="cv-star" cx="206" cy="44" r="1.8"/>
+        <circle class="cv-star" cx="252" cy="30" r="1.2"/>
+        <circle class="cv-star" cx="332" cy="58" r="1.6"/>
+        <line class="cv-ground" x1="44" y1="256" x2="356" y2="256"/>
+        <ellipse class="cv-shadow" cx="126" cy="256" rx="44" ry="6"/>
+        <ellipse class="cv-shadow" cx="300" cy="248" rx="30" ry="5"/>
+
+        <!-- Ligne de vue (VLOS) pilote → drone -->
+        <path class="cv-los" d="M140 142 L262 102"/>
+
+        <!-- Télépilote -->
+        <rect class="cv-fill" x="116" y="205" width="9" height="51" rx="4.5"/>
+        <rect class="cv-fill" x="131" y="205" width="9" height="51" rx="4.5"/>
+        <rect class="cv-fill" x="110" y="165" width="27" height="46" rx="12"/>
+        <path class="cv-stroke" d="M114 174 C124 187 138 184 147 184"/>
+        <path class="cv-stroke" d="M134 174 C147 187 161 184 169 184"/>
+        <g transform="rotate(-10 158 184)">
+          <rect class="cv-paper" x="144" y="177" width="29" height="15" rx="4"/>
+          <line class="cv-stroke" style="stroke-width:3" x1="149" y1="177" x2="146" y2="166"/>
+          <line class="cv-stroke" style="stroke-width:3" x1="168" y1="177" x2="171" y2="166"/>
+          <circle class="cv-accent" cx="152" cy="184" r="2.2"/>
+          <circle class="cv-accent" cx="165" cy="184" r="2.2"/>
+        </g>
+        <circle class="cv-fill" cx="127" cy="150" r="13"/>
+        <rect class="cv-accent" x="116" y="139" width="22" height="9" rx="4.5"/>
+        <rect class="cv-accent" x="133" y="141" width="13" height="4.5" rx="2.25" transform="rotate(-18 133 143)"/>
+
+        <!-- Drone en vol (réutilise les classes de l'écran de chargement) -->
+        <g transform="translate(300 92) scale(0.46) translate(-110 -74)">
+          <g class="drone-sway"><g class="drone-float">
+            <g class="drone-frame">
+              <line x1="110" y1="74" x2="46" y2="46"/>
+              <line x1="110" y1="74" x2="174" y2="46"/>
+              <line x1="110" y1="74" x2="46" y2="102"/>
+              <line x1="110" y1="74" x2="174" y2="102"/>
+            </g>
+            <ellipse class="disc" cx="46" cy="46" rx="27" ry="6"/>
+            <ellipse class="disc" cx="174" cy="46" rx="27" ry="6"/>
+            <ellipse class="disc" cx="46" cy="102" rx="27" ry="6"/>
+            <ellipse class="disc" cx="174" cy="102" rx="27" ry="6"/>
+            <circle class="motor" cx="46" cy="46" r="7"/>
+            <circle class="motor" cx="174" cy="46" r="7"/>
+            <circle class="motor" cx="46" cy="102" r="7"/>
+            <circle class="motor" cx="174" cy="102" r="7"/>
+            <g transform="translate(46 46)"><g class="rotor"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+            <g transform="translate(174 46)"><g class="rotor rev"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+            <g transform="translate(46 102)"><g class="rotor rev"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+            <g transform="translate(174 102)"><g class="rotor"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+            <rect class="body" x="83" y="55" width="54" height="38" rx="14"/>
+            <circle class="nav nav-g" cx="92" cy="62" r="2.7"/>
+            <circle class="nav nav-r" cx="128" cy="62" r="2.7"/>
+            <circle class="gimbal" cx="110" cy="93" r="8"/>
+            <circle class="lens" cx="110" cy="93" r="3.4"/>
+          </g></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cover-title">
+      <h1>Prêt à préparer ton vol ?</h1>
+      <p>Météo, espace aérien, restrictions &amp; SUP AIP — en quelques secondes.</p>
+    </div>
+
+    <button class="cover-cta" onclick="showScreen('screen-form')">Préparer mon vol →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
 <!-- SCREEN 1 — SAISIE MISSION                             -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="screen active" id="screen-form">
+<div class="screen" id="screen-form">
   <div class="form-scroll">
 
     <!-- Zone de vol -->
@@ -2113,6 +2223,7 @@ function buildSupAipRetrieval(geo) {
   const SIA_LIST = 'https://www.sia.aviation-civile.gouv.fr/documents/supaip/aip/id/6'; // SUP AIP Métropole en vigueur
   const SOFIA = 'https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamform.html'; // briefing trajet/zone (PIB)
   const VAIP = 'https://www.sia.aviation-civile.gouv.fr/vaip'; // visualisateur AIP / zones actives
+  const SUPAIP = 'https://supaip.fr/'; // carte tierce (non officielle) — aide visuelle uniquement
   const dept = (geo && geo.dept) ? geo.dept : '';
   const deptNom = (geo && geo.deptNom) ? geo.deptNom : '';
   const deptHint = dept
@@ -2127,7 +2238,10 @@ function buildSupAipRetrieval(geo) {
       { label: '🧭 SOFIA — Briefing trajet/zone (PIB NOTAM/SUP AIP)', url: SOFIA },
       { label: '🗺 SIA — Visualisateur AIP / zones actives', url: VAIP }
     ])}
-    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Sur <strong>SOFIA</strong> : saisis ton aérodrome de départ/arrivée (ou des coordonnées en « point tournant », ex. <em>4536N00123W</em>), un rayon et ton créneau, puis lance le PIB. Les liens ouvrent la source officielle dans un nouvel onglet ; <strong>aucune donnée n'est récupérée automatiquement</strong> par l'application.</span></div>`);
+    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Sur <strong>SOFIA</strong> : saisis ton aérodrome de départ/arrivée (ou des coordonnées en « point tournant », ex. <em>4536N00123W</em>), un rayon et ton créneau, puis lance le PIB. Les liens ouvrent la source officielle dans un nouvel onglet ; <strong>aucune donnée n'est récupérée automatiquement</strong> par l'application.</span></div>
+    <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.12em; font-weight:700;">Complément visuel — non officiel</div>
+    ${srcLinks([{ label: '🗺 Carte SUP AIP — supaip.fr (outil tiers, indicatif)', url: SUPAIP }])}
+    <div class="malert warn mt8"><span class="malert-ico">⚠</span><span><strong>Source non officielle</strong> : site tiers, données auto-extraites des PDF du SIA, fournies à titre indicatif. Pratique pour <strong>visualiser</strong> les zones${dept ? ` autour de ta commune (dépt ${dept})` : ' autour de ta commune'}, mais ne s'y substitue pas : <strong>vérifie toujours sur le SIA</strong> ci-dessus.</span></div>`);
 }
 
 function buildNotam(r, s) {
