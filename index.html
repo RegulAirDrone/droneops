@@ -1350,7 +1350,7 @@ async function fetchMeteo(lat, lon, flightISO) {
       wind80: H.wind_speed_80m?.[hNow] ?? null,
       wind120: H.wind_speed_120m?.[hNow] ?? null,
       wind180: H.wind_speed_180m?.[hNow] ?? null,
-      vis: c.visibility, precip: c.precipitation, temp: c.temperature_2m,
+      precip: c.precipitation, temp: c.temperature_2m,
       hum: c.relative_humidity_2m, clouds: c.cloud_cover,
       cape: c.cape ?? H.cape?.[hNow] ?? null,
       freezing: c.freezing_level_height ?? H.freezing_level_height?.[hNow] ?? null,
@@ -1367,7 +1367,7 @@ async function fetchMeteo(lat, lon, flightISO) {
           time: H.time[i],
           windKt: H.wind_speed_10m?.[i], gustKt: H.wind_gusts_10m?.[i], windDir: H.wind_direction_10m?.[i],
           wind80: H.wind_speed_80m?.[i] ?? null, wind120: H.wind_speed_120m?.[i] ?? null, wind180: H.wind_speed_180m?.[i] ?? null,
-          vis: H.visibility?.[i], precip: H.precipitation?.[i], temp: H.temperature_2m?.[i],
+          precip: H.precipitation?.[i], temp: H.temperature_2m?.[i],
           hum: H.relative_humidity_2m?.[i], clouds: H.cloud_cover?.[i],
           cape: H.cape?.[i] ?? null, freezing: H.freezing_level_height?.[i] ?? null,
           precipProb: H.precipitation_probability?.[i] ?? null,
@@ -1385,8 +1385,8 @@ async function fetchMeteo(lat, lon, flightISO) {
   let global = null, sun = null, globalErr = null;
   try {
     const urlG = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,visibility,cape,freezing_level_height` +
-      `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,visibility,cloud_cover,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,wind_speed_80m,wind_speed_120m,wind_speed_180m,cape,freezing_level_height` +
+      `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,cape,freezing_level_height` +
+      `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,wind_speed_80m,wind_speed_120m,wind_speed_180m,cape,freezing_level_height` +
       `&daily=sunrise,sunset,daylight_duration,temperature_2m_min` +
       `&wind_speed_unit=kn&forecast_days=16&timezone=UTC`;
     const r = await fetchWithTimeout(urlG, {}, 9000);
@@ -1412,8 +1412,8 @@ async function fetchMeteo(lat, lon, flightISO) {
   try {
     const urlA = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
       `&models=meteofrance_arome_france_hd` +
-      `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,visibility,cape,freezing_level_height` +
-      `&hourly=temperature_2m,precipitation,weather_code,visibility,cloud_cover,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,wind_speed_80m,wind_speed_120m,wind_speed_180m,cape,freezing_level_height` +
+      `&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,cape,freezing_level_height` +
+      `&hourly=temperature_2m,precipitation,weather_code,cloud_cover,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,wind_speed_80m,wind_speed_120m,wind_speed_180m,cape,freezing_level_height` +
       `&wind_speed_unit=kn&forecast_days=4&timezone=UTC`;
     const r = await fetchWithTimeout(urlA, {}, 8000);
     const d = await r.json();
@@ -1604,8 +1604,8 @@ function getOaciChecklist(geo) {
 // ── STATUS HELPERS ────────────────────────────────────
 function meteoStatus(m) {
   if (m.error) return 'warn';
-  if (m.windKt>20||m.gustKt>25||m.vis<1500||m.wcode>=80) return 'nogo';
-  if (m.windKt>12||m.gustKt>17||m.vis<5000||m.precip>0.5||m.wcode>=45) return 'warn';
+  if (m.windKt>20||m.gustKt>25||m.wcode>=80) return 'nogo';
+  if (m.windKt>12||m.gustKt>17||m.precip>0.5||m.wcode>=45) return 'warn';
   return 'go';
 }
 function kpStatus(kp) {
@@ -1696,11 +1696,62 @@ function renderWizard(results, statuses, inp) {
     buildMeteo(results.meteo, statuses.meteo, inp.altitude, inp.droneData, results.metar);
   // Étape 2 — Indice KP
   document.getElementById('wiz-kp').innerHTML = buildKP(results.kp, statuses.kp);
-  // Étape 3 — Zones / espace aérien (sous la carte)
+  // Étape 3 — Synthèse rattachement aéroportuaire + zones / espace aérien (sous la carte)
   document.getElementById('wiz-carto').innerHTML =
+    buildAirspaceAttachment(results.zones) +
     buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist);
   // Étape 4 — SUP AIP & NOTAM
   document.getElementById('wiz-supaip').innerHTML = buildNotam(results.notam, 'info');
+}
+
+// Synthèse « rattachement aéroportuaire / espace aérien » — déduite des zones de restriction drone
+// (SIA/DGAC via api.cquest.org/drone, déjà récupérées dans results.zones). Aucune nouvelle requête.
+function _attachSrcNote() {
+  return `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Déduit des zones de restriction drone <strong>SIA/DGAC</strong> (millésime indicatif, orienté vol de loisir). Le statut exact (CTR/ATZ, contrôlé/non contrôlé, fréquence) se vérifie sur la <strong>carte OACI</strong> ci-dessus et l'AIP officielle. Aucune donnée n'est inventée : seules les zones renvoyées par la source sont affichées.</span></div>`;
+}
+function buildAirspaceAttachment(zd) {
+  const TITLE = 'Espace aérien / rattachement aéroportuaire';
+  if (!zd || zd.error) {
+    return modWrap('rattach', TITLE, 'warn', 'INDISPONIBLE', `
+      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination indisponible${zd && zd.error ? ' : ' + zd.error : ''} (source SIA/DGAC injoignable). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>`);
+  }
+  const zones = (zd.zones || []).slice().sort((a, b) => (a.distance_m ?? 1e12) - (b.distance_m ?? 1e12));
+  if (!zones.length) {
+    return modWrap('rattach', TITLE, 'go', 'AUCUNE ZONE', `
+      <div class="malert go"><span class="malert-ico">✓</span><span>Aucune zone aéroportuaire ni de restriction recensée dans un rayon de 8 km autour de votre point. Espace <strong>a priori non contrôlé</strong> pour le vol drone — à confirmer sur la carte OACI ci-dessus.</span></div>
+      ${_attachSrcNote()}`);
+  }
+  const fmtDist = m => m == null ? '—' : (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
+  const cap = deg => { if (deg == null) return ''; const d = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']; return ' au ' + d[Math.round(deg / 45) % 8]; };
+  const isAero = z => /a[ée]ro|\bAD\b|\bCTR\b|\bATZ\b|\bTMA\b|h[ée]listation|base a[ée]rienne|LF[A-Z]{2}/i.test(((z.nom || '') + ' ' + (z.type || '')));
+  const inside = zones.filter(z => z.distance_m === 0);
+  let rattach, contextLbl;
+  if (inside.length) {
+    rattach = inside.find(isAero) || inside.slice().sort((a, b) => (a.limite_alti_m ?? 9999) - (b.limite_alti_m ?? 9999))[0];
+    contextLbl = 'Votre point de vol est situé dans cette zone.';
+  } else {
+    rattach = zones.find(isAero) || zones[0];
+    contextLbl = `Hors zone — élément le plus proche (${fmtDist(rattach.distance_m)}${cap(rattach.cap_deg)}).`;
+  }
+  const lim = rattach.limite_alti_m;
+  let limTxt, limSt;
+  if (lim === 0) { limTxt = 'Survol drone interdit sans dérogation (cœur de zone / proximité piste).'; limSt = 'nogo'; }
+  else if (lim != null) { limTxt = `Vol drone limité à ${lim} m sans accord préalable de l'autorité.`; limSt = 'warn'; }
+  else { limTxt = 'Plafond drone non précisé par la donnée — à vérifier sur la carte OACI.'; limSt = 'warn'; }
+  const headline = inside.length
+    ? `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">⚑</span><span>Vous dépendez de : <strong>${rattach.nom}</strong>${rattach.type ? ` (${rattach.type})` : ''}. ${contextLbl}</span></div>`
+    : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Aérodrome / zone la plus proche : <strong>${rattach.nom}</strong>${rattach.type ? ` (${rattach.type})` : ''} — ${fmtDist(rattach.distance_m)}${cap(rattach.cap_deg)}.</span></div>`;
+  const insideHtml = inside.length
+    ? `<div style="margin:6px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zone(s) couvrant le point</div>
+       <div class="dcells">${inside.slice(0, 6).map(z => dc(z.nom, z.limite_alti_m != null ? `${z.limite_alti_m} m max` : 'Voir cond.', z.limite_alti_m === 0 ? 'nogo' : 'warn', z.type || '')).join('')}</div>`
+    : '';
+  const badge = inside.length ? (lim === 0 ? 'INTERDIT' : 'ZONE') : 'PROCHE';
+  const st = inside.length ? (lim === 0 ? 'nogo' : 'warn') : 'info';
+  return modWrap('rattach', TITLE, st, badge, `
+    ${headline}
+    <div class="malert ${limSt}" style="margin-bottom:10px"><span class="malert-ico">${limSt === 'nogo' ? '✕' : '⚠'}</span><span>${limTxt}</span></div>
+    ${insideHtml}
+    ${_attachSrcNote()}`);
 }
 
 // Carte « coucher du soleil & créneau »
@@ -1903,8 +1954,6 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   const wdLabel = compassLabel(dir);
   const wSt = eff.windKt>20?'nogo':eff.windKt>12?'warn':'go';
   const gSt = eff.gustKt>25?'nogo':eff.gustKt>17?'warn':'go';
-  const vSt = eff.vis<1500?'nogo':eff.vis<5000?'warn':'go';
-  const visLabel = eff.vis>=10000?'>10 km':(eff.vis/1000).toFixed(1)+' km';
   const wAlt = windAtAlt(altMax, eff.windKt, eff.wind80, eff.wind120, eff.wind180);
 
   const modAlerts = [];
@@ -1912,7 +1961,6 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   else if (eff.windKt>12) modAlerts.push({niveau:'warn',message:`Vent ${eff.windKt} kt — Risque de dérive, surveiller`});
   if (eff.gustKt>25) modAlerts.push({niveau:'nogo',message:`Rafales ${eff.gustKt} kt — Risque de perte de contrôle`});
   else if (eff.gustKt>17) modAlerts.push({niveau:'warn',message:`Rafales ${eff.gustKt} kt — Attention aux pics`});
-  if (eff.vis<5000) modAlerts.push({niveau:eff.vis<1500?'nogo':'warn',message:`Visibilité horizontale ${visLabel} — ${eff.vis<1500?'sous le minimum réglementaire VLOS (1,5 km de portée visuelle)':'portée visuelle dégradée'}`});
   if (eff.precip>0) modAlerts.push({niveau:eff.precip>1?'nogo':'warn',message:`Précipitations ${eff.precip} mm/h — Risque pour équipements`});
   if (eff.wcode>=80) modAlerts.push({niveau:'nogo',message:`${eff.desc} — Conditions incompatibles avec le vol`});
   if (wAlt!=null && wAlt>eff.windKt+3) modAlerts.push({niveau: wAlt>25?'nogo':wAlt>18?'warn':'go', message:`Vent estimé à ${altMax} m : ${Math.round(wAlt)} kt — plus fort qu'en surface`});
