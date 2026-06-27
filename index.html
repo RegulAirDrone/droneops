@@ -780,7 +780,7 @@ body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
         <div class="field-row">
           <div class="field">
             <label>Altitude max (m AGL)</label>
-            <input type="number" id="altitude" value="120" min="0" max="1000" inputmode="numeric" />
+            <input type="number" id="altitude" value="120" min="0" max="500" inputmode="numeric" />
           </div>
           <div class="field">
             <label>Durée (min)</label>
@@ -1108,9 +1108,22 @@ function closeCommuneList() {
 function pickCommune(idx) {
   const c = communeOptions[idx];
   if (!c) return;
+  // Département : code fourni par l'API, sinon déduit du code INSEE (gère Corse 2A/2B et DOM 97x/98x)
+  const insee = String(c.code || '');
+  let dept = c.codeDepartement || '';
+  if (!dept && insee) {
+    dept = /^(2A|2B)/i.test(insee) ? insee.slice(0, 2).toUpperCase()
+         : /^9[78]/.test(insee) ? insee.slice(0, 3)
+         : insee.slice(0, 2);
+  }
   selectedCommune = {
     lat: c.centre?.coordinates?.[1],
     lon: c.centre?.coordinates?.[0],
+    nom: c.nom || '',
+    cp: c.codesPostaux?.[0] || '',
+    dept: dept || '',
+    deptNom: c.departement?.nom || '',
+    insee,
     label: `${c.nom} (${c.codesPostaux?.[0]||''}) — ${c.departement?.nom||c.codeDepartement||''}`
   };
   const deptTag = c.codeDepartement ? ` (${c.codeDepartement})` : '';
@@ -1865,6 +1878,7 @@ async function runAnalysis() {
   const lon = geo.lon ?? 2.3522;
 
   const results = {};
+  results.geo = geo; // commune sélectionnée (dept, nom…) — utilisée par l'encart SUP AIP
 
   const flightDT = getFlightDateTime(inp);
 
@@ -1930,8 +1944,10 @@ function renderWizard(results, statuses, inp) {
   document.getElementById('wiz-carto').innerHTML =
     buildAirspaceAttachment(results.aero, results.zones) +
     buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist);
-  // Étape 4 — SUP AIP & NOTAM
-  document.getElementById('wiz-supaip').innerHTML = buildNotam(results.notam, 'info');
+  // Étape 4 — Récupération SUP AIP (liens officiels) + checklist NOTAM
+  document.getElementById('wiz-supaip').innerHTML =
+    buildSupAipRetrieval(results.geo) +
+    buildNotam(results.notam, 'info');
 }
 
 // Synthèse « rattachement aéroportuaire / espace aérien ».
@@ -2088,7 +2104,30 @@ function alerts(arr) {
   return `<div class="mod-alerts">${arr.map(a=>`<div class="malert ${a.niveau}"><span class="malert-ico">${a.niveau==='go'?'✓':a.niveau==='warn'?'⚠':'✕'}</span><span>${a.message}</span></div>`).join('')}</div>`;
 }
 function srcLinks(links) {
-  return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank">${l.label}</a>`).join('')}</div>`;
+  return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join('')}</div>`;
+}
+
+// Encart « Récupérer les SUP AIP » — option C enrichie : liens officiels (aucun fetch, aucun PDF inline,
+// donc aucun problème de CORS). Le téléchargement se fait sur le site du SIA, dans le navigateur du pilote.
+function buildSupAipRetrieval(geo) {
+  const SIA_LIST = 'https://www.sia.aviation-civile.gouv.fr/documents/supaip/aip/id/6'; // SUP AIP Métropole en vigueur
+  const SOFIA = 'https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamform.html'; // briefing trajet/zone (PIB)
+  const VAIP = 'https://www.sia.aviation-civile.gouv.fr/vaip'; // visualisateur AIP / zones actives
+  const dept = (geo && geo.dept) ? geo.dept : '';
+  const deptNom = (geo && geo.deptNom) ? geo.deptNom : '';
+  const deptHint = dept
+    ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Ta zone de vol est dans le département <strong>${dept}${deptNom ? ' — ' + deptNom : ''}</strong>. Dans la liste officielle, <strong>repère les SUP AIP mentionnant ton département (${dept}) ou ta zone</strong> (ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`
+    : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Dans la liste officielle, <strong>repère les SUP AIP mentionnant ta zone</strong> (département, ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`;
+  return modWrap('supaip-get', 'Récupérer les SUP AIP', 'info', 'OFFICIEL', `
+    ${deptHint}
+    <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚠</span><span>La <strong>liste officielle du SIA</strong> est la seule source à jour (cycle AIRAC, ~28 jours). C'est au télépilote de <strong>vérifier et télécharger</strong> le SUP AIP applicable à son créneau et à sa zone.</span></div>
+    <div style="margin:8px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.12em; font-weight:700;">Liens officiels — téléchargement</div>
+    ${srcLinks([
+      { label: '📄 SIA — SUP AIP Métropole en vigueur (liste + PDF)', url: SIA_LIST },
+      { label: '🧭 SOFIA — Briefing trajet/zone (PIB NOTAM/SUP AIP)', url: SOFIA },
+      { label: '🗺 SIA — Visualisateur AIP / zones actives', url: VAIP }
+    ])}
+    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Sur <strong>SOFIA</strong> : saisis ton aérodrome de départ/arrivée (ou des coordonnées en « point tournant », ex. <em>4536N00123W</em>), un rayon et ton créneau, puis lance le PIB. Les liens ouvrent la source officielle dans un nouvel onglet ; <strong>aucune donnée n'est récupérée automatiquement</strong> par l'application.</span></div>`);
 }
 
 function buildNotam(r, s) {
