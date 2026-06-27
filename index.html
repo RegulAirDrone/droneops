@@ -661,6 +661,87 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .lgd-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .lgd-sw { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.15); }
 
+/* ════════════════════════════════════════════════════════
+   POLISH VISUEL — raffinement additif (n'altère ni la structure
+   ni le JS ; surcharge volontairement les règles précédentes).
+   ════════════════════════════════════════════════════════ */
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; letter-spacing: .004em; }
+
+/* Hiérarchie typographique — titres « instrument » plus nets */
+.topbar-brand, .step-title, .mod-title, .dcell .val, .kp-num, .drone-specs-name { letter-spacing: -.014em; }
+.section-title { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.step-eyebrow, .mtbl th, .dcell .lbl, .ds-cell .ds-lbl, .kv-lbl { letter-spacing: .12em; }
+.step-title { line-height: 1.12; }
+.mod-txt, .malert, .ds-note, .carto-legend { line-height: 1.6; }
+
+/* Cartes & modules — ombres plus douces, profondeur cohérente par thème */
+.section-card { box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 8px 20px rgba(16,24,40,.06); transition: box-shadow .25s ease, border-color .25s ease, transform .2s ease; }
+.module { box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 5px 16px rgba(16,24,40,.05); transition: box-shadow .25s ease, border-color .25s ease; }
+body.night .section-card { box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 10px 26px rgba(0,0,0,.46); }
+body.night .module { box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 7px 22px rgba(0,0,0,.42); }
+body.night .drone-specs, body.night .dcell, body.night .ds-cell { box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
+
+/* Champs — anneau de focus accessible + transitions douces */
+.field input, .field select, .field textarea { transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.field input:focus, .field select:focus, .field textarea:focus { box-shadow: 0 0 0 4px var(--orange-d); }
+
+/* Boutons & éléments interactifs — états hover/active/focus soignés */
+.btn-analyse, .btn-suivant, .btn-prev, .btn-back-verdict, .btn-back-new, .btn-details, .btn-new, .theme-toggle, .src-link, .commune-opt, .lmod, .mod-hdr {
+  transition: transform .15s cubic-bezier(.34,1.4,.64,1), background .18s ease, box-shadow .22s ease, opacity .18s ease, filter .18s ease, color .18s ease;
+}
+.btn-analyse { box-shadow: 0 6px 18px var(--orange-d); }
+body.night .btn-analyse { box-shadow: 0 0 0 1px rgba(78,200,182,.28), 0 8px 24px rgba(78,200,182,.20); }
+@media (hover: hover) {
+  .btn-analyse:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 10px 26px var(--orange-d); }
+  .btn-suivant:hover, .btn-back-new:hover, .btn-new:hover { filter: brightness(1.12); transform: translateY(-1px); }
+  .btn-prev:hover, .btn-back-verdict:hover, .btn-details:hover { background: var(--stone); transform: translateY(-1px); }
+  .theme-toggle:hover { background: var(--stone-2); transform: rotate(-8deg); }
+  .src-link:hover { background: var(--stone); color: var(--ink); }
+  .commune-opt:hover { background: var(--stone); }
+  .mod-hdr:hover .mod-title { color: var(--orange); }
+  .section-card:hover { border-color: var(--ink-faint); }
+}
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.btn-analyse:focus-visible, .btn-suivant:focus-visible, .btn-prev:focus-visible, .btn-back-new:focus-visible, .btn-back-verdict:focus-visible, .theme-toggle:focus-visible { outline-offset: 3px; border-radius: 22px; }
+
+/* Accents harmonisés — pastilles d'étape & puces */
+.step-dots i { transition: background .3s ease, box-shadow .3s ease; }
+.step-dots i.on { background: var(--orange); }
+body.night .step-dots i.on { box-shadow: var(--glow) var(--orange); }
+
+/* ════════ ÉCRAN DE CHARGEMENT — drone en vol stationnaire (pur SVG/CSS) ════════ */
+.drone-loader { width: 210px; max-width: 68vw; margin: 4px auto 2px; }
+.drone-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.drone-frame line { stroke: var(--ink-soft); stroke-width: 5; stroke-linecap: round; }
+.drone-svg .motor { fill: var(--ink-soft); }
+.drone-svg .disc { fill: var(--ink-faint); opacity: .16; }
+.drone-svg .blade { fill: var(--ink-soft); opacity: .85; }
+.drone-svg .body { fill: var(--paper); stroke: var(--stone-2); stroke-width: 2; }
+.drone-svg .gimbal { fill: var(--ink); }
+.drone-svg .lens { fill: var(--orange); }
+.drone-shadow { fill: var(--ink); }
+body.night .drone-svg .body { fill: var(--stone); }
+body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
+
+.drone-sway  { animation: droneSway 4.6s ease-in-out infinite alternate;  transform-box: fill-box; transform-origin: center; }
+.drone-float { animation: droneFloat 2.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.rotor       { transform-box: fill-box; transform-origin: center; animation: rotorSpin .22s linear infinite; }
+.rotor.rev   { animation-direction: reverse; }
+.drone-shadow{ transform-box: fill-box; transform-origin: center; animation: droneShadow 2.4s ease-in-out infinite alternate; }
+.nav-g { fill: var(--green); animation: navBlink 1.5s steps(1,end) infinite; }
+.nav-r { fill: var(--red);   animation: navBlink 1.5s steps(1,end) .75s infinite; }
+
+@keyframes droneSway   { from { transform: translateX(-13px) rotate(-1.6deg); } to { transform: translateX(13px) rotate(1.6deg); } }
+@keyframes droneFloat  { from { transform: translateY(4px); }  to { transform: translateY(-5px); } }
+@keyframes rotorSpin   { to { transform: rotate(360deg); } }
+@keyframes droneShadow { from { transform: scale(1.06); opacity: .15; } to { transform: scale(.8); opacity: .07; } }
+@keyframes navBlink    { 0%,42% { opacity: 1; } 43%,100% { opacity: .12; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .drone-sway, .drone-float, .rotor, .drone-shadow, .nav-g, .nav-r { animation: none; }
+  .drone-float { transform: translateY(-1px); }
+}
+
 ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -763,7 +844,36 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 <!-- SCREEN 2 — CHARGEMENT                                 -->
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-loading">
-  <div class="spinner-ring"></div>
+  <div class="drone-loader" aria-hidden="true">
+    <svg viewBox="0 0 220 150" class="drone-svg" xmlns="http://www.w3.org/2000/svg">
+      <ellipse class="drone-shadow" cx="110" cy="140" rx="46" ry="7"/>
+      <g class="drone-sway"><g class="drone-float">
+        <g class="drone-frame">
+          <line x1="110" y1="74" x2="46" y2="46"/>
+          <line x1="110" y1="74" x2="174" y2="46"/>
+          <line x1="110" y1="74" x2="46" y2="102"/>
+          <line x1="110" y1="74" x2="174" y2="102"/>
+        </g>
+        <ellipse class="disc" cx="46" cy="46" rx="27" ry="6"/>
+        <ellipse class="disc" cx="174" cy="46" rx="27" ry="6"/>
+        <ellipse class="disc" cx="46" cy="102" rx="27" ry="6"/>
+        <ellipse class="disc" cx="174" cy="102" rx="27" ry="6"/>
+        <circle class="motor" cx="46" cy="46" r="7"/>
+        <circle class="motor" cx="174" cy="46" r="7"/>
+        <circle class="motor" cx="46" cy="102" r="7"/>
+        <circle class="motor" cx="174" cy="102" r="7"/>
+        <g transform="translate(46 46)"><g class="rotor"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+        <g transform="translate(174 46)"><g class="rotor rev"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+        <g transform="translate(46 102)"><g class="rotor rev"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+        <g transform="translate(174 102)"><g class="rotor"><rect class="blade" x="-25" y="-2.3" width="50" height="4.6" rx="2.3"/></g></g>
+        <rect class="body" x="83" y="55" width="54" height="38" rx="14"/>
+        <circle class="nav nav-g" cx="92" cy="62" r="2.7"/>
+        <circle class="nav nav-r" cx="128" cy="62" r="2.7"/>
+        <circle class="gimbal" cx="110" cy="93" r="8"/>
+        <circle class="lens" cx="110" cy="93" r="3.4"/>
+      </g></g>
+    </svg>
+  </div>
   <div class="loading-label">Récupération des données en cours…</div>
   <div class="loading-modules" id="lmods">
     <div class="lmod" id="lm-meteo"><span class="lmod-icon">○</span> Météo & coucher du soleil</div>
@@ -1549,6 +1659,42 @@ async function fetchZonesDrone(lat, lon, rayon = 8000) {
   }
 }
 
+// ── AÉRODROMES (WFS officiel IGN/Géoplateforme — BD TOPO, source SIA, CORS-friendly, sans clé) ──
+// Point représentatif d'une géométrie GeoJSON (moyenne des sommets) pour estimer la distance.
+function geomRepPoint(g) {
+  if (!g || !g.coordinates) return null;
+  let sx = 0, sy = 0, n = 0;
+  const walk = a => { if (typeof a[0] === 'number') { sx += a[0]; sy += a[1]; n++; } else { for (const x of a) walk(x); } };
+  try { walk(g.coordinates); } catch { return null; }
+  return n ? { lon: sx / n, lat: sy / n } : null;
+}
+// Renvoie les aérodromes proches (nom, code OACI, nature, catégorie, distance), triés par distance.
+async function fetchAerodromes(lat, lon) {
+  try {
+    const dLat = 0.35, dLon = 0.35 / Math.max(0.3, Math.cos(lat * Math.PI / 180)); // ~±39 km
+    const bbox = `${(lat-dLat).toFixed(4)},${(lon-dLon).toFixed(4)},${(lat+dLat).toFixed(4)},${(lon+dLon).toFixed(4)}`; // EPSG:4326 = lat,lon
+    const url = `https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=BDTOPO_V3:aerodrome&SRSNAME=EPSG:4326&BBOX=${bbox}&OUTPUTFORMAT=application/json&COUNT=80`;
+    const r = await fetchWithTimeout(url, {}, 9000);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const aero = (d.features || []).map(f => {
+      const p = f.properties || {};
+      const c = geomRepPoint(f.geometry);
+      return {
+        nom: p.toponyme || p.nature || 'Aérodrome',
+        nature: p.nature || '', categorie: p.categorie || '', usage: p.usage || '',
+        icao: p.code_icao || null, iata: p.code_iata || null,
+        fictif: !!p.fictif, etat: p.etat_de_l_objet || '',
+        dist_m: c ? haversine(lat, lon, c.lat, c.lon) : null
+      };
+    }).filter(a => a.dist_m != null && a.etat !== 'Détruit');
+    aero.sort((a, b) => a.dist_m - b.dist_m);
+    return { aero, count: aero.length, error: null };
+  } catch(e) {
+    return { aero: [], count: 0, error: e.message };
+  }
+}
+
 // ── CONTENU RÉGLEMENTAIRE STATIQUE (à vérifier manuellement) ──
 // Ces modules rassemblent les bons réflexes et les liens officiels pour que la vérification manuelle soit rapide.
 function getAirspaceChecklist(geo) {
@@ -1641,13 +1787,16 @@ async function runAnalysis() {
 
   const flightDT = getFlightDateTime(inp);
 
-  // APIs temps réel — uniquement les sources utiles au parcours (météo, KP, zones de restriction + METAR)
-  const [kpData, meteoData, zonesData, metarData] = await Promise.all([
+  // APIs temps réel — météo, KP, aérodromes (WFS officiel IGN), zones de restriction (cquest, complément) + METAR
+  const [kpData, meteoData, aeroData, zonesData, metarData] = await Promise.all([
     fetchKP().then(d=>{ results.kp=d; lmod('kp', d.error?'fail':'done'); return d; }),
     fetchMeteo(lat,lon, flightDT?.iso).then(d=>{ results.meteo=d; lmod('meteo', d.error?'fail':'done'); return d; }),
-    fetchZonesDrone(lat,lon).then(d=>{ results.zones=d; lmod('oaci', d.error?'fail':'done'); return d; }),
+    fetchAerodromes(lat,lon).then(d=>{ results.aero=d; return d; }).catch(e=>{ const r={aero:[],count:0,error:e&&e.message?e.message:String(e)}; results.aero=r; return r; }),
+    fetchZonesDrone(lat,lon).then(d=>{ results.zones=d; return d; }).catch(e=>{ const r={zones:[],count:0,error:e&&e.message?e.message:String(e)}; results.zones=r; return r; }),
     fetchMetar(lat,lon).then(d=>{ results.metar=d; return d; }).catch(e=>{ const r={error:e&&e.message?e.message:String(e)}; results.metar=r; return r; }),
   ]);
+  // Module « espace aérien » OK si au moins une source (aérodromes WFS OU zones) a répondu
+  lmod('oaci', (!aeroData?.error || !zonesData?.error) ? 'done' : 'fail');
 
   // Contenus réglementaires (liens officiels + checklists)
   results.notam = getNotamChecklist(geo);
@@ -1698,59 +1847,83 @@ function renderWizard(results, statuses, inp) {
   document.getElementById('wiz-kp').innerHTML = buildKP(results.kp, statuses.kp);
   // Étape 3 — Synthèse rattachement aéroportuaire + zones / espace aérien (sous la carte)
   document.getElementById('wiz-carto').innerHTML =
-    buildAirspaceAttachment(results.zones) +
+    buildAirspaceAttachment(results.aero, results.zones) +
     buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist);
   // Étape 4 — SUP AIP & NOTAM
   document.getElementById('wiz-supaip').innerHTML = buildNotam(results.notam, 'info');
 }
 
-// Synthèse « rattachement aéroportuaire / espace aérien » — déduite des zones de restriction drone
-// (SIA/DGAC via api.cquest.org/drone, déjà récupérées dans results.zones). Aucune nouvelle requête.
+// Synthèse « rattachement aéroportuaire / espace aérien ».
+// Source PRIMAIRE : aérodromes BD TOPO IGN/Géoplateforme (WFS officiel, CORS, sans clé) → toujours disponible.
+// COMPLÉMENT : zones de restriction drone SIA/DGAC (cquest) pour le plafond, si disponibles.
 function _attachSrcNote() {
-  return `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Déduit des zones de restriction drone <strong>SIA/DGAC</strong> (millésime indicatif, orienté vol de loisir). Le statut exact (CTR/ATZ, contrôlé/non contrôlé, fréquence) se vérifie sur la <strong>carte OACI</strong> ci-dessus et l'AIP officielle. Aucune donnée n'est inventée : seules les zones renvoyées par la source sont affichées.</span></div>`;
+  return `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Aérodromes : <strong>BD TOPO — IGN / Géoplateforme</strong> (source SIA, officiel). Restrictions de hauteur éventuelles : SIA/DGAC. Le statut exact (CTR/ATZ, contrôlé/non contrôlé, fréquence) se confirme sur la <strong>carte OACI</strong> ci-dessus et l'AIP. Aucune donnée n'est inventée.</span></div>`;
 }
-function buildAirspaceAttachment(zd) {
+function buildAirspaceAttachment(aeroData, zonesData) {
   const TITLE = 'Espace aérien / rattachement aéroportuaire';
-  if (!zd || zd.error) {
-    return modWrap('rattach', TITLE, 'warn', 'INDISPONIBLE', `
-      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination indisponible${zd && zd.error ? ' : ' + zd.error : ''} (source SIA/DGAC injoignable). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>`);
+  const fmtDist = m => m == null ? '—' : (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
+  const aeroOk = aeroData && !aeroData.error && (aeroData.aero || []).length > 0;
+  const zonesOk = zonesData && !zonesData.error;
+  const insideZones = (zonesOk ? (zonesData.zones || []) : []).filter(z => z.distance_m === 0);
+  const interdit = insideZones.some(z => z.limite_alti_m === 0);
+
+  // Bloc plafond (complément cquest) si le point est dans une zone de restriction
+  let limBlock = '';
+  if (insideZones.length) {
+    const z0 = insideZones.slice().sort((a, b) => (a.limite_alti_m ?? 9999) - (b.limite_alti_m ?? 9999))[0];
+    const lim = z0.limite_alti_m;
+    const txt = lim === 0 ? `Survol drone interdit sans dérogation dans « ${z0.nom} » (cœur de zone / proximité piste).`
+      : lim != null ? `Point situé dans « ${z0.nom} » : vol drone limité à ${lim} m sans accord préalable.`
+      : `Point situé dans « ${z0.nom} » : conditions spécifiques — voir l'AIP.`;
+    limBlock = `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">${lim === 0 ? '✕' : '⚑'}</span><span>${txt}</span></div>`;
   }
-  const zones = (zd.zones || []).slice().sort((a, b) => (a.distance_m ?? 1e12) - (b.distance_m ?? 1e12));
-  if (!zones.length) {
-    return modWrap('rattach', TITLE, 'go', 'AUCUNE ZONE', `
-      <div class="malert go"><span class="malert-ico">✓</span><span>Aucune zone aéroportuaire ni de restriction recensée dans un rayon de 8 km autour de votre point. Espace <strong>a priori non contrôlé</strong> pour le vol drone — à confirmer sur la carte OACI ci-dessus.</span></div>
+
+  // Les deux sources injoignables → indisponible (cas rare : WFS IGN est très fiable)
+  if (!aeroOk && !zonesOk) {
+    const err = (aeroData && aeroData.error) || (zonesData && zonesData.error) || 'sources injoignables';
+    return modWrap('rattach', TITLE, 'warn', 'INDISPONIBLE', `
+      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination momentanément indisponible (${err}). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>
       ${_attachSrcNote()}`);
   }
-  const fmtDist = m => m == null ? '—' : (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
-  const cap = deg => { if (deg == null) return ''; const d = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']; return ' au ' + d[Math.round(deg / 45) % 8]; };
-  const isAero = z => /a[ée]ro|\bAD\b|\bCTR\b|\bATZ\b|\bTMA\b|h[ée]listation|base a[ée]rienne|LF[A-Z]{2}/i.test(((z.nom || '') + ' ' + (z.type || '')));
-  const inside = zones.filter(z => z.distance_m === 0);
-  let rattach, contextLbl;
-  if (inside.length) {
-    rattach = inside.find(isAero) || inside.slice().sort((a, b) => (a.limite_alti_m ?? 9999) - (b.limite_alti_m ?? 9999))[0];
-    contextLbl = 'Votre point de vol est situé dans cette zone.';
-  } else {
-    rattach = zones.find(isAero) || zones[0];
-    contextLbl = `Hors zone — élément le plus proche (${fmtDist(rattach.distance_m)}${cap(rattach.cap_deg)}).`;
+
+  // WFS sans aérodrome trouvé (ou erreur) mais on a éventuellement une zone
+  if (!aeroOk) {
+    if (insideZones.length) {
+      return modWrap('rattach', TITLE, interdit ? 'nogo' : 'warn', interdit ? 'INTERDIT' : 'ZONE', `
+        ${limBlock}
+        <div class="malert info"><span class="malert-ico">📍</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>
+        ${_attachSrcNote()}`);
+    }
+    return modWrap('rattach', TITLE, 'go', 'DÉGAGÉ', `
+      <div class="malert go"><span class="malert-ico">✓</span><span>Aucun aérodrome recensé dans ~39 km autour de votre point, ni zone de restriction connue. Espace <strong>a priori non contrôlé</strong> — confirmez sur la carte OACI.</span></div>
+      ${_attachSrcNote()}`);
   }
-  const lim = rattach.limite_alti_m;
-  let limTxt, limSt;
-  if (lim === 0) { limTxt = 'Survol drone interdit sans dérogation (cœur de zone / proximité piste).'; limSt = 'nogo'; }
-  else if (lim != null) { limTxt = `Vol drone limité à ${lim} m sans accord préalable de l'autorité.`; limSt = 'warn'; }
-  else { limTxt = 'Plafond drone non précisé par la donnée — à vérifier sur la carte OACI.'; limSt = 'warn'; }
-  const headline = inside.length
-    ? `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">⚑</span><span>Vous dépendez de : <strong>${rattach.nom}</strong>${rattach.type ? ` (${rattach.type})` : ''}. ${contextLbl}</span></div>`
-    : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Aérodrome / zone la plus proche : <strong>${rattach.nom}</strong>${rattach.type ? ` (${rattach.type})` : ''} — ${fmtDist(rattach.distance_m)}${cap(rattach.cap_deg)}.</span></div>`;
-  const insideHtml = inside.length
-    ? `<div style="margin:6px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zone(s) couvrant le point</div>
-       <div class="dcells">${inside.slice(0, 6).map(z => dc(z.nom, z.limite_alti_m != null ? `${z.limite_alti_m} m max` : 'Voir cond.', z.limite_alti_m === 0 ? 'nogo' : 'warn', z.type || '')).join('')}</div>`
+
+  // Cas nominal : aérodrome(s) trouvé(s) via WFS
+  const all = aeroData.aero;
+  const real = all.filter(a => a.nature === 'Aérodrome' && !a.fictif);
+  const main = real[0] || all[0];
+  const onsite = main.dist_m != null && main.dist_m < 1200;
+  const catCtl = /internationale|nationale/i.test(main.categorie || '');
+  const icaoTag = main.icao ? ` [${main.icao}]` : '';
+  const headline = `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">🛬</span><span>Aérodrome de rattachement le plus proche : <strong>${main.nom}</strong>${icaoTag} — ${onsite ? 'sur place / à proximité immédiate' : fmtDist(main.dist_m)}${main.categorie ? ` · cat. ${main.categorie}` : ''}.</span></div>`;
+  const ctlTxt = catCtl
+    ? 'Aérodrome majeur : espace souvent <strong>contrôlé</strong> (CTR/ATZ probable). Coordination/clairance possiblement requise — vérifiez la carte OACI et la fréquence.'
+    : 'Aérodrome a priori <strong>non contrôlé</strong> ; restez vigilant (trafic VFR, ATZ éventuelle) et vérifiez la carte OACI.';
+  const ctlSt = catCtl ? 'warn' : 'info';
+  const list = all.filter(a => a.nature === 'Aérodrome' || a.icao).slice(0, 5);
+  const listHtml = list.length
+    ? `<div style="margin:6px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Aérodromes à proximité</div>
+       <table class="mtbl"><thead><tr><th>Aérodrome</th><th>OACI</th><th>Type</th><th>Dist.</th></tr></thead>
+       <tbody>${list.map(a => `<tr><td style="font-weight:600">${a.nom}</td><td>${a.icao || '—'}</td><td>${a.nature || '—'}${a.categorie ? ` · ${a.categorie}` : ''}</td><td>${fmtDist(a.dist_m)}</td></tr>`).join('')}</tbody></table>`
     : '';
-  const badge = inside.length ? (lim === 0 ? 'INTERDIT' : 'ZONE') : 'PROCHE';
-  const st = inside.length ? (lim === 0 ? 'nogo' : 'warn') : 'info';
+  const badge = interdit ? 'INTERDIT' : (catCtl ? 'CONTRÔLÉ ?' : 'PROCHE');
+  const st = interdit ? 'nogo' : (catCtl ? 'warn' : 'info');
   return modWrap('rattach', TITLE, st, badge, `
     ${headline}
-    <div class="malert ${limSt}" style="margin-bottom:10px"><span class="malert-ico">${limSt === 'nogo' ? '✕' : '⚠'}</span><span>${limTxt}</span></div>
-    ${insideHtml}
+    ${limBlock}
+    <div class="malert ${ctlSt}" style="margin-bottom:10px"><span class="malert-ico">ℹ</span><span>${ctlTxt}</span></div>
+    ${listHtml}
     ${_attachSrcNote()}`);
 }
 
@@ -1768,7 +1941,6 @@ function buildSunCard(li) {
       ${dc('Lever du soleil', fmtUTC(li.sunrise))}
       ${dc('Aube aéro (−30 min)', fmtUTC(li.aubeAero), 'blue')}
       ${dc('Crépuscule aéro (+30 min)', fmtUTC(li.crepAero), 'blue')}
-      ${dc('Phase au créneau', phaseLbl, li.phase==='jour'?'go':'warn')}
     </div>
     ${alerts(a)}
     <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Heures en <strong>heure de Paris</strong> (CET/CEST). Nuit aéronautique = du coucher +30 min au lever −30 min (indicatif).</span></div>`);
