@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Profenvol — © 2026 Profenvol. Tous droits réservés.
+  Code propriétaire : reproduction, distribution et réutilisation interdites sans autorisation écrite.
+  Auteur : anonyme (publication anonyme conformément à l'art. 6-III-2 de la LCEN).
+-->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -6,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>DroneOps</title>
+<title>Profenvol</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -794,6 +799,7 @@ body.night .drone-svg .lens { filter: drop-shadow(0 0 3px var(--orange)); }
 .cover-title p { font-size: 12.5px; color: var(--ink-faint); margin-top: 4px; }
 .cover-cta { width: 100%; background: var(--orange); color: var(--btn-text); font-family: var(--disp); font-size: 15px; font-weight: 700; padding: 18px; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 18px var(--orange-d); transition: transform .14s, filter .18s; }
 .cover-cta:active { transform: scale(.98); }
+.cover-copy { text-align: center; font-size: 10.5px; line-height: 1.5; color: var(--ink-faint); margin-top: 4px; padding: 0 6px; }
 body.night .cover-cta { box-shadow: 0 0 0 1px rgba(78,200,182,.28), 0 8px 24px rgba(78,200,182,.20); }
 @media (hover: hover) { .cover-cta:hover { filter: brightness(1.06); transform: translateY(-1px); } }
 /* éléments de l'illustration */
@@ -814,7 +820,7 @@ body.night .cv-paper { fill: var(--stone); }
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-brand"><span class="dot"></span>DroneOps</div>
+  <div class="topbar-brand"><span class="dot"></span>Profenvol</div>
   <div class="topbar-right">
     <div class="topbar-time" id="utc-clock">--:-- Paris</div>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Basculer jour/nuit" title="Basculer jour/nuit">☀️</button>
@@ -899,6 +905,7 @@ body.night .cv-paper { fill: var(--stone); }
     </div>
 
     <button class="cover-cta" onclick="showScreen('screen-form')">Préparer mon vol →</button>
+    <p class="cover-copy">© 2026 Profenvol — Tous droits réservés. Reproduction et réutilisation interdites sans autorisation.</p>
   </div>
 </div>
 

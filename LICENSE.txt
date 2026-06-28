@@ -1,0 +1,79 @@
+PROFENVOL — LICENCE PROPRIÉTAIRE
+« TOUS DROITS RÉSERVÉS »
+
+© 2026 Profenvol. Tous droits réservés.
+
+Auteur : anonyme. L'œuvre est publiée de manière anonyme, sous la marque
+« Profenvol », conformément à la faculté reconnue à l'article 6-III-2 de la
+loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique
+(LCEN). Le titulaire des droits est désigné sous la dénomination « Profenvol ».
+
+
+1. OBJET
+
+Le présent document définit les conditions d'utilisation du logiciel
+« Profenvol » et de l'ensemble de son code source, de ses contenus, de ses
+éléments graphiques et de sa documentation (ci-après « l'Œuvre »). L'Œuvre est
+un logiciel PROPRIÉTAIRE. Elle n'est PAS un logiciel libre ni open source.
+
+
+2. TITULARITÉ DES DROITS
+
+L'Œuvre, dans sa structure, son code, sa conception, ses illustrations et ses
+textes, est la propriété exclusive de Profenvol et demeure protégée par le droit
+d'auteur et, le cas échéant, par tout autre droit de propriété intellectuelle
+applicable. Aucune disposition de la présente licence n'emporte cession de droits.
+
+
+3. INTERDICTIONS
+
+Sauf autorisation écrite, préalable et expresse du titulaire des droits, sont
+strictement INTERDITES, à titre gratuit ou onéreux :
+
+  - la reproduction, totale ou partielle, de l'Œuvre ou de son code source ;
+  - la copie, le téléchargement ou l'enregistrement du code en vue d'une
+    réutilisation ;
+  - la distribution, la mise à disposition, la publication ou la communication
+    de l'Œuvre à des tiers ;
+  - la modification, l'adaptation, la traduction, la décompilation ou la
+    création d'œuvres dérivées ;
+  - l'intégration, totale ou partielle, dans un autre produit, service ou
+    projet, qu'il soit privé, commercial, libre ou open source ;
+  - tout usage de la marque « Profenvol » ou d'éléments susceptibles de créer
+    une confusion avec celle-ci.
+
+
+4. USAGE AUTORISÉ
+
+L'Œuvre est mise à disposition à titre de CONSULTATION, exclusivement via le
+site déployé par le titulaire, et pour un usage personnel de préparation de vol.
+La consultation du code éventuellement rendu accessible par le navigateur, du
+fait du fonctionnement technique du Web, ne confère aucun droit de réutilisation.
+
+
+5. ABSENCE DE GARANTIE — CARACTÈRE INDICATIF
+
+L'Œuvre constitue une AIDE à la préparation de vol. Les informations qu'elle
+présente sont fournies à titre strictement indicatif et NE SE SUBSTITUENT EN
+AUCUN CAS aux publications officielles (SIA, NOTAM, etc.) ni aux vérifications
+manuelles incombant au télépilote. L'Œuvre est fournie « en l'état », sans
+garantie d'aucune sorte. Le télépilote demeure seul responsable de la conformité
+et de la sécurité de son vol. Le titulaire ne saurait être tenu responsable de
+tout dommage direct ou indirect résultant de l'utilisation de l'Œuvre.
+
+
+6. DEMANDES D'AUTORISATION
+
+Toute demande d'autorisation relative à un usage non prévu par la présente
+licence doit être adressée au titulaire « Profenvol » via les coordonnées de
+contact publiées sur le site déployé.
+
+
+7. DROIT APPLICABLE
+
+La présente licence est régie par le droit français. Tout litige relatif à son
+interprétation ou à son exécution relèvera de la compétence des juridictions
+françaises.
+
+
+Profenvol — © 2026. Tous droits réservés.
