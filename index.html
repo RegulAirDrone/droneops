@@ -297,6 +297,16 @@ a { color: var(--orange); }
 }
 @media (hover: hover) { .btn-geoloc:hover:not(:disabled) { background: var(--stone-2); } }
 
+/* Encart d'avertissement « hauteur > 120 m » + confirmation */
+.alt-warn { background: var(--amber-d); border: 1px solid var(--stone-2); border-left: 3px solid var(--amber); border-radius: 16px; padding: 13px 15px; }
+.alt-warn-hd { display: flex; align-items: center; gap: 8px; font-family: var(--disp); font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--amber); margin-bottom: 7px; }
+.alt-warn-ic { font-size: 14px; }
+.alt-warn p { font-size: 12.5px; line-height: 1.55; color: var(--ink-soft); }
+.alt-warn p strong { color: var(--ink); }
+.alt-warn-chk { display: flex; align-items: flex-start; gap: 9px; margin-top: 11px; font-size: 12.5px; line-height: 1.45; color: var(--ink); cursor: pointer; }
+.alt-warn-chk input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: var(--amber); }
+.alt-warn.invalid { box-shadow: 0 0 0 3px var(--amber-d); }
+
 /* Drone specs panel — rounded pebble cluster */
 .drone-specs {
   background: var(--bg);
@@ -694,6 +704,18 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .btn-suivant { flex: 1; background: var(--ink); border-radius: 20px; color: var(--bg); font-family: var(--disp); font-size: 14px; font-weight: 700; padding: 15px; }
 .btn-prev { flex: 1; background: var(--paper); border-radius: 20px; color: var(--ink); font-family: var(--disp); font-size: 14px; font-weight: 700; padding: 15px; }
 .btn-suivant:active, .btn-prev:active { transform: scale(.98); }
+/* Barre finale (page 4) : Précédent + Nouvelle mission sur une ligne, Fermer en pleine largeur dessous */
+.detail-nav--final { flex-wrap: wrap; }
+.btn-close { flex: 1; flex-basis: 100%; background: var(--stone); border: 1px solid var(--stone-2); color: var(--ink-soft); border-radius: 20px; font-family: var(--disp); font-size: 14px; font-weight: 700; padding: 14px; transition: background .15s, transform .12s; }
+.btn-close:active { transform: scale(.98); }
+@media (hover: hover) { .btn-close:hover { background: var(--stone-2); color: var(--ink); } }
+/* Écran « application fermée » */
+#screen-closed { align-items: center; justify-content: center; padding: 24px 22px calc(22px + var(--safe-b)); }
+.closed-inner { max-width: 360px; margin: auto 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.closed-ic { width: 64px; height: 64px; border-radius: 50%; background: var(--green-d); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.closed-inner h1 { font-family: var(--disp); font-size: 22px; font-weight: 700; color: var(--ink); }
+.closed-inner p { font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
+.closed-inner .cover-cta { margin-top: 6px; width: 100%; }
 #carto-map { height: 46vh; min-height: 300px; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--stone-2); z-index: 0; }
 .leaflet-container { background: var(--paper); font: 12px var(--ui, sans-serif); }
 .carto-legend { font-size: 11px; color: var(--ink-soft); line-height: 1.5; background: var(--paper); border: 1px solid var(--stone-2); border-radius: 16px; padding: 12px 14px; }
@@ -934,12 +956,17 @@ body.night .cv-paper { fill: var(--stone); }
         <div class="field-row">
           <div class="field">
             <label>Altitude max (m AGL)</label>
-            <input type="number" id="altitude" value="120" min="0" max="500" inputmode="numeric" />
+            <input type="number" id="altitude" value="120" min="0" max="500" inputmode="numeric" oninput="onAltitudeInput()" />
           </div>
           <div class="field">
             <label>Durée (min)</label>
             <input type="number" id="duration" value="30" min="1" inputmode="numeric" />
           </div>
+        </div>
+        <div class="alt-warn" id="alt-warn" style="display:none">
+          <div class="alt-warn-hd"><span class="alt-warn-ic">⚠️</span><span>Hauteur supérieure à 120 m AGL</span></div>
+          <p>Au-delà de <strong>120 m</strong> (limite de la catégorie ouverte), le vol n'est <strong>pas réglementaire</strong> sans autorisation ou dérogation spécifique (scénario STS, déclaration, etc.).</p>
+          <label class="alt-warn-chk"><input type="checkbox" id="alt-confirm"><span>Je confirme en avoir conscience et disposer de l'autorisation nécessaire.</span></label>
         </div>
       </div>
     </div>
@@ -1097,9 +1124,22 @@ body.night .cv-paper { fill: var(--stone); }
     <div class="step-dots"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div>
   </div>
   <div class="wiz-scroll" id="wiz-supaip"></div>
-  <div class="detail-nav">
+  <div class="detail-nav detail-nav--final">
     <button class="btn-prev" onclick="goStep('carto')">← Précédent</button>
     <button class="btn-suivant" onclick="newMission()">↺ Nouvelle mission</button>
+    <button class="btn-close" onclick="closeApp()">✕ Fermer l'application</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN — APPLICATION FERMÉE                           -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-closed">
+  <div class="closed-inner">
+    <div class="closed-ic">✓</div>
+    <h1>Préparation terminée</h1>
+    <p>Tu peux fermer cet onglet en toute sécurité.<br>Bon vol — et reste vigilant : le télépilote demeure seul responsable de la sécurité et de la conformité de son vol.</p>
+    <button class="cover-cta" onclick="newMission()">↺ Nouvelle mission</button>
   </div>
 </div>
 
@@ -1150,6 +1190,28 @@ function showScreen(id, dir) {
 function newMission() {
   showScreen('screen-form');
   document.getElementById('btn-analyse').disabled = false;
+}
+
+// Fermeture de l'application. La plupart des navigateurs refusent window.close() pour un onglet
+// que le script n'a pas ouvert lui-même → on bascule alors sur un écran « fermé » propre.
+function closeApp() {
+  try { window.open('', '_self'); window.close(); } catch (e) {}
+  setTimeout(() => showScreen('screen-closed'), 120);
+}
+
+// Affiche/masque l'avertissement réglementaire quand la hauteur dépasse 120 m AGL
+function onAltitudeInput() {
+  const v = parseInt(document.getElementById('altitude').value, 10);
+  const warn = document.getElementById('alt-warn');
+  if (!warn) return;
+  if (v > 120) {
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+    warn.classList.remove('invalid');
+    const c = document.getElementById('alt-confirm');
+    if (c) c.checked = false;
+  }
 }
 
 // ── FETCH AVEC TIMEOUT (sans AbortSignal — incompatible avec le sandbox postMessage mobile) ────
@@ -2101,6 +2163,16 @@ async function runAnalysis() {
     document.getElementById('loc-name').focus();
     return;
   }
+  // Hauteur > 120 m AGL : confirmation réglementaire obligatoire avant analyse
+  if (inp.altitude > 120) {
+    const confirmEl = document.getElementById('alt-confirm');
+    const warn = document.getElementById('alt-warn');
+    if (warn) warn.style.display = 'block';
+    if (!confirmEl || !confirmEl.checked) {
+      if (warn) { warn.classList.add('invalid'); warn.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      return;
+    }
+  }
 
   document.getElementById('btn-analyse').disabled = true;
   showScreen('screen-loading');
@@ -2293,9 +2365,12 @@ function ensureCartoMap() {
   const OACI = 'https://data.geopf.fr/private/wmts?apikey=ign_scan_ws';  // endpoint Géoportail (clé publique fixe)
   if (!_cartoMap) {
     _cartoMap = L.map('carto-map', { zoomControl: true, attributionControl: true }).setView([lat, lon], 11);
-    // 1) Fond cartographique (base)
+    // 1) Fond cartographique « plan » lisible (villes, villages, rues) — OpenStreetMap, par défaut
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { minZoom: 5, maxZoom: 19, maxNativeZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(_cartoMap);
+    // Fond alternatif : Plan IGN (Géoplateforme) — non affiché par défaut
     const planLayer = L.tileLayer(tile(PUB, 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png', '?'),
-      { minZoom: 5, maxZoom: 18, maxNativeZoom: 18, attribution: '© IGN / Géoplateforme' }).addTo(_cartoMap);
+      { minZoom: 5, maxZoom: 18, maxNativeZoom: 18, attribution: '© IGN / Géoplateforme' });
     // 2) Restrictions drone DGAC (surimpression, libre)
     const droneLayer = L.tileLayer(tile(PUB, 'TRANSPORTS.DRONES.RESTRICTIONS', 'image/png', '?'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 16, opacity: 0.7, attribution: 'Restrictions drone © DGAC/SIA' }).addTo(_cartoMap);
@@ -2304,7 +2379,7 @@ function ensureCartoMap() {
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
     // Contrôle de couches : activer/désactiver chaque surimpression
     L.control.layers(
-      { 'Plan IGN': planLayer },
+      { 'Plan (villes/rues)': osmLayer, 'Plan IGN': planLayer },
       { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer },
       { collapsed: true }
     ).addTo(_cartoMap);
