@@ -718,6 +718,15 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .closed-inner .cover-cta { margin-top: 6px; width: 100%; }
 #carto-map { height: 46vh; min-height: 300px; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--stone-2); z-index: 0; }
 .leaflet-container { background: var(--paper); font: 12px var(--ui, sans-serif); }
+/* Marqueur « drone » (vue de dessus) + halo pulsant — point de vol sur la carte */
+.drone-marker { background: transparent !important; border: none !important; }
+.dm-svg { position: absolute; inset: 0; width: 40px; height: 40px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+.dm-arm { stroke: #fff; stroke-width: 3; stroke-linecap: round; }
+.dm-rotor { fill: #e0512f; stroke: #fff; stroke-width: 1.4; }
+.dm-body { fill: #e0512f; stroke: #fff; stroke-width: 1.8; }
+.dm-pulse { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: rgba(224,81,47,.45); animation: dmPulse 1.8s ease-out infinite; }
+@keyframes dmPulse { 0% { transform: scale(.55); opacity: .75; } 100% { transform: scale(2.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dm-pulse { animation: none; opacity: .35; } }
 .carto-legend { font-size: 11px; color: var(--ink-soft); line-height: 1.5; background: var(--paper); border: 1px solid var(--stone-2); border-radius: 16px; padding: 12px 14px; }
 .carto-legend b { color: var(--ink); }
 .lgd-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
@@ -835,6 +844,24 @@ body.night .cover-cta { box-shadow: 0 0 0 1px rgba(78,200,182,.28), 0 8px 24px r
 .cv-star   { fill: var(--ink-faint); }
 body.night .cv-paper { fill: var(--stone); }
 
+/* ════════ HARMONISATION coins/ombres des encarts récents avec la famille « modules » ════════ */
+.cover-warn, .alt-warn, .carto-legend {
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 5px 16px rgba(16,24,40,.06);
+}
+body.night .cover-warn, body.night .alt-warn, body.night .carto-legend {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 7px 22px rgba(0,0,0,.40);
+}
+.btn-geoloc { border-radius: 16px; }
+.commune-suggestions { border-radius: 20px; }
+
+/* ════════ JEU D'ICÔNES SVG UNIFIÉ (trait, currentColor) ════════ */
+.ic { display: inline-block; vertical-align: middle; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.section-icon .ic { width: 18px; height: 18px; stroke: var(--ink-soft); }
+.theme-toggle .ic { width: 18px; height: 18px; stroke: var(--ink); }
+.cover-warn-ic .ic, .alt-warn-ic .ic { width: 15px; height: 15px; stroke: var(--amber); }
+.malert-ico .ic { width: 13px; height: 13px; }
+
 ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -845,7 +872,7 @@ body.night .cv-paper { fill: var(--stone); }
   <div class="topbar-brand"><span class="dot"></span>Profenvol</div>
   <div class="topbar-right">
     <div class="topbar-time" id="utc-clock">--:-- Paris</div>
-    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Basculer jour/nuit" title="Basculer jour/nuit">☀️</button>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Basculer jour/nuit" title="Basculer jour/nuit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg></button>
   </div>
 </div>
 
@@ -855,7 +882,7 @@ body.night .cv-paper { fill: var(--stone); }
 <div class="screen active" id="screen-cover">
   <div class="cover-inner">
     <div class="cover-warn">
-      <div class="cover-warn-hd"><span class="cover-warn-ic">⚠️</span><span class="cover-warn-ttl">Avertissement</span></div>
+      <div class="cover-warn-hd"><span class="cover-warn-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9 16.5H3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><span class="cover-warn-ttl">Avertissement</span></div>
       <div class="cover-warn-tx"><strong>Aide</strong> à la préparation de vol — sans valeur officielle. Ne remplace pas les <strong>vérifications manuelles</strong> ni les <strong>publications officielles</strong> (SIA, NOTAM…). Le télépilote reste <strong>seul responsable</strong> de la sécurité et de la conformité de son vol.</div>
     </div>
 
@@ -940,7 +967,7 @@ body.night .cv-paper { fill: var(--stone); }
     <!-- Zone de vol -->
     <div class="section-card section-card--locate">
       <div class="section-head">
-        <span class="section-icon">📍</span>
+        <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
         <span class="section-title">Zone de vol</span>
       </div>
       <div class="section-body">
@@ -964,7 +991,7 @@ body.night .cv-paper { fill: var(--stone); }
           </div>
         </div>
         <div class="alt-warn" id="alt-warn" style="display:none">
-          <div class="alt-warn-hd"><span class="alt-warn-ic">⚠️</span><span>Hauteur supérieure à 120 m AGL</span></div>
+          <div class="alt-warn-hd"><span class="alt-warn-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9 16.5H3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><span>Hauteur supérieure à 120 m AGL</span></div>
           <p>Au-delà de <strong>120 m</strong> (limite de la catégorie ouverte), le vol n'est <strong>pas réglementaire</strong> sans autorisation ou dérogation spécifique (scénario STS, déclaration, etc.).</p>
           <label class="alt-warn-chk"><input type="checkbox" id="alt-confirm"><span>Je confirme en avoir conscience et disposer de l'autorisation nécessaire.</span></label>
         </div>
@@ -974,7 +1001,7 @@ body.night .cv-paper { fill: var(--stone); }
     <!-- Mission -->
     <div class="section-card">
       <div class="section-head">
-        <span class="section-icon">🎯</span>
+        <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg></span>
         <span class="section-title">Mission</span>
       </div>
       <div class="section-body">
@@ -1002,7 +1029,7 @@ body.night .cv-paper { fill: var(--stone); }
     <!-- Notes -->
     <div class="section-card">
       <div class="section-head">
-        <span class="section-icon">📝</span>
+        <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></span>
         <span class="section-title">Notes opérationnelles</span>
       </div>
       <div class="section-body">
@@ -1149,7 +1176,7 @@ function applyTheme(theme) {
   const isNight = theme === 'night';
   document.body.classList.toggle('night', isNight);
   const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = isNight ? '🌙' : '☀️';
+  if (btn) btn.innerHTML = isNight ? ic('moon') : ic('sun');
 }
 function toggleTheme() {
   const isNight = document.body.classList.contains('night');
@@ -1253,7 +1280,7 @@ async function searchCommunes(query) {
 
   // 1) Tentative principale — API Découpage administratif (geo.api.gouv.fr)
   try {
-    const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&boost=population&fields=nom,code,codesPostaux,codeDepartement,departement,centre&limit=12`;
+    const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&boost=population&fields=nom,code,codesPostaux,codeDepartement,departement,centre,mairie&limit=12`;
     const r = await fetchWithTimeout(url, {}, 7000);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     list = await r.json();
@@ -1337,9 +1364,11 @@ function pickCommune(idx) {
          : /^9[78]/.test(insee) ? insee.slice(0, 3)
          : insee.slice(0, 2);
   }
+  // Point de référence : la MAIRIE (centre-ville) en priorité, sinon le centroïde de la commune
+  const pt = (c.mairie && c.mairie.coordinates) || (c.centre && c.centre.coordinates) || [];
   selectedCommune = {
-    lat: c.centre?.coordinates?.[1],
-    lon: c.centre?.coordinates?.[0],
+    lat: pt[1],
+    lon: pt[0],
     nom: c.nom || '',
     cp: c.codesPostaux?.[0] || '',
     dept: dept || '',
@@ -2298,7 +2327,7 @@ function buildAirspaceAttachment(aeroData, zonesData) {
     if (insideZones.length) {
       return modWrap('rattach', TITLE, interdit ? 'nogo' : 'warn', interdit ? 'INTERDIT' : 'ZONE', `
         ${limBlock}
-        <div class="malert info"><span class="malert-ico">📍</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>
+        <div class="malert info"><span class="malert-ico">${ic('pin')}</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>
         ${_attachSrcNote()}`);
     }
     return modWrap('rattach', TITLE, 'go', 'DÉGAGÉ', `
@@ -2313,7 +2342,7 @@ function buildAirspaceAttachment(aeroData, zonesData) {
   const onsite = main.dist_m != null && main.dist_m < 1200;
   const catCtl = /internationale|nationale/i.test(main.categorie || '');
   const icaoTag = main.icao ? ` [${main.icao}]` : '';
-  const headline = `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">🛬</span><span>Aérodrome de rattachement le plus proche : <strong>${main.nom}</strong>${icaoTag} — ${onsite ? 'sur place / à proximité immédiate' : fmtDist(main.dist_m)}${main.categorie ? ` · cat. ${main.categorie}` : ''}.</span></div>`;
+  const headline = `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">${ic('plane')}</span><span>Aérodrome de rattachement le plus proche : <strong>${main.nom}</strong>${icaoTag} — ${onsite ? 'sur place / à proximité immédiate' : fmtDist(main.dist_m)}${main.categorie ? ` · cat. ${main.categorie}` : ''}.</span></div>`;
   const ctlTxt = catCtl
     ? 'Aérodrome majeur : espace souvent <strong>contrôlé</strong> (CTR/ATZ probable). Coordination/clairance possiblement requise — vérifiez la carte OACI et la fréquence.'
     : 'Aérodrome a priori <strong>non contrôlé</strong> ; restez vigilant (trafic VFR, ATZ éventuelle) et vérifiez la carte OACI.';
@@ -2365,9 +2394,9 @@ function ensureCartoMap() {
   const OACI = 'https://data.geopf.fr/private/wmts?apikey=ign_scan_ws';  // endpoint Géoportail (clé publique fixe)
   if (!_cartoMap) {
     _cartoMap = L.map('carto-map', { zoomControl: true, attributionControl: true }).setView([lat, lon], 11);
-    // 1) Fond cartographique « plan » lisible (villes, villages, rues) — OpenStreetMap, par défaut
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { minZoom: 5, maxZoom: 19, maxNativeZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(_cartoMap);
+    // 1) Vue SATELLITE (orthophotos IGN, Géoplateforme) — fond par défaut
+    const satLayer = L.tileLayer(tile(PUB, 'ORTHOIMAGERY.ORTHOPHOTOS', 'image/jpeg', '?'),
+      { minZoom: 5, maxZoom: 19, maxNativeZoom: 19, attribution: '© IGN / Géoplateforme — Orthophotos' }).addTo(_cartoMap);
     // Fond alternatif : Plan IGN (Géoplateforme) — non affiché par défaut
     const planLayer = L.tileLayer(tile(PUB, 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png', '?'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 18, attribution: '© IGN / Géoplateforme' });
@@ -2379,7 +2408,7 @@ function ensureCartoMap() {
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
     // Contrôle de couches : activer/désactiver chaque surimpression
     L.control.layers(
-      { 'Plan (villes/rues)': osmLayer, 'Plan IGN': planLayer },
+      { 'Satellite': satLayer, 'Plan IGN': planLayer },
       { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer },
       { collapsed: true }
     ).addTo(_cartoMap);
@@ -2387,13 +2416,42 @@ function ensureCartoMap() {
   }
   _cartoOverlay.clearLayers();
   L.circle([lat, lon], { radius, color: '#2b6cb0', weight: 1.5, fillColor: '#2b6cb0', fillOpacity: 0.06 }).addTo(_cartoOverlay);
-  L.circleMarker([lat, lon], { radius: 8, color: '#fff', weight: 2, fillColor: '#e0512f', fillOpacity: 1 })
-    .addTo(_cartoOverlay).bindPopup('Point de vol analysé');
+  // Marqueur « drone » (vue de dessus) + halo pulsant
+  const droneHtml = '<span class="dm-pulse"></span>'
+    + '<svg class="dm-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'
+    + '<line class="dm-arm" x1="20" y1="20" x2="8" y2="8"/><line class="dm-arm" x1="20" y1="20" x2="32" y2="8"/>'
+    + '<line class="dm-arm" x1="20" y1="20" x2="8" y2="32"/><line class="dm-arm" x1="20" y1="20" x2="32" y2="32"/>'
+    + '<circle class="dm-rotor" cx="8" cy="8" r="4.2"/><circle class="dm-rotor" cx="32" cy="8" r="4.2"/>'
+    + '<circle class="dm-rotor" cx="8" cy="32" r="4.2"/><circle class="dm-rotor" cx="32" cy="32" r="4.2"/>'
+    + '<rect class="dm-body" x="13.5" y="13.5" width="13" height="13" rx="3.5"/>'
+    + '</svg>';
+  L.marker([lat, lon], {
+    icon: L.divIcon({ className: 'drone-marker', html: droneHtml, iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -16] })
+  }).addTo(_cartoOverlay).bindPopup('Point de vol analysé');
   _cartoMap.setView([lat, lon], 11);
   setTimeout(() => _cartoMap.invalidateSize(), 150);
 }
 
 // (Ancien cadran verdict + écran détail remplacés par le parcours par étapes ci-dessus.)
+
+// ── JEU D'ICÔNES SVG (trait, hérite de la couleur du texte via currentColor) ──
+// Dictionnaire interne à la fonction (déclaration hoisted) → appelable dès l'init, sans TDZ.
+function ic(n) {
+  const I = {
+    pin:   '<path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/>',
+    note:  '<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h4"/>',
+    sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/>',
+    moon:  '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+    alert: '<path d="M12 3.5l9 16.5H3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/>',
+    plane: '<path d="M21 15.5l-8-3V6a1.5 1.5 0 0 0-3 0v6.5l-8 3V18l8-2v3l-2 1.4V22l3.5-1 3.5 1v-1.6L13 19v-3z"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.5 2"/>',
+    hires: '<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M4 14h16M10 4v16M14 4v16"/>',
+    globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/>',
+    signal:'<path d="M5 13a7 7 0 0 1 7-7"/><path d="M8 13a4 4 0 0 1 4-4"/><circle cx="12" cy="13" r="1.4"/><path d="M12 14.4V21"/>'
+  };
+  return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${I[n] || ''}</svg>`;
+}
 
 function modWrap(id, title, status, badge, body) {
   return `<div class="module ${status}" id="mod-${id}">
@@ -2429,8 +2487,8 @@ function buildSupAipRetrieval(geo) {
   const dept = (geo && geo.dept) ? geo.dept : '';
   const deptNom = (geo && geo.deptNom) ? geo.deptNom : '';
   const deptHint = dept
-    ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Ta zone de vol est dans le département <strong>${dept}${deptNom ? ' — ' + deptNom : ''}</strong>. Dans la liste officielle, <strong>repère les SUP AIP mentionnant ton département (${dept}) ou ta zone</strong> (ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`
-    : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📍</span><span>Dans la liste officielle, <strong>repère les SUP AIP mentionnant ta zone</strong> (département, ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`;
+    ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('pin')}</span><span>Ta zone de vol est dans le département <strong>${dept}${deptNom ? ' — ' + deptNom : ''}</strong>. Dans la liste officielle, <strong>repère les SUP AIP mentionnant ton département (${dept}) ou ta zone</strong> (ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`
+    : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('pin')}</span><span>Dans la liste officielle, <strong>repère les SUP AIP mentionnant ta zone</strong> (département, ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`;
   return modWrap('supaip-get', 'Récupérer les SUP AIP', 'info', 'OFFICIEL', `
     ${deptHint}
     <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚠</span><span>La <strong>liste officielle du SIA</strong> est la seule source à jour (cycle AIRAC, ~28 jours). C'est au télépilote de <strong>vérifier et télécharger</strong> le SUP AIP applicable à son créneau et à sa zone.</span></div>
@@ -2473,7 +2531,6 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
   }
 
   const inside = zonesData.zones.filter(z => z.distance_m === 0);
-  const nearby = zonesData.zones.filter(z => z.distance_m > 0).slice(0, 8);
 
   const capLabel = (deg) => {
     if (deg === null || deg === undefined) return '';
@@ -2493,25 +2550,8 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
     insideHtml = `<div class="malert go" style="margin-bottom:10px"><span class="malert-ico">✓</span><span>Le point de vol n'est dans aucune zone de restriction recensée (hors interdictions temporaires — voir NOTAM).</span></div>`;
   }
 
-  // Tableau des zones proches
-  let nearbyHtml = '';
-  if (nearby.length > 0) {
-    nearbyHtml = `
-      <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Zones à proximité</div>
-      <table class="mtbl">
-        <thead><tr><th>Zone</th><th>Dist.</th><th>Cap</th><th>Plafond</th></tr></thead>
-        <tbody>${nearby.map(z=>`<tr>
-          <td style="font-weight:600">${z.nom}${z.type?`<br><span style="color:var(--ink-faint);font-size:10px">${z.type}</span>`:''}</td>
-          <td>${z.distance_m!=null ? (z.distance_m<1000 ? z.distance_m+' m' : (z.distance_m/1000).toFixed(1)+' km') : '—'}</td>
-          <td>${capLabel(z.cap_deg)}</td>
-          <td>${z.limite_alti_m!=null ? z.limite_alti_m+' m' : '—'}</td>
-        </tr>`).join('')}</tbody>
-      </table>`;
-  }
-
   return modWrap('oaci', TITRE, s, badge, `
     ${insideHtml}
-    ${nearbyHtml}
     <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Données de zonage drone (source SIA/DGAC, millésime 2021) — <strong>indicatives</strong>, hors interdictions temporaires et établies pour le vol de loisir. Votre statut étatique peut modifier les autorisations applicables. Recoupez avec la carte officielle Géoportail (liens ci-dessous), mise à jour en continu.</span></div>
     <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Points à vérifier</div>
     <div class="mod-alerts">${allPoints.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
@@ -2610,7 +2650,7 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   }
 
   const winNote = isWin
-    ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">🕑</span><span>Conditions <strong>prévues pour votre créneau (${whenLbl})</strong> — base de la décision météo.</span></div>`
+    ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('clock')}</span><span>Conditions <strong>prévues pour votre créneau (${whenLbl})</strong> — base de la décision météo.</span></div>`
     : `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚠</span><span>Prévision indisponible pour le créneau saisi (hors plage) — <strong>conditions actuelles</strong> affichées.</span></div>`;
 
   // Bannière source : modèle utilisé (AROME HD vs global) + heure de fraîcheur des données
@@ -2620,7 +2660,7 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   const fetchLbl = m.fetchedAt ? fmtParis(m.fetchedAt) : null;
   const freshTxt = [obsLbl?`données à ${obsLbl}`:null, fetchLbl?`récupéré ${fetchLbl}`:null].filter(Boolean).join(' · ');
   const freshTz = freshTxt ? freshTxt + ' · heure de Paris' : '';
-  const modelBanner = `<div class="malert ${isArome?'go':'info'}" style="margin-bottom:10px"><span class="malert-ico">${isArome?'🛰':'🌍'}</span><span>Modèle : <strong>${modelName}</strong>${isArome?' — haute résolution France':' — repli (créneau hors portée AROME ou hors France métro)'}${freshTz?` · ${freshTz}`:''}</span></div>`;
+  const modelBanner = `<div class="malert ${isArome?'go':'info'}" style="margin-bottom:10px"><span class="malert-ico">${isArome?ic('hires'):ic('globe')}</span><span>Modèle : <strong>${modelName}</strong>${isArome?' — haute résolution France':' — repli (créneau hors portée AROME ou hors France métro)'}${freshTz?` · ${freshTz}`:''}</span></div>`;
 
   return modWrap('meteo','Météo temps réel',s, s==='go'?'FAVORABLE':s==='nogo'?'DÉFAVORABLE':'CONSULTER', `
     ${winNote}
@@ -2649,7 +2689,7 @@ function buildTraffic(d, s) {
 
   const radius = d.radiusKm || 46;
   const low = d.aircraft.filter(a=>a.alt_m<500);
-  const srcTag = d.source ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">📡</span><span>Source : <strong>${d.source}</strong> · rayon ~${radius} km autour du point.</span></div>` : '';
+  const srcTag = d.source ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('signal')}</span><span>Source : <strong>${d.source}</strong> · rayon ~${radius} km autour du point.</span></div>` : '';
 
   return modWrap('traffic','Trafic aérien ADS-B',s, d.count===0?'DÉGAGÉ':low.length>0?'ACTIVITÉ BASSE':'ACTIVITÉ', `
     ${srcTag}
