@@ -742,6 +742,7 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .vac-close { flex: none; width: 34px; height: 34px; border: 0; border-radius: 10px; background: rgba(127,127,127,.16); color: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
 .vac-close:hover { background: rgba(127,127,127,.3); }
 .vac-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.vac-frame { flex: 1; width: 100%; border: 0; background: #525659; }
 .vac-canvas-wrap { flex: 1; min-height: 0; overflow: auto; background: #525659; padding: 9px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .vac-page { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.4); background: #fff; }
 .vac-status { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted, #5a6b7b); }
@@ -2418,7 +2419,7 @@ function vacUrl(icao) {
 function _vacEsc(e) { if (e.key === 'Escape') closeVac(); }
 // Relais CORS perso optionnel (ex. Cloudflare Worker). Si renseigné, il est essayé en priorité.
 // Le Worker doit récupérer ?url=<PDF> et le renvoyer avec en-tête Access-Control-Allow-Origin: *.
-const VAC_PROXY = '';
+const VAC_PROXY = 'https://raspy-cake-9a27.zuhlian.workers.dev/';
 let _pdfjsP = null;
 function _ensurePdfJs() {
   if (window.pdfjsLib) return Promise.resolve();
@@ -2436,7 +2437,6 @@ function _ensurePdfJs() {
 async function _renderVac(icao, wrap, status) {
   const pdfUrl = vacUrl(icao);
   const builders = [];
-  if (VAC_PROXY) builders.push(u => VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(u));
   builders.push(u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
   builders.push(u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`);
   try { await _ensurePdfJs(); }
@@ -2466,6 +2466,12 @@ function openVac(icao, encName) {
   const url = vacUrl(icao);
   let ov = document.getElementById('vac-overlay');
   if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
+  // Avec relais perso (VAC_PROXY) : cadre natif via le relais (le plus fiable).
+  // Sans relais : tentative de rendu PDF.js via relais publics (best effort, souvent capricieux).
+  const body = VAC_PROXY
+    ? `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte VAC ${icao}"></iframe>`
+    : `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
+         <div class="vac-canvas-wrap" id="vac-pages"></div>`;
   ov.innerHTML =
     `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte VAC ${icao}">
        <div class="vac-head">
@@ -2473,8 +2479,7 @@ function openVac(icao, encName) {
          <button type="button" class="vac-close" onclick="closeVac()" aria-label="Fermer">✕</button>
        </div>
        <div class="vac-body">
-         <div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
-         <div class="vac-canvas-wrap" id="vac-pages"></div>
+         ${body}
          <div class="vac-fallback">Carte officielle SIA, cycle <strong>${airacFolder().replace('eAIP_', '').replace(/_/g, ' ')}</strong>. <a href="${url}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.</div>
        </div>
      </div>`;
@@ -2482,7 +2487,7 @@ function openVac(icao, encName) {
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.addEventListener('keydown', _vacEsc);
-  _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'));
+  if (!VAC_PROXY) _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'));
 }
 function closeVac() {
   const ov = document.getElementById('vac-overlay');
