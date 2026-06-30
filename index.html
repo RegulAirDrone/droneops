@@ -727,6 +727,34 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .dm-pulse { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: rgba(224,81,47,.45); animation: dmPulse 1.8s ease-out infinite; }
 @keyframes dmPulse { 0% { transform: scale(.55); opacity: .75; } 100% { transform: scale(2.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dm-pulse { animation: none; opacity: .35; } }
+/* Marqueurs « aérodromes » (couche optionnelle) + popup */
+.aero-marker { background: transparent !important; border: none !important; }
+.aero-marker svg { width: 30px; height: 30px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.aero-name-btn { display: block; background: none; border: 0; padding: 0; margin: 0 0 3px; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.aero-name-btn:hover b { text-decoration: underline; }
+.aero-pop .aero-vac { cursor: pointer; }
+.vac-overlay { position: fixed; inset: 0; z-index: 99999; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(8,12,20,.66); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.vac-overlay.open { display: flex; }
+.vac-modal { display: flex; flex-direction: column; width: min(980px, 96vw); height: min(92vh, 1040px); overflow: hidden; background: var(--card, #fff); color: var(--text, #16202c); border-radius: 18px; box-shadow: 0 20px 64px rgba(0,0,0,.5); }
+.vac-head { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-bottom: 1px solid rgba(127,127,127,.22); }
+.vac-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.vac-title span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vac-close { flex: none; width: 34px; height: 34px; border: 0; border-radius: 10px; background: rgba(127,127,127,.16); color: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
+.vac-close:hover { background: rgba(127,127,127,.3); }
+.vac-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.vac-canvas-wrap { flex: 1; min-height: 0; overflow: auto; background: #525659; padding: 9px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.vac-page { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.4); background: #fff; }
+.vac-status { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted, #5a6b7b); }
+.vac-status a { color: #1d6fb8; font-weight: 600; }
+.vac-spin { width: 15px; height: 15px; border: 2px solid rgba(127,127,127,.35); border-top-color: #1d6fb8; border-radius: 50%; display: inline-block; animation: vacSpin .8s linear infinite; }
+@keyframes vacSpin { to { transform: rotate(360deg); } }
+.vac-fallback { flex: none; padding: 8px 12px; font-size: 12px; text-align: center; color: var(--muted, #5a6b7b); border-top: 1px solid rgba(127,127,127,.18); }
+.vac-fallback a { color: #1d6fb8; font-weight: 600; }
+.aero-pop { font-family: var(--ui, sans-serif); line-height: 1.4; min-width: 150px; }
+.aero-pop b { color: var(--ink); font-size: 13px; }
+.aero-icao { display: inline-block; font-family: var(--disp); font-weight: 700; font-size: 11px; color: var(--orange); background: var(--orange-d); padding: 1px 7px; border-radius: 99px; margin-left: 4px; }
+.aero-pop .aero-meta { display: block; font-size: 11px; color: var(--ink-soft); margin: 3px 0 6px; }
+.aero-pop .aero-vac { display: inline-block; font-family: var(--disp); font-weight: 700; font-size: 12px; color: var(--orange); text-decoration: none; }
 .carto-legend { font-size: 11px; color: var(--ink-soft); line-height: 1.5; background: var(--paper); border: 1px solid var(--stone-2); border-radius: 16px; padding: 12px 14px; }
 .carto-legend b { color: var(--ink); }
 .lgd-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
@@ -2282,6 +2310,8 @@ function renderWizard(results, statuses, inp) {
   document.getElementById('wiz-carto').innerHTML =
     buildAirspaceAttachment(results.aero, results.zones) +
     buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist);
+  // Encarts informatifs de l'étape 3 repliés par défaut (l'utilisateur les déroule au besoin)
+  document.querySelectorAll('#wiz-carto .module').forEach(m => m.classList.add('closed'));
   // Étape 4 — Récupération SUP AIP (liens officiels) + checklist NOTAM
   document.getElementById('wiz-supaip').innerHTML =
     buildSupAipRetrieval(results.geo) +
@@ -2291,9 +2321,6 @@ function renderWizard(results, statuses, inp) {
 // Synthèse « rattachement aéroportuaire / espace aérien ».
 // Source PRIMAIRE : aérodromes BD TOPO IGN/Géoplateforme (WFS officiel, CORS, sans clé) → toujours disponible.
 // COMPLÉMENT : zones de restriction drone SIA/DGAC (cquest) pour le plafond, si disponibles.
-function _attachSrcNote() {
-  return `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Aérodromes : <strong>BD TOPO — IGN / Géoplateforme</strong> (source SIA, officiel). Restrictions de hauteur éventuelles : SIA/DGAC. Le statut exact (CTR/ATZ, contrôlé/non contrôlé, fréquence) se confirme sur la <strong>carte OACI</strong> ci-dessus et l'AIP. Aucune donnée n'est inventée.</span></div>`;
-}
 function buildAirspaceAttachment(aeroData, zonesData) {
   const TITLE = 'Espace aérien / rattachement aéroportuaire';
   const fmtDist = m => m == null ? '—' : (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
@@ -2318,8 +2345,7 @@ function buildAirspaceAttachment(aeroData, zonesData) {
   if (!aeroOk && !zonesOk) {
     const err = (aeroData && aeroData.error) || (zonesData && zonesData.error) || 'sources injoignables';
     return modWrap('rattach', TITLE, 'warn', 'INDISPONIBLE', `
-      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination momentanément indisponible (${err}). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>
-      ${_attachSrcNote()}`);
+      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination momentanément indisponible (${err}). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>`);
   }
 
   // WFS sans aérodrome trouvé (ou erreur) mais on a éventuellement une zone
@@ -2327,12 +2353,10 @@ function buildAirspaceAttachment(aeroData, zonesData) {
     if (insideZones.length) {
       return modWrap('rattach', TITLE, interdit ? 'nogo' : 'warn', interdit ? 'INTERDIT' : 'ZONE', `
         ${limBlock}
-        <div class="malert info"><span class="malert-ico">${ic('pin')}</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>
-        ${_attachSrcNote()}`);
+        <div class="malert info"><span class="malert-ico">${ic('pin')}</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>`);
     }
     return modWrap('rattach', TITLE, 'go', 'DÉGAGÉ', `
-      <div class="malert go"><span class="malert-ico">✓</span><span>Aucun aérodrome recensé dans ~39 km autour de votre point, ni zone de restriction connue. Espace <strong>a priori non contrôlé</strong> — confirmez sur la carte OACI.</span></div>
-      ${_attachSrcNote()}`);
+      <div class="malert go"><span class="malert-ico">✓</span><span>Aucun aérodrome recensé dans ~39 km autour de votre point, ni zone de restriction connue. Espace <strong>a priori non contrôlé</strong> — confirmez sur la carte OACI.</span></div>`);
   }
 
   // Cas nominal : aérodrome(s) trouvé(s) via WFS
@@ -2347,20 +2371,12 @@ function buildAirspaceAttachment(aeroData, zonesData) {
     ? 'Aérodrome majeur : espace souvent <strong>contrôlé</strong> (CTR/ATZ probable). Coordination/clairance possiblement requise — vérifiez la carte OACI et la fréquence.'
     : 'Aérodrome a priori <strong>non contrôlé</strong> ; restez vigilant (trafic VFR, ATZ éventuelle) et vérifiez la carte OACI.';
   const ctlSt = catCtl ? 'warn' : 'info';
-  const list = all.filter(a => a.nature === 'Aérodrome' || a.icao).slice(0, 5);
-  const listHtml = list.length
-    ? `<div style="margin:6px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Aérodromes à proximité</div>
-       <table class="mtbl"><thead><tr><th>Aérodrome</th><th>OACI</th><th>Type</th><th>Dist.</th></tr></thead>
-       <tbody>${list.map(a => `<tr><td style="font-weight:600">${a.nom}</td><td>${a.icao || '—'}</td><td>${a.nature || '—'}${a.categorie ? ` · ${a.categorie}` : ''}</td><td>${fmtDist(a.dist_m)}</td></tr>`).join('')}</tbody></table>`
-    : '';
   const badge = interdit ? 'INTERDIT' : (catCtl ? 'CONTRÔLÉ ?' : 'PROCHE');
   const st = interdit ? 'nogo' : (catCtl ? 'warn' : 'info');
   return modWrap('rattach', TITLE, st, badge, `
     ${headline}
     ${limBlock}
-    <div class="malert ${ctlSt}" style="margin-bottom:10px"><span class="malert-ico">ℹ</span><span>${ctlTxt}</span></div>
-    ${listHtml}
-    ${_attachSrcNote()}`);
+    <div class="malert ${ctlSt}" style="margin-bottom:10px"><span class="malert-ico">ℹ</span><span>${ctlTxt}</span></div>`);
 }
 
 // Carte « coucher du soleil & créneau »
@@ -2378,12 +2394,149 @@ function buildSunCard(li) {
       ${dc('Aube aéro (−30 min)', fmtUTC(li.aubeAero), 'blue')}
       ${dc('Crépuscule aéro (+30 min)', fmtUTC(li.crepAero), 'blue')}
     </div>
-    ${alerts(a)}
-    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Heures en <strong>heure de Paris</strong> (CET/CEST). Nuit aéronautique = du coucher +30 min au lever −30 min (indicatif).</span></div>`);
+    ${alerts(a)}`);
 }
 
 // Carte Leaflet — fond IGN + couche « Restrictions drone » (DGAC/SIA) + surimpression carte OACI (SIA/IGN), point + rayon
-let _cartoMap = null, _cartoOverlay = null;
+let _cartoMap = null, _cartoOverlay = null, _aeroLayer = null;
+
+// Charge les aérodromes de l'emprise visible (WFS BD TOPO IGN) → marqueurs cliquables + carte VAC.
+// ── Visualiseur VAC intégré (carte VAC du SIA affichée DANS l'app, sans redirection) ──
+// Dossier eAIP du cycle AIRAC en vigueur (cycles de 28 j calés sur l'ancrage 2020-01-02).
+function airacFolder(d) {
+  const anchor = Date.UTC(2026, 5, 25), period = 28 * 86400000; // 25 JUN 2026 = date AIRAC confirmée
+  const now = (d || new Date()).getTime();
+  const eff = new Date(anchor + Math.floor((now - anchor) / period) * period);
+  const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const dd = String(eff.getUTCDate()).padStart(2, '0');
+  return `eAIP_${dd}_${MON[eff.getUTCMonth()]}_${eff.getUTCFullYear()}`;
+}
+// URL directe de la carte VAC (PDF) d'un aérodrome par son code OACI.
+function vacUrl(icao) {
+  return `https://www.sia.aviation-civile.gouv.fr/dvd/${airacFolder()}/Atlas-VAC/PDF_AIPparSSECTION/VAC/AD/AD-2.${icao}.pdf`;
+}
+function _vacEsc(e) { if (e.key === 'Escape') closeVac(); }
+// Relais CORS perso optionnel (ex. Cloudflare Worker). Si renseigné, il est essayé en priorité.
+// Le Worker doit récupérer ?url=<PDF> et le renvoyer avec en-tête Access-Control-Allow-Origin: *.
+const VAC_PROXY = '';
+let _pdfjsP = null;
+function _ensurePdfJs() {
+  if (window.pdfjsLib) return Promise.resolve();
+  if (_pdfjsP) return _pdfjsP;
+  _pdfjsP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => { try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; } catch (_) {} res(); };
+    s.onerror = () => rej(new Error('pdf.js indisponible'));
+    document.head.appendChild(s);
+  });
+  return _pdfjsP;
+}
+// Récupère le PDF via un relais CORS et le rend page par page dans la modale (aucun stockage).
+async function _renderVac(icao, wrap, status) {
+  const pdfUrl = vacUrl(icao);
+  const builders = [];
+  if (VAC_PROXY) builders.push(u => VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(u));
+  builders.push(u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
+  builders.push(u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`);
+  try { await _ensurePdfJs(); }
+  catch (_) { status.innerHTML = `Affichage intégré indisponible. <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`; return; }
+  for (const mk of builders) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ url: mk(pdfUrl) }).promise;
+      wrap.innerHTML = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const base = page.getViewport({ scale: 1 });
+        const scale = Math.min(2.4, Math.max(0.8, ((wrap.clientWidth || 900) - 18) / base.width));
+        const vp = page.getViewport({ scale });
+        const cv = document.createElement('canvas');
+        cv.className = 'vac-page'; cv.width = vp.width; cv.height = vp.height;
+        wrap.appendChild(cv);
+        await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      }
+      status.style.display = 'none';
+      return;
+    } catch (_) { /* relais suivant */ }
+  }
+  status.innerHTML = `La carte n'a pas pu être chargée ici (relais indisponible). <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`;
+}
+function openVac(icao, encName) {
+  let name = encName; try { name = decodeURIComponent(encName); } catch (_) {}
+  const url = vacUrl(icao);
+  let ov = document.getElementById('vac-overlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
+  ov.innerHTML =
+    `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte VAC ${icao}">
+       <div class="vac-head">
+         <div class="vac-title"><span>${name}</span> <span class="aero-icao">${icao}</span></div>
+         <button type="button" class="vac-close" onclick="closeVac()" aria-label="Fermer">✕</button>
+       </div>
+       <div class="vac-body">
+         <div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
+         <div class="vac-canvas-wrap" id="vac-pages"></div>
+         <div class="vac-fallback">Carte officielle SIA, cycle <strong>${airacFolder().replace('eAIP_', '').replace(/_/g, ' ')}</strong>. <a href="${url}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.</div>
+       </div>
+     </div>`;
+  ov.onclick = e => { if (e.target === ov) closeVac(); };
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', _vacEsc);
+  _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'));
+}
+function closeVac() {
+  const ov = document.getElementById('vac-overlay');
+  if (ov) { ov.classList.remove('open'); ov.innerHTML = ''; }
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', _vacEsc);
+}
+
+// Couche masquée par défaut ; ne charge qu'à partir d'un zoom suffisant pour éviter la surcharge.
+function _loadAerodromes() {
+  if (!_cartoMap || !_aeroLayer) return;
+  if (_cartoMap.getZoom() < 8) { _aeroLayer.clearLayers(); return; }
+  const b = _cartoMap.getBounds();
+  const bbox = `${b.getSouth().toFixed(4)},${b.getWest().toFixed(4)},${b.getNorth().toFixed(4)},${b.getEast().toFixed(4)}`;
+  const url = `https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature` +
+    `&TYPENAMES=BDTOPO_V3:aerodrome&SRSNAME=EPSG:4326&BBOX=${bbox}&OUTPUTFORMAT=application/json&COUNT=400`;
+  fetchWithTimeout(url, {}, 9000).then(r => r.ok ? r.json() : null).then(d => {
+    if (!d || !_aeroLayer) return;
+    _aeroLayer.clearLayers();
+    // Symbologie aéronautique OACI/VAC : cercle = aérodrome, cercle + piste = aéroport, « H » cerclé = hélistation.
+    const SYM = {
+      ad:   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/></svg>',
+      apt:  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/><rect x="10.8" y="4.2" width="2.4" height="15.6" rx="1" fill="#0b4aa2" transform="rotate(35 12 12)"/></svg>',
+      heli: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/><path d="M9 8V16M15 8V16M9 12h6" fill="none" stroke="#0b4aa2" stroke-width="2" stroke-linecap="round"/></svg>'
+    };
+    const symFor = (nat, cat) => {
+      const N = (nat || '').toLowerCase();
+      if (N.indexOf('héli') >= 0 || N.indexOf('heli') >= 0 || N.indexOf('hélist') >= 0 || N.indexOf('helist') >= 0) return SYM.heli;
+      if ((N.indexOf('aérodrome') >= 0 || N.indexOf('aerodrome') >= 0) && /internationale|nationale/i.test(cat || '')) return SYM.apt;
+      return SYM.ad;
+    };
+    (d.features || []).forEach(f => {
+      const p = f.properties || {};
+      if (p.fictif || p.etat_de_l_objet === 'Détruit') return;
+      const c = geomRepPoint(f.geometry); if (!c) return;
+      const nom = p.toponyme || p.nature || 'Aérodrome';
+      const icao = p.code_icao || '';
+      const meta = `${p.nature || ''}${p.categorie ? ' · ' + p.categorie : ''}`;
+      // Nom encodé pour passage sûr en attribut onclick (ni quotes ni < >).
+      const enc = encodeURIComponent(nom).replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29');
+      const head = icao
+        ? `<button type="button" class="aero-name-btn" onclick="openVac('${icao}','${enc}')"><b>${nom}</b> <span class="aero-icao">${icao}</span></button>`
+        : `<b>${nom}</b>`;
+      const vacLink = icao
+        ? `<span class="aero-vac" onclick="openVac('${icao}','${enc}')">Ouvrir la carte VAC (dans l'app) →</span>`
+        : `<span class="aero-meta">Pas de code OACI publié</span>`;
+      const popup = `<div class="aero-pop">${head}` +
+        `<span class="aero-meta">${meta}</span>${vacLink}</div>`;
+      L.marker([c.lat, c.lon], {
+        icon: L.divIcon({ className: 'aero-marker', html: symFor(p.nature, p.categorie), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] })
+      }).addTo(_aeroLayer).bindPopup(popup);
+    });
+  }).catch(() => {});
+}
 function ensureCartoMap() {
   if (typeof L === 'undefined') return;
   const mis = window._mission || {};
@@ -2406,12 +2559,17 @@ function ensureCartoMap() {
     // 3) Carte aéronautique OACI SIA/IGN (surimpression semi-transparente, par-dessus) — pour identifier l'aérodrome de rattachement
     const oaciLayer = L.tileLayer(tile(OACI, 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN-OACI', 'image/jpeg', '&'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
+    // Couche « Aérodromes » (cliquables) — masquée par défaut (non ajoutée à la carte)
+    _aeroLayer = L.layerGroup();
     // Contrôle de couches : activer/désactiver chaque surimpression
     L.control.layers(
       { 'Satellite': satLayer, 'Plan IGN': planLayer },
-      { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer },
+      { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer, 'Aérodromes (cliquables)': _aeroLayer },
       { collapsed: true }
     ).addTo(_cartoMap);
+    // Charger/rafraîchir les aérodromes seulement quand la couche est active
+    _cartoMap.on('overlayadd', e => { if (e.layer === _aeroLayer) { _loadAerodromes(); _cartoMap.on('moveend', _loadAerodromes); } });
+    _cartoMap.on('overlayremove', e => { if (e.layer === _aeroLayer) { _cartoMap.off('moveend', _loadAerodromes); _aeroLayer.clearLayers(); } });
     _cartoOverlay = L.layerGroup().addTo(_cartoMap); // marqueur + rayon : toujours au-dessus (overlayPane)
   }
   _cartoOverlay.clearLayers();
@@ -2515,8 +2673,6 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
   const TITRE = 'Espace aérien & zones';
   const badge = (zonesData && !zonesData.error && zonesData.zones.some(z=>z.distance_m===0)) ? 'ZONE PRÉSENTE' : 'À VÉRIFIER';
 
-  // Fusion des points de vérification (espace aérien + OACI), sans doublon
-  const allPoints = [...(airspaceChecklist?.points||[]), ...(r?.points||[])];
   // Fusion des liens, dédoublonnés par URL
   const linkMap = {};
   [...(airspaceChecklist?.liens||[]), ...(r?.liens||[])].forEach(l => { linkMap[l.url] = l; });
@@ -2526,17 +2682,10 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
   if (!zonesData || zonesData.error) {
     return modWrap('oaci', TITRE, s, 'À VÉRIFIER', `
       <div class="malert warn"><span class="malert-ico">⚠</span><span>Zones de restriction indisponibles${zonesData?.error?' : '+zonesData.error:''} — vérifiez directement sur Géoportail.</span></div>
-      <div class="mod-alerts mt8">${allPoints.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
       ${srcLinks(allLinks)}`);
   }
 
   const inside = zonesData.zones.filter(z => z.distance_m === 0);
-
-  const capLabel = (deg) => {
-    if (deg === null || deg === undefined) return '';
-    const dirs = ['N','NE','E','SE','S','SO','O','NO'];
-    return dirs[Math.round(deg/45)%8];
-  };
 
   // Bloc "vous êtes dans ces zones"
   let insideHtml = '';
@@ -2552,9 +2701,6 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
 
   return modWrap('oaci', TITRE, s, badge, `
     ${insideHtml}
-    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Données de zonage drone (source SIA/DGAC, millésime 2021) — <strong>indicatives</strong>, hors interdictions temporaires et établies pour le vol de loisir. Votre statut étatique peut modifier les autorisations applicables. Recoupez avec la carte officielle Géoportail (liens ci-dessous), mise à jour en continu.</span></div>
-    <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">Points à vérifier</div>
-    <div class="mod-alerts">${allPoints.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
     ${srcLinks(allLinks)}`);
 }
 
@@ -2612,7 +2758,6 @@ function buildMeteo(m, s, altMax, droneData, metar) {
   else if (eff.gustKt>17) modAlerts.push({niveau:'warn',message:`Rafales ${eff.gustKt} kt — Attention aux pics`});
   if (eff.precip>0) modAlerts.push({niveau:eff.precip>1?'nogo':'warn',message:`Précipitations ${eff.precip} mm/h — Risque pour équipements`});
   if (eff.wcode>=80) modAlerts.push({niveau:'nogo',message:`${eff.desc} — Conditions incompatibles avec le vol`});
-  if (wAlt!=null && wAlt>eff.windKt+3) modAlerts.push({niveau: wAlt>25?'nogo':wAlt>18?'warn':'go', message:`Vent estimé à ${altMax} m : ${Math.round(wAlt)} kt — plus fort qu'en surface`});
   // Instabilité convective (CAPE) — risque d'orage / fortes rafales
   if (eff.cape!=null) {
     if (eff.cape>=2000) modAlerts.push({niveau:'nogo',message:`Instabilité forte (CAPE ${Math.round(eff.cape)} J/kg) — risque orageux marqué, vol déconseillé`});
@@ -2635,18 +2780,6 @@ function buildMeteo(m, s, altMax, droneData, metar) {
         modAlerts.unshift({niveau:'warn',message:`Rafales proches de la limite constructeur du ${droneData.name} (${droneData.ventMax} ≈ ${droneVentKt} kt)`});
       }
     }
-  }
-
-  const monoStyle = "font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.55;background:var(--bg);border:1px solid var(--stone-2);border-radius:14px;padding:11px 13px;margin-bottom:8px;word-break:break-word;color:var(--ink)";
-  let metarHtml = '';
-  if (metar && !metar.error && metar.raw) {
-    metarHtml = `
-      <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-weight:700;">METAR / TAF — ${metar.station}${metar.name?' · '+metar.name:''} · ${metar.dist_km} km</div>
-      <div style="${monoStyle}">${metar.raw}</div>
-      ${metar.taf ? `<div style="${monoStyle}">${metar.taf}</div>` : `<div class="malert info"><span class="malert-ico">ℹ</span><span>TAF non publié pour ce terrain.</span></div>`}
-      <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Codes METAR/TAF horodatés en <strong>Zulu (UTC)</strong> par convention aéronautique — ex. « 281150Z » = 11:50 UTC. Le reste de l'application est en heure de Paris.</span></div>`;
-  } else {
-    metarHtml = `<div class="malert info mt8"><span class="malert-ico">ℹ</span><span>METAR/TAF temps réel indisponible${metar&&metar.error?' ('+metar.error+')':''} — consultez le briefing officiel SOFIA.</span></div>`;
   }
 
   const winNote = isWin
@@ -2678,7 +2811,6 @@ function buildMeteo(m, s, altMax, droneData, metar) {
       ${dc('Humidité', `${eff.hum}%`, eff.hum>90?'warn':'go')}
     </div>
     ${alerts(modAlerts)}
-    ${metarHtml}
     ${srcLinks([{label:'Open-Meteo',url:'https://open-meteo.com'},{label:'Météo-France Aviation',url:'https://aviation.meteo.fr'},{label:'SOFIA METAR/TAF',url:'https://sofia-briefing.aviation-civile.gouv.fr'},{label:'Windy',url:'https://www.windy.com'}])}`);
 }
 
