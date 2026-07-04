@@ -978,6 +978,31 @@ body{
 .screen{ background:transparent !important; }
 #screen-cover{ background:transparent !important; }
 
+
+/* ===== Étape 3 — en-tête & navigation compacts pour agrandir la carte ===== */
+#screen-supaip .step-head{ padding:8px 16px 0; }
+#screen-supaip .step-eyebrow{ display:none; }
+#screen-supaip .step-title{ font-size:15px; margin-top:0; line-height:1.1; }
+#screen-supaip .step-dots{ margin-top:6px; }
+#screen-supaip .wiz-scroll{ padding-top:6px; padding-bottom:calc(54px + var(--safe-b)); }
+#screen-supaip .detail-nav{ padding:7px 12px calc(7px + var(--safe-b)); gap:7px; background:rgba(8,17,25,.72); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+#screen-supaip .detail-nav--final{ flex-wrap:nowrap; }
+#screen-supaip .detail-nav button{ padding:9px 8px; font-size:12px; border-radius:13px; }
+#screen-supaip .btn-close{ flex:1; flex-basis:auto; padding:9px 8px; }
+
+
+/* Fenetre d'info zone SUP AIP (modale, facon visionneuse VAC) */
+#zone-overlay .vac-modal{ width:min(440px,94vw); height:auto; max-height:86vh; background:var(--paper); color:var(--ink); border:1px solid var(--stone-2); }
+#zone-overlay .vac-head{ border-bottom:1px solid var(--stone-2); }
+#zone-overlay .vac-close{ background:var(--stone); color:var(--ink); }
+.zi-body{ padding:14px 16px 18px; display:block; overflow-y:auto; font:13px/1.5 var(--body,sans-serif); }
+.zi-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--stone-2); }
+.zi-row:last-of-type{ border-bottom:0; }
+.zi-k{ flex:0 0 90px; color:var(--ink-faint); font-weight:700; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; padding-top:2px; }
+.zi-v{ flex:1; color:var(--ink); word-break:break-word; }
+.zi-link{ display:inline-block; margin-top:12px; font-weight:700; color:var(--orange); text-decoration:none; }
+.zi-src{ margin-top:12px; font-size:11px; color:var(--ink-faint); }
+
 </style>
 </head>
 <body>
@@ -1213,9 +1238,9 @@ body{
     <div id="supaip-map"></div>
   </div>
   <div class="detail-nav detail-nav--final">
-    <button class="btn-prev" onclick="goStep('kp')">← Précédent</button>
-    <button class="btn-suivant" onclick="newMission()">↺ Nouvelle mission</button>
-    <button class="btn-close" onclick="closeApp()">✕ Fermer l'application</button>
+    <button class="btn-prev" onclick="goStep('kp')">← Préc.</button>
+    <button class="btn-suivant" onclick="newMission()">↺ Nouvelle</button>
+    <button class="btn-close" onclick="closeApp()">✕ Fermer</button>
   </div>
 </div>
 
@@ -2536,7 +2561,7 @@ function makeDroneMarker(lat, lon) {
 //  Couche 2 : zones UAS du SIA (ED-269) — fichier officiel « libre disposition »,
 //             importé/déposé et converti dans le navigateur (aucun proxy).
 //  Couche 3 : aérodromes cliquables (WFS BD TOPO IGN) — clic → carte VAC intégrée.
-let _supMap = null, _dgacLayer = null, _uasLayer = null, _uasDemoLayer = null, _supAeroLayer = null, _supOverlay = null, _supBanner = null, _uasLoaded = false, _uasDemoLoaded = false, _dgacReqId = 0, _uasAll = [], _uasSrc = '';
+let _supMap = null, _dgacLayer = null, _uasLayer = null, _uasDemoLayer = null, _supAeroLayer = null, _supOverlay = null, _supBanner = null, _uasLoaded = false, _uasDemoLoaded = false, _dgacReqId = 0, _uasAll = [], _uasSrc = '', _popupOpen = false;
 const UAS_DEMO_FILE = 'zones-uas-demo.geojson'; // échantillon 2022 (démonstration visuelle uniquement)
 // Fichier de zones officielles déposé à côté d'index.html (facultatif) : peut être
 // le JSON ED-269 brut du SIA (UASZones_*.json) OU un GeoJSON déjà converti.
@@ -2741,6 +2766,38 @@ function _geomBounds(g) {
 }
 function _bboxHit(b, w, s, e, n) { return !(b[2] < w || b[0] > e || b[3] < s || b[1] > n); }
 
+// ── Fenêtre d'info d'une zone SUP AIP (modale intégrée, façon visionneuse VAC) ──
+function _ziEsc(e) { if (e.key === 'Escape') closeZoneInfo(); }
+function closeZoneInfo() { const ov = document.getElementById('zone-overlay'); if (ov) { ov.classList.remove('open'); ov.innerHTML = ''; } document.body.style.overflow = ''; document.removeEventListener('keydown', _ziEsc); }
+function _ziRow(k, v) { if (v == null || v === '') return ''; if (Array.isArray(v)) v = v.filter(Boolean).join(' · '); return '<div class="zi-row"><span class="zi-k">' + k + '</span><span class="zi-v">' + v + '</span></div>'; }
+function openZoneInfo(p) {
+  p = p || {};
+  const col = uasColor(p.restriction);
+  let ov = document.getElementById('zone-overlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'zone-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
+  const validite = p.permanent === true ? 'Permanente'
+    : (p.startDateTime || p.endDateTime)
+      ? ((p.startDateTime ? p.startDateTime.replace('T', ' ').slice(0, 16) : '—') + ' → ' + (p.endDateTime ? p.endDateTime.replace('T', ' ').slice(0, 16) : '—'))
+      : null;
+  const rows = _ziRow('Restriction', uasRestrictionLabel(p.restriction))
+    + _ziRow('Altitudes', uasVertical(p))
+    + _ziRow('Validité', validite)
+    + _ziRow('Motif', p.reason)
+    + _ziRow('Conditions', p.restrictionConditions)
+    + _ziRow('Infos', p.otherReasonInfo)
+    + _ziRow('Message', p.message)
+    + _ziRow('Autorité', p.authName ? (p.authName + (p.authPhone ? ' · ' + p.authPhone : '')) : null);
+  const link = p.authURL ? '<a class="zi-link" href="' + p.authURL + '" target="_blank" rel="noopener">Site de l\'autorité ↗</a>' : '';
+  ov.innerHTML = '<div class="vac-modal zone-modal" role="dialog" aria-modal="true">'
+    + '<div class="vac-head" style="border-left:4px solid ' + col + '">'
+    + '<div class="vac-title"><span>' + (p.name || 'Zone SUP AIP') + '</span> <span class="aero-icao" style="color:' + col + ';background:transparent;border:1px solid ' + col + '">' + uasRestrictionLabel(p.restriction) + '</span></div>'
+    + '<button type="button" class="vac-close" onclick="closeZoneInfo()" aria-label="Fermer">✕</button></div>'
+    + '<div class="vac-body zi-body">' + rows + link + '<div class="zi-src">Source officielle : SIA/DGAC — zones UAS (ED-269)</div></div></div>';
+  ov.onclick = e => { if (e.target === ov) closeZoneInfo(); };
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', _ziEsc);
+}
 // Rendu de la couche temporaire limité à l'emprise visible (performance : 7000+ zones au total).
 function _renderUasView() {
   if (!_uasLayer || !_supMap) return;
@@ -2751,7 +2808,7 @@ function _renderUasView() {
   _uasLayer.clearLayers();
   L.geoJSON({ type: 'FeatureCollection', features: vis }, {
     style: f => { const c = uasColor(f.properties && f.properties.restriction); return { color: c, weight: 1.6, opacity: 0.9, fillColor: c, fillOpacity: 0.2 }; },
-    onEachFeature: (f, ly) => ly.bindPopup(uasPopup(f.properties), { maxWidth: 280 })
+    onEachFeature: (f, ly) => ly.on('click', () => openZoneInfo(f.properties))
   }).addTo(_uasLayer);
   _setSupBanner('<b>' + vis.length + '</b> zone' + (vis.length > 1 ? 's' : '') + ' SUP AIP dans la vue / ' + _uasAll.length + ' · ' + (_uasSrc || 'SIA ED-269'));
 }
@@ -2947,7 +3004,9 @@ function ensureSupAipMap() {
       return div;
     };
     importCtl.addTo(_supMap);
-    _supMap.on('moveend', () => { _loadDgacZones(); _loadSupAerodromes(); if (_uasLayer && _supMap.hasLayer(_uasLayer)) _renderUasView(); });
+    _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); if (_uasLayer && _supMap.hasLayer(_uasLayer)) _renderUasView(); });
+    _supMap.on('popupopen', () => { _popupOpen = true; });
+    _supMap.on('popupclose', () => { _popupOpen = false; });
     _supMap.on('overlayadd', e => {
       if (e.layer === _dgacLayer) _loadDgacZones();
       if (e.layer === _supAeroLayer) _loadSupAerodromes();
