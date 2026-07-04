@@ -716,7 +716,8 @@ body.night .dial-arc.nogo { filter: drop-shadow(0 0 6px rgba(224,106,106,0.5)); 
 .closed-inner h1 { font-family: var(--disp); font-size: 22px; font-weight: 700; color: var(--ink); }
 .closed-inner p { font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
 .closed-inner .cover-cta { margin-top: 6px; width: 100%; }
-#carto-map { height: 46vh; min-height: 300px; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--stone-2); z-index: 0; }
+#carto-map { flex: 1; min-height: 300px; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--stone-2); z-index: 0; }
+#screen-carto .wiz-scroll { overflow: hidden; padding-bottom: calc(78px + var(--safe-b)); }
 .leaflet-container { background: var(--paper); font: 12px var(--ui, sans-serif); }
 /* Marqueur « drone » (vue de dessus) + halo pulsant — point de vol sur la carte */
 .drone-marker { background: transparent !important; border: none !important; }
@@ -1055,19 +1056,6 @@ body.night .cover-warn, body.night .alt-warn, body.night .carto-legend {
       </div>
     </div>
 
-    <!-- Notes -->
-    <div class="section-card">
-      <div class="section-head">
-        <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></span>
-        <span class="section-title">Notes opérationnelles</span>
-      </div>
-      <div class="section-body">
-        <div class="field">
-          <textarea id="notes" placeholder="Contraintes connues, contacts locaux, environnement particulier..."></textarea>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /form-scroll -->
 
   <div class="cta-bar">
@@ -1158,12 +1146,6 @@ body.night .cover-warn, body.night .alt-warn, body.night .carto-legend {
   </div>
   <div class="wiz-scroll">
     <div id="carto-map"></div>
-    <div class="carto-legend">
-      <b>Restrictions drone (DGAC/SIA)</b> + <b>carte aéronautique OACI (SIA/IGN)</b> superposées au fond IGN. La carte OACI permet d'identifier l'aérodrome/espace aérien de rattachement (CTR, ATZ, fréquences). Utilisez le <b>sélecteur de couches</b> (en haut à droite de la carte) pour afficher/masquer chaque couche.
-      <div class="lgd-row"><span class="lgd-sw" style="background:#e0512f"></span> Point de vol analysé</div>
-      <div class="lgd-row"><span class="lgd-sw" style="background:#2b6cb0;opacity:.25"></span> Rayon d'analyse (8 km)</div>
-      <div class="lgd-row" style="margin-top:8px;font-size:10px;color:var(--ink-faint)">Carte OACI servie via l'endpoint Géoportail IGN. Si les tuiles ne s'affichent pas, désactivez/réactivez la couche — le reste de la carte reste fonctionnel.</div>
-    </div>
     <div id="wiz-carto"></div>
   </div>
   <div class="detail-nav">
@@ -1664,8 +1646,7 @@ function getInputs() {
     droneKey,
     droneData,
     fDate:       document.getElementById('f-date').value,
-    fTime:       document.getElementById('f-time').value,
-    notes:       document.getElementById('notes').value.trim()
+    fTime:       document.getElementById('f-time').value
   };
 }
 
@@ -2307,12 +2288,8 @@ function renderWizard(results, statuses, inp) {
     buildMeteo(results.meteo, statuses.meteo, inp.altitude, inp.droneData, results.metar);
   // Étape 2 — Indice KP
   document.getElementById('wiz-kp').innerHTML = buildKP(results.kp, statuses.kp);
-  // Étape 3 — Synthèse rattachement aéroportuaire + zones / espace aérien (sous la carte)
-  document.getElementById('wiz-carto').innerHTML =
-    buildAirspaceAttachment(results.aero, results.zones) +
-    buildOaci(results.oaci, statuses.oaci, results.zones, inp.altitude, results.airspaceChecklist);
-  // Encarts informatifs de l'étape 3 repliés par défaut (l'utilisateur les déroule au besoin)
-  document.querySelectorAll('#wiz-carto .module').forEach(m => m.classList.add('closed'));
+  // Étape 3 — carte seule (encarts informatifs supprimés pour alléger l'écran)
+  document.getElementById('wiz-carto').innerHTML = '';
   // Étape 4 — Récupération SUP AIP (liens officiels) + checklist NOTAM
   document.getElementById('wiz-supaip').innerHTML =
     buildSupAipRetrieval(results.geo) +
@@ -2399,9 +2376,8 @@ function buildSunCard(li) {
 }
 
 // Carte Leaflet — fond IGN + couche « Restrictions drone » (DGAC/SIA) + surimpression carte OACI (SIA/IGN), point + rayon
-let _cartoMap = null, _cartoOverlay = null, _aeroLayer = null;
+let _cartoMap = null, _cartoOverlay = null;
 
-// Charge les aérodromes de l'emprise visible (WFS BD TOPO IGN) → marqueurs cliquables + carte VAC.
 // ── Visualiseur VAC intégré (carte VAC du SIA affichée DANS l'app, sans redirection) ──
 // Dossier eAIP du cycle AIRAC en vigueur (cycles de 28 j calés sur l'ancrage 2020-01-02).
 function airacFolder(d) {
@@ -2496,52 +2472,6 @@ function closeVac() {
   document.removeEventListener('keydown', _vacEsc);
 }
 
-// Couche masquée par défaut ; ne charge qu'à partir d'un zoom suffisant pour éviter la surcharge.
-function _loadAerodromes() {
-  if (!_cartoMap || !_aeroLayer) return;
-  if (_cartoMap.getZoom() < 8) { _aeroLayer.clearLayers(); return; }
-  const b = _cartoMap.getBounds();
-  const bbox = `${b.getSouth().toFixed(4)},${b.getWest().toFixed(4)},${b.getNorth().toFixed(4)},${b.getEast().toFixed(4)}`;
-  const url = `https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature` +
-    `&TYPENAMES=BDTOPO_V3:aerodrome&SRSNAME=EPSG:4326&BBOX=${bbox}&OUTPUTFORMAT=application/json&COUNT=400`;
-  fetchWithTimeout(url, {}, 9000).then(r => r.ok ? r.json() : null).then(d => {
-    if (!d || !_aeroLayer) return;
-    _aeroLayer.clearLayers();
-    // Symbologie aéronautique OACI/VAC : cercle = aérodrome, cercle + piste = aéroport, « H » cerclé = hélistation.
-    const SYM = {
-      ad:   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/></svg>',
-      apt:  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/><rect x="10.8" y="4.2" width="2.4" height="15.6" rx="1" fill="#0b4aa2" transform="rotate(35 12 12)"/></svg>',
-      heli: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#fff" stroke="#0b4aa2" stroke-width="2.2"/><path d="M9 8V16M15 8V16M9 12h6" fill="none" stroke="#0b4aa2" stroke-width="2" stroke-linecap="round"/></svg>'
-    };
-    const symFor = (nat, cat) => {
-      const N = (nat || '').toLowerCase();
-      if (N.indexOf('héli') >= 0 || N.indexOf('heli') >= 0 || N.indexOf('hélist') >= 0 || N.indexOf('helist') >= 0) return SYM.heli;
-      if ((N.indexOf('aérodrome') >= 0 || N.indexOf('aerodrome') >= 0) && /internationale|nationale/i.test(cat || '')) return SYM.apt;
-      return SYM.ad;
-    };
-    (d.features || []).forEach(f => {
-      const p = f.properties || {};
-      if (p.fictif || p.etat_de_l_objet === 'Détruit') return;
-      const c = geomRepPoint(f.geometry); if (!c) return;
-      const nom = p.toponyme || p.nature || 'Aérodrome';
-      const icao = p.code_icao || '';
-      const meta = `${p.nature || ''}${p.categorie ? ' · ' + p.categorie : ''}`;
-      // Nom encodé pour passage sûr en attribut onclick (ni quotes ni < >).
-      const enc = encodeURIComponent(nom).replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29');
-      const head = icao
-        ? `<button type="button" class="aero-name-btn" onclick="openVac('${icao}','${enc}')"><b>${nom}</b> <span class="aero-icao">${icao}</span></button>`
-        : `<b>${nom}</b>`;
-      const vacLink = icao
-        ? `<span class="aero-vac" onclick="openVac('${icao}','${enc}')">Ouvrir la carte VAC (dans l'app) →</span>`
-        : `<span class="aero-meta">Pas de code OACI publié</span>`;
-      const popup = `<div class="aero-pop">${head}` +
-        `<span class="aero-meta">${meta}</span>${vacLink}</div>`;
-      L.marker([c.lat, c.lon], {
-        icon: L.divIcon({ className: 'aero-marker', html: symFor(p.nature, p.categorie), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] })
-      }).addTo(_aeroLayer).bindPopup(popup);
-    });
-  }).catch(() => {});
-}
 function ensureCartoMap() {
   if (typeof L === 'undefined') return;
   const mis = window._mission || {};
@@ -2564,17 +2494,12 @@ function ensureCartoMap() {
     // 3) Carte aéronautique OACI SIA/IGN (surimpression semi-transparente, par-dessus) — pour identifier l'aérodrome de rattachement
     const oaciLayer = L.tileLayer(tile(OACI, 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN-OACI', 'image/jpeg', '&'),
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' }).addTo(_cartoMap);
-    // Couche « Aérodromes » (cliquables) — masquée par défaut (non ajoutée à la carte)
-    _aeroLayer = L.layerGroup();
     // Contrôle de couches : activer/désactiver chaque surimpression
     L.control.layers(
       { 'Satellite': satLayer, 'Plan IGN': planLayer },
-      { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer, 'Aérodromes (cliquables)': _aeroLayer },
+      { 'Restrictions drone (DGAC)': droneLayer, 'Carte OACI (SIA/IGN)': oaciLayer },
       { collapsed: true }
     ).addTo(_cartoMap);
-    // Charger/rafraîchir les aérodromes seulement quand la couche est active
-    _cartoMap.on('overlayadd', e => { if (e.layer === _aeroLayer) { _loadAerodromes(); _cartoMap.on('moveend', _loadAerodromes); } });
-    _cartoMap.on('overlayremove', e => { if (e.layer === _aeroLayer) { _cartoMap.off('moveend', _loadAerodromes); _aeroLayer.clearLayers(); } });
     _cartoOverlay = L.layerGroup().addTo(_cartoMap); // marqueur + rayon : toujours au-dessus (overlayPane)
   }
   _cartoOverlay.clearLayers();
