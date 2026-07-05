@@ -2538,6 +2538,7 @@ function _ensurePdfJs() {
 async function _renderVac(icao, wrap, status) {
   const pdfUrl = vacUrl(icao);
   const builders = [];
+  if (typeof VAC_PROXY === 'string' && VAC_PROXY) builders.push(u => VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(u));
   builders.push(u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
   builders.push(u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`);
   try { await _ensurePdfJs(); }
@@ -2660,10 +2661,12 @@ function openVac(icao, encName) {
   if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
   // Avec relais perso (VAC_PROXY) : cadre natif via le relais (le plus fiable).
   // Sans relais : tentative de rendu PDF.js via relais publics (best effort, souvent capricieux).
-  const body = VAC_PROXY
-    ? `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte VAC ${icao}"></iframe>`
-    : `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
-         <div class="vac-canvas-wrap" id="vac-pages"></div>`;
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  const useCanvas = isMobile || !VAC_PROXY;
+  const body = useCanvas
+    ? `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
+         <div class="vac-canvas-wrap" id="vac-pages"></div>`
+    : `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte VAC ${icao}"></iframe>`;
   ov.innerHTML =
     `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte VAC ${icao}">
        <div class="vac-head">
@@ -2679,7 +2682,7 @@ function openVac(icao, encName) {
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.addEventListener('keydown', _vacEsc);
-  if (!VAC_PROXY) _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'));
+  if (useCanvas) _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'));
 }
 function closeVac() {
   const ov = document.getElementById('vac-overlay');
