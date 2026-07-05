@@ -1175,6 +1175,10 @@ body.night .drone-loader .drone-svg { filter: drop-shadow(0 13px 28px rgba(0,0,0
 .vac-zoombar { position: absolute; right: 12px; bottom: 54px; display: flex; flex-direction: column; gap: 8px; z-index: 6; }
 .vac-zoombar button { width: 42px; height: 42px; border-radius: 12px; background: rgba(18,26,36,.86); color: #fff; font-size: 22px; font-weight: 700; line-height: 1; border: 1px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 4px 14px rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; }
 .vac-zoombar button:active { transform: scale(.93); }
+
+/* Zoom VAC : rendu transform universel (Firefox inclus) */
+.vac-canvas-wrap { touch-action: none; overflow: hidden; }
+.vac-zoom { zoom: normal; transform-origin: 0 0; will-change: transform; }
 </style>
 </head>
 <body>
@@ -2727,58 +2731,74 @@ async function openNotam(icao, encName){
   }catch(e){ _ntSetBody('<div class="nt-err">NOTAM indisponibles ('+_ntEscape((e&&e.message)||'réseau')+'). Consultez <a href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">SOFIA</a>.</div>'); }
 }
 // ── Zoom tactile des cartes VAC (mobile) : pincer, déplacer, double-tap, boutons ──
-let _vz = null, _vzScale = 1;
+let _vz = null;
 function _vacZoomInit(scroll, inner) {
   if (!scroll || !inner) return;
-  _vz = { scroll, inner }; _vzScale = 1; inner.style.zoom = 1;
-  let d0 = 0, z0 = 1, mx0 = 0, my0 = 0, sl0 = 0, st0 = 0;
+  const st = { s: 1, tx: 0, ty: 0 };
+  _vz = { scroll, inner, st };
+  inner.style.transformOrigin = '0 0';
+  const apply = () => { inner.style.transform = 'translate(' + st.tx + 'px,' + st.ty + 'px) scale(' + st.s + ')'; };
+  const clamp = () => {
+    const vw = scroll.clientWidth, vh = scroll.clientHeight;
+    const cw = inner.offsetWidth * st.s, ch = inner.offsetHeight * st.s;
+    st.tx = cw <= vw ? (vw - cw) / 2 : Math.min(0, Math.max(vw - cw, st.tx));
+    st.ty = ch <= vh ? 0 : Math.min(0, Math.max(vh - ch, st.ty));
+  };
+  const needsPan = () => (inner.offsetWidth * st.s > scroll.clientWidth + 1) || (inner.offsetHeight * st.s > scroll.clientHeight + 1);
+  _vz.apply = apply; _vz.clamp = clamp;
   const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  let pinch = null, pan = null;
   scroll.addEventListener('touchstart', e => {
+    const r = scroll.getBoundingClientRect();
     if (e.touches.length === 2) {
-      const r = scroll.getBoundingClientRect();
-      d0 = dist(e.touches); z0 = _vzScale;
-      mx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
-      my0 = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
-      sl0 = scroll.scrollLeft; st0 = scroll.scrollTop;
-      e.preventDefault();
+      pinch = { d0: dist(e.touches), s0: st.s, vx: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, vy: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top, tx0: st.tx, ty0: st.ty };
+      pan = null; e.preventDefault();
+    } else if (e.touches.length === 1 && needsPan()) {
+      pan = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx0: st.tx, ty0: st.ty };
     }
   }, { passive: false });
   scroll.addEventListener('touchmove', e => {
-    if (e.touches.length === 2) {
+    if (pinch && e.touches.length === 2) {
       e.preventDefault();
-      let z = z0 * dist(e.touches) / (d0 || 1);
-      z = Math.max(1, Math.min(5, z));
-      inner.style.zoom = z;
-      scroll.scrollLeft = (sl0 + mx0) * (z / z0) - mx0;
-      scroll.scrollTop = (st0 + my0) * (z / z0) - my0;
-      _vzScale = z;
+      let ns = pinch.s0 * dist(e.touches) / (pinch.d0 || 1);
+      ns = Math.max(1, Math.min(6, ns));
+      st.tx = pinch.vx - (pinch.vx - pinch.tx0) * (ns / pinch.s0);
+      st.ty = pinch.vy - (pinch.vy - pinch.ty0) * (ns / pinch.s0);
+      st.s = ns; clamp(); apply();
+    } else if (pan && e.touches.length === 1) {
+      e.preventDefault();
+      st.tx = pan.tx0 + (e.touches[0].clientX - pan.x);
+      st.ty = pan.ty0 + (e.touches[0].clientY - pan.y);
+      clamp(); apply();
     }
   }, { passive: false });
-  let lastTap = 0;
   scroll.addEventListener('touchend', e => {
-    if (e.touches.length === 0 && e.changedTouches.length === 1) {
-      const now = Date.now();
-      if (now - lastTap < 300) { _vacSetZoom(_vzScale > 1 ? 1 : 2.5, e.changedTouches[0]); e.preventDefault(); }
-      lastTap = now;
+    if (e.touches.length === 0) {
+      const wasPanning = pan; pinch = null; pan = null;
+      if (!wasPanning && e.changedTouches.length === 1) {
+        const now = Date.now();
+        if (now - (_vz._lt || 0) < 300) { _vacDblTap(e.changedTouches[0]); }
+        _vz._lt = now;
+      }
     }
   }, { passive: false });
+  clamp(); apply();
 }
-function _vacSetZoom(z, touch) {
-  if (!_vz) return;
-  z = Math.max(1, Math.min(5, z));
-  const r = _vz.scroll.getBoundingClientRect();
-  const vx = touch ? touch.clientX - r.left : _vz.scroll.clientWidth / 2;
-  const vy = touch ? touch.clientY - r.top : _vz.scroll.clientHeight / 2;
-  const z0 = _vzScale || 1;
-  _vzScale = z; _vz.inner.style.zoom = z;
-  _vz.scroll.scrollLeft = (_vz.scroll.scrollLeft + vx) * (z / z0) - vx;
-  _vz.scroll.scrollTop = (_vz.scroll.scrollTop + vy) * (z / z0) - vy;
+function _vacDblTap(touch) {
+  if (!_vz) return; const st = _vz.st; const r = _vz.scroll.getBoundingClientRect();
+  const vx = touch.clientX - r.left, vy = touch.clientY - r.top; const ns = st.s > 1 ? 1 : 2.6;
+  st.tx = vx - (vx - st.tx) * (ns / st.s); st.ty = vy - (vy - st.ty) * (ns / st.s); st.s = ns;
+  _vz.clamp(); _vz.apply();
 }
 function _vzBtn(f) {
-  if (!_vz) return;
-  if (f === 'reset') { _vzScale = 1; _vz.inner.style.zoom = 1; _vz.scroll.scrollTo(0, 0); return; }
-  _vacSetZoom(f === 'in' ? _vzScale * 1.4 : _vzScale / 1.4);
+  if (!_vz) return; const st = _vz.st;
+  if (f === 'reset') { st.s = 1; st.tx = 0; st.ty = 0; _vz.clamp(); _vz.apply(); return; }
+  const vx = _vz.scroll.clientWidth / 2, vy = _vz.scroll.clientHeight / 2;
+  const ns = Math.max(1, Math.min(6, f === 'in' ? st.s * 1.4 : st.s / 1.4));
+  st.tx = vx - (vx - st.tx) * (ns / st.s); st.ty = vy - (vy - st.ty) * (ns / st.s); st.s = ns;
+  _vz.clamp(); _vz.apply();
 }
+
 function openVac(icao, encName) {
   let name = encName; try { name = decodeURIComponent(encName); } catch (_) {}
   const url = vacUrl(icao);
