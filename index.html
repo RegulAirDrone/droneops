@@ -1120,6 +1120,15 @@ body.night .nd-body{ fill:rgba(4,16,20,.62); }
 .nd-glow{ filter:drop-shadow(0 0 4px currentColor); }
 @media (prefers-reduced-motion: no-preference){ #screen-cover .cv-radar, #screen-cover .cv-radar-in{ animation:radarPulse 4.5s ease-in-out infinite; } }
 @keyframes radarPulse{ 0%,100%{ opacity:.5; } 50%{ opacity:.85; } }
+
+/* ===== Barre supérieure compacte (gain de hauteur, toutes étapes) ===== */
+.topbar { padding: 9px 18px 7px; }
+.topbar-brand { font-size: 15px; gap: 8px; }
+.topbar-brand .dot { width: 8px; height: 8px; }
+.topbar-time { font-size: 12px; padding: 3.5px 11px; }
+.topbar-right { gap: 8px; }
+.theme-toggle { width: 32px; height: 32px; font-size: 15px; }
+.theme-toggle .ic { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -3134,15 +3143,12 @@ function ensureSupAipMap() {
       { minZoom: 5, maxZoom: 18, maxNativeZoom: 11, opacity: 0.7, attribution: 'Carte OACI © IGN / SIA-DGAC' });
     // Couche 1 (officielle · live) — restrictions drone DGAC/IGN permanentes (WFS IGN, auto-MAJ AIRAC). Active par defaut.
     _dgacLayer = L.layerGroup().addTo(_supMap);
-    // Couche 2 (officielle) — zones temporaires ZRT/ZDT/TRA (SUP AIP, fichier SIA ED-269 servi en live). Active par defaut.
-    _uasLayer = L.layerGroup().addTo(_supMap);
     // Couche 3 — aerodromes cliquables (VAC integree). Masquee par defaut.
     _supAeroLayer = L.layerGroup();
     L.control.layers(
       { 'Plan IGN': planLayer, 'Satellite': satLayer },
       {
         'Restrictions drone (officiel · DGAC/IGN)': _dgacLayer,
-        'Zones temporaires (ZRT/ZDT/TRA · SUP AIP)': _uasLayer,
         'Carte OACI (SIA/IGN)': oaciLayer,
         'Aerodromes (VAC)': _supAeroLayer
       },
@@ -3151,30 +3157,19 @@ function ensureSupAipMap() {
     _supBanner = L.control({ position: 'bottomleft' });
     _supBanner.onAdd = () => { const div = L.DomUtil.create('div', 'supaip-banner'); div.innerHTML = ''; return div; };
     _supBanner.addTo(_supMap);
-    const importCtl = L.control({ position: 'topleft' });
-    importCtl.onAdd = () => {
-      const div = L.DomUtil.create('div', 'leaflet-bar uas-import');
-      div.innerHTML = '<label class="uas-import-btn" title="Importer le fichier officiel SIA (zones UAS, format ED-269)">Importer zones SIA<input type="file" accept=".json,.geojson,application/json" style="display:none"></label>';
-      const input = div.querySelector('input');
-      L.DomEvent.disableClickPropagation(div);
-      input.addEventListener('change', e => { if (e.target.files && e.target.files[0]) uasImportFromFile(e.target.files[0]); e.target.value = ''; });
-      return div;
-    };
-    importCtl.addTo(_supMap);
-    _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); if (_uasLayer && _supMap.hasLayer(_uasLayer)) _renderUasView(); });
+    _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); });
     _supMap.on('popupopen', () => { _popupOpen = true; });
     _supMap.on('popupclose', () => { _popupOpen = false; });
     _supMap.on('overlayadd', e => {
       if (e.layer === _dgacLayer) _loadDgacZones();
       if (e.layer === _supAeroLayer) _loadSupAerodromes();
-      if (e.layer === _uasLayer) _loadUasZones();
     });
     _supOverlay = L.layerGroup().addTo(_supMap);
   }
   _supOverlay.clearLayers();
   makeDroneMarker(lat, lon).addTo(_supOverlay);
   if (window._mission && window._mission.lat != null) _supMap.setView([lat, lon], Math.max(_supMap.getZoom(), 10));
-  setTimeout(() => { _supMap.invalidateSize(); _loadDgacZones(); _loadUasZones(); _loadSupAerodromes(); }, 150);
+  setTimeout(() => { _supMap.invalidateSize(); _loadDgacZones(); _loadSupAerodromes(); }, 150);
 }
 
 // (Ancien cadran verdict + écran détail remplacés par le parcours par étapes ci-dessus.)
