@@ -2545,7 +2545,7 @@ async function _renderVac(icao, wrap, status) {
   catch (_) { status.innerHTML = `Affichage intégré indisponible. <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`; return; }
   for (const mk of builders) {
     try {
-      const pdf = await pdfjsLib.getDocument({ url: mk(pdfUrl) }).promise;
+      const pdf = await pdfjsLib.getDocument({ url: mk(pdfUrl), disableRange: true, disableStream: true, disableAutoFetch: true }).promise;
       wrap.innerHTML = '';
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -2561,7 +2561,7 @@ async function _renderVac(icao, wrap, status) {
       return;
     } catch (_) { /* relais suivant */ }
   }
-  status.innerHTML = `La carte n'a pas pu être chargée ici (relais indisponible). <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`;
+  status.innerHTML = `Rendu inline indisponible sur ce navigateur. <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`;
 }
 // ── NOTAM par aérodrome (API FAA via le Worker) — affichage décodé en français ──
 const _NOTAM_FR = {
@@ -2661,7 +2661,9 @@ function openVac(icao, encName) {
   if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
   // Avec relais perso (VAC_PROXY) : cadre natif via le relais (le plus fiable).
   // Sans relais : tentative de rendu PDF.js via relais publics (best effort, souvent capricieux).
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  const _coarse = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  const _touch = (navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
+  const isMobile = /Android|iPhone|iPod|Mobile|Silk/i.test(navigator.userAgent) || _coarse || (_touch && window.innerWidth < 900);
   const useCanvas = isMobile || !VAC_PROXY;
   const body = useCanvas
     ? `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
