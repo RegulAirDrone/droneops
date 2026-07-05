@@ -2536,6 +2536,7 @@ function _fmtNotamDate(s){
   if(/^PERM/i.test(String(s))) return 'permanent';
   const d=new Date(s);
   if(isNaN(d.getTime())) return String(s);
+  if(d.getUTCFullYear()>2100) return 'permanent';
   const p=n=>String(n).padStart(2,'0');
   return p(d.getUTCDate())+'/'+p(d.getUTCMonth()+1)+'/'+String(d.getUTCFullYear()).slice(2)+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes())+'Z';
 }
@@ -2548,25 +2549,35 @@ function _decodeNotamText(t){
   return s;
 }
 function _parseNotams(d){
-  const items=(d&&(d.items||d.features||d.data))||[];
   const out=[];
+  // Format autorouter (Eurocontrol EAD) : { total, rows:[...] }
+  if(d && Array.isArray(d.rows)){
+    d.rows.forEach(n=>{
+      const num=(n.series||'')+String(n.number==null?'':n.number).padStart(4,'0')+'/'+String(n.year==null?'':n.year);
+      out.push({
+        number:num,
+        start:n.startvalidity? n.startvalidity*1000 : '',
+        end:n.endvalidity? n.endvalidity*1000 : '',
+        est:!!n.estimation,
+        text:n.iteme||'',
+        classification:n.type||''
+      });
+    });
+    return out;
+  }
+  // Repli : format FAA { items:[{properties.coreNOTAMData.notam}] }
+  const items=(d&&(d.items||d.features||d.data))||[];
   items.forEach(it=>{
     const core=it&&it.properties&&it.properties.coreNOTAMData;
     const n=core&&core.notam;
     if(!n) return;
     const tr=core.notamTranslation&&core.notamTranslation[0];
-    out.push({
-      number:n.number||n.id||'',
-      start:n.effectiveStart||n.effectiveStartDate||'',
-      end:n.effectiveEnd||n.effectiveEndDate||'',
-      text:(tr&&tr.formattedText)||n.text||n.icaoText||'',
-      classification:n.classification||''
-    });
+    out.push({ number:n.number||n.id||'', start:n.effectiveStart||n.effectiveStartDate||'', end:n.effectiveEnd||n.effectiveEndDate||'', text:(tr&&tr.formattedText)||n.text||n.icaoText||'', classification:n.classification||'' });
   });
   return out;
 }
 function _notamCard(n){
-  const validite=_fmtNotamDate(n.start)+' → '+_fmtNotamDate(n.end);
+  const validite=_fmtNotamDate(n.start)+' → '+_fmtNotamDate(n.end)+(n.est?' (est.)':'');
   return '<div class="nt-card"><div class="nt-hd"><span class="nt-num">'+_ntEscape(n.number||'NOTAM')+'</span><span class="nt-val">'+validite+'</span></div>'
     +'<div class="nt-fr">'+_decodeNotamText(n.text)+'</div>'
     +'<details class="nt-raw"><summary>Texte brut (OACI)</summary><pre>'+_ntEscape(n.text)+'</pre></details></div>';
@@ -3437,8 +3448,4 @@ function buildKP(d, s) {
       </tbody>
     </table>` : ''}
     ${alerts(modAlerts)}
-    ${srcLinks([{label:'NOAA SWPC',url:'https://www.swpc.noaa.gov/products/planetary-k-index'},{label:'SpaceWeatherLive',url:'https://www.spaceweatherlive.com/fr/actualite-solaire/indice-kp.html'}])}`);
-}
-</script>
-</body>
-</html>
+    ${srcLinks([{label:'NOAA SWPC',url:'https://www.swpc.noaa.gov/products/planetary-k-index'},{label:'Spac
