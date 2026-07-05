@@ -920,63 +920,54 @@ body.night .cover-warn, body.night .alt-warn, body.night .carto-legend {
 
 ::-webkit-scrollbar { width: 0; height: 0; }
 
-/* ===== Page de garde — refonte moderne (glassmorphism + glow) ===== */
-#screen-cover{
-  background:
-    radial-gradient(120% 85% at 18% 8%, rgba(11,124,140,.34), transparent 58%),
-    radial-gradient(95% 70% at 88% 18%, rgba(78,200,182,.22), transparent 55%),
-    radial-gradient(110% 90% at 50% 118%, rgba(11,124,140,.28), transparent 60%),
-    linear-gradient(158deg,#0A1519 0%,#0B1B22 46%,#071119 100%);
-}
-#screen-cover .cover-inner{ gap:22px; }
-#screen-cover .cover-eyebrow{ text-align:center; font-family:var(--disp); font-size:11px; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:#5FD0C2; }
-#screen-cover .cover-scene{ position:relative; border-radius:30px; padding:14px 14px 6px; background:linear-gradient(158deg,rgba(255,255,255,.09),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.13); box-shadow:0 26px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12); -webkit-backdrop-filter:blur(16px) saturate(1.25); backdrop-filter:blur(16px) saturate(1.25); overflow:hidden; }
-#screen-cover .cover-scene::before{ content:""; position:absolute; left:50%; top:46%; width:280px; height:280px; transform:translate(-50%,-50%); border-radius:50%; background:radial-gradient(circle,rgba(78,200,182,.30),rgba(11,124,140,.10) 45%,transparent 70%); filter:blur(6px); pointer-events:none; }
-#screen-cover .cover-svg{ position:relative; max-height:34vh; filter:drop-shadow(0 10px 26px rgba(0,0,0,.45)); }
-#screen-cover .cv-arm{ stroke:#CBD9DD; }
-#screen-cover .drone-svg .motor{ fill:#CBD9DD; }
-#screen-cover .drone-svg .disc{ fill:#8FB0B4; opacity:.14; }
-#screen-cover .drone-svg .blade{ fill:#B4C6CB; opacity:.9; }
-#screen-cover .drone-svg .body{ fill:rgba(255,255,255,.10); stroke:rgba(255,255,255,.28); }
-#screen-cover .cv-plate{ fill:rgba(255,255,255,.12); stroke:rgba(255,255,255,.22); }
-#screen-cover .cv-plate-ln{ stroke:#5FD0C2; opacity:.9; }
-#screen-cover .cv-skid{ stroke:#B4C6CB; }
-#screen-cover .drone-svg .gimbal{ fill:#0B7C8C; }
-#screen-cover .drone-svg .lens{ fill:#5FD0C2; filter:drop-shadow(0 0 6px #5FD0C2); }
-#screen-cover .cv-radar{ stroke:rgba(255,255,255,.16); }
-#screen-cover .cv-radar-in{ stroke:rgba(255,255,255,.10); }
-#screen-cover .cv-crossln{ stroke:rgba(255,255,255,.08); }
-#screen-cover .cv-tick{ stroke:rgba(255,255,255,.22); }
-#screen-cover .cv-north{ fill:#5FD0C2; }
-#screen-cover .cover-title h1{ font-size:31px; line-height:1.08; letter-spacing:-.02em; background:linear-gradient(180deg,#FFFFFF 0%,#A7ECE1 128%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
-#screen-cover .cover-title p{ color:rgba(220,236,238,.66); font-size:13px; }
-#screen-cover .cover-cta{ background:linear-gradient(180deg,#15A6B7,#0B7C8C); color:#fff; border-radius:999px; box-shadow:0 10px 34px rgba(11,124,140,.6),inset 0 1px 0 rgba(255,255,255,.28); }
+/* ===== Page de garde — design moderne adaptatif (jour / nuit) ===== */
+#screen-cover{ position:relative; overflow:hidden; background:transparent; }
+#screen-cover .cover-inner{ position:relative; z-index:1; gap:22px; }
+#screen-cover::before{ content:""; position:absolute; left:-15%; top:-12%; width:72%; height:56%; background:radial-gradient(50% 55% at 40% 40%, var(--orange-d), transparent 72%); filter:blur(26px); opacity:.9; pointer-events:none; z-index:0; animation:coverAurora 16s ease-in-out infinite alternate; }
+@keyframes coverAurora{ from{ transform:translate(-3%,-2%) scale(1);} to{ transform:translate(10%,6%) scale(1.18);} }
+
+#screen-cover .cover-eyebrow{ text-align:center; font-family:var(--disp); font-size:11px; font-weight:700; letter-spacing:.26em; text-transform:uppercase; color:var(--orange); }
+
+#screen-cover .cover-scene{ position:relative; border-radius:30px; padding:14px 14px 6px; overflow:hidden; background:linear-gradient(158deg,rgba(255,255,255,.72),rgba(255,255,255,.4)); border:1px solid rgba(255,255,255,.85); box-shadow:0 20px 50px rgba(16,44,64,.14), inset 0 1px 0 rgba(255,255,255,.9); -webkit-backdrop-filter:blur(16px) saturate(1.2); backdrop-filter:blur(16px) saturate(1.2); }
+body.night #screen-cover .cover-scene{ background:linear-gradient(158deg,rgba(255,255,255,.09),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.13); box-shadow:0 26px 70px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+#screen-cover .cover-scene::before{ content:""; position:absolute; left:50%; top:46%; width:280px; height:280px; transform:translate(-50%,-50%); border-radius:50%; background:radial-gradient(circle, var(--orange-d), transparent 68%); filter:blur(4px); pointer-events:none; }
+#screen-cover .cover-svg{ position:relative; max-height:34vh; }
+body.night #screen-cover .cover-svg{ filter:drop-shadow(0 10px 26px rgba(0,0,0,.45)); }
+
+#screen-cover .cover-title h1{ font-size:33px; line-height:1.06; letter-spacing:-.025em; background:linear-gradient(180deg, var(--ink) 0%, var(--orange) 145%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+body.night #screen-cover .cover-title h1{ background:linear-gradient(180deg,#FFFFFF 0%,#A7ECE1 128%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+#screen-cover .cover-title p{ color:var(--ink-faint); font-size:13px; }
+
+#screen-cover .cover-cta{ position:relative; overflow:hidden; background:var(--orange); color:var(--btn-text); border-radius:999px; box-shadow:0 12px 30px var(--orange-d), inset 0 1px 0 rgba(255,255,255,.32); }
+#screen-cover .cover-cta::after{ content:""; position:absolute; top:0; left:-60%; width:42%; height:100%; background:linear-gradient(105deg,transparent,rgba(255,255,255,.5),transparent); transform:skewX(-18deg); animation:ctaSheen 4.8s ease-in-out infinite; }
+@keyframes ctaSheen{ 0%{ left:-60%; } 58%,100%{ left:135%; } }
 #screen-cover .cover-cta:active{ transform:scale(.98); }
-#screen-cover .cover-warn{ background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.12); border-left:3px solid var(--amber); border-radius:16px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:0 8px 26px rgba(0,0,0,.32); }
-#screen-cover .cover-warn-tx{ color:rgba(223,236,238,.78); }
-#screen-cover .cover-warn-tx strong{ color:#F1F6F7; }
-#screen-cover .cover-copy{ color:rgba(200,216,220,.4); }
-@media (hover:hover){ #screen-cover .cover-cta:hover{ filter:brightness(1.07); transform:translateY(-1px); } }
 
+#screen-cover .cover-warn{ background:var(--amber-d); border:1px solid var(--stone-2); border-left:3px solid var(--amber); border-radius:16px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+#screen-cover .cover-warn-tx{ color:var(--ink-soft); }
+#screen-cover .cover-warn-tx strong{ color:var(--ink); }
+#screen-cover .cover-copy{ color:var(--ink-faint); }
+@media (hover:hover){ #screen-cover .cover-cta:hover{ filter:brightness(1.05); transform:translateY(-1px); } }
+@media (prefers-reduced-motion: reduce){ #screen-cover::before, #screen-cover .cover-cta::after{ animation:none; } }
 
-/* ===== Theme premium uniforme — couleur de la page de garde sur toutes les pages ===== */
+/* ===== Fond ambiance adaptatif (jour / nuit) — toutes les pages ===== */
 body{
-  --bg:#0B0F14; --paper:#121821; --stone:#1A2230; --stone-2:#2A3645;
-  --ink:#D6E2F0; --ink-soft:#8DA2BD; --ink-faint:#54657D;
-  --orange:#4EC8B6; --orange-d:rgba(78,200,182,.13);
-  --green:#3FB46B; --green-d:rgba(63,180,107,.14);
-  --amber:#D9962F; --amber-d:rgba(217,150,47,.14);
-  --red:#E06A6A; --red-d:rgba(224,106,106,.14);
-  --btn-text:#04140F; --glow:0 0 8px;
+  background:
+    radial-gradient(120% 85% at 18% 8%, rgba(11,124,140,.09), transparent 60%),
+    radial-gradient(90% 70% at 88% 12%, rgba(78,200,182,.11), transparent 55%),
+    radial-gradient(120% 100% at 50% 122%, rgba(11,124,140,.08), transparent 60%),
+    linear-gradient(160deg,#F6FAFB 0%,#EBF2F4 52%,#F1F7F8 100%);
+  background-attachment:fixed;
+}
+body.night{
   background:
     radial-gradient(120% 85% at 18% 8%, rgba(11,124,140,.30), transparent 58%),
     radial-gradient(95% 70% at 88% 12%, rgba(78,200,182,.18), transparent 55%),
     radial-gradient(120% 100% at 50% 120%, rgba(11,124,140,.24), transparent 60%),
-    linear-gradient(158deg,#0A1519 0%,#0B1B22 46%,#071119 100%) !important;
-  background-attachment:fixed !important;
+    linear-gradient(158deg,#0A1519 0%,#0B1B22 46%,#071119 100%);
+  background-attachment:fixed;
 }
-.screen{ background:transparent !important; }
-#screen-cover{ background:transparent !important; }
+.screen{ background:transparent; }
 
 
 /* ===== Étape 3 — en-tête & navigation compacts pour agrandir la carte ===== */
@@ -1003,6 +994,23 @@ body{
 .zi-link{ display:inline-block; margin-top:12px; font-weight:700; color:var(--orange); text-decoration:none; }
 .zi-src{ margin-top:12px; font-size:11px; color:var(--ink-faint); }
 
+
+/* Fenetre NOTAM (aerodrome) */
+.nt-note{ font-size:11px; color:var(--ink-faint); margin-bottom:10px; }
+.nt-card{ border:1px solid var(--stone-2); border-radius:12px; padding:10px 12px; margin-bottom:10px; background:var(--stone); }
+.nt-hd{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; margin-bottom:5px; }
+.nt-num{ font-family:var(--disp); font-weight:700; font-size:12px; color:var(--orange); }
+.nt-val{ font-size:11px; color:var(--ink-soft); white-space:nowrap; }
+.nt-fr{ font-size:13px; line-height:1.5; color:var(--ink); }
+.nt-raw{ margin-top:8px; }
+.nt-raw summary{ cursor:pointer; font-size:11px; color:var(--ink-faint); }
+.nt-raw pre{ white-space:pre-wrap; word-break:break-word; font-size:11px; color:var(--ink-soft); margin-top:6px; background:var(--paper); padding:8px; border-radius:8px; }
+.nt-load,.nt-empty,.nt-err{ font-size:13px; color:var(--ink-soft); }
+.nt-err a,.nt-empty a{ color:var(--orange); }
+.aero-notam{ display:block; margin-top:6px; }
+
+
+.nt-sofia{ display:block; margin-top:12px; text-align:center; font-family:var(--disp); font-weight:700; font-size:12.5px; color:var(--btn-text); background:var(--orange); padding:11px; border-radius:12px; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -1274,7 +1282,9 @@ function toggleTheme() {
 (function initTheme(){
   let saved = null;
   try { saved = localStorage.getItem('droneops-theme'); } catch(e) {}
-  applyTheme(saved || 'night');
+  let _thm = saved;
+  if (!_thm) { _thm = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'day' : 'night'; }
+  applyTheme(_thm);
 })();
 
 // ── CLOCK ─────────────────────────────────────────────
@@ -2505,6 +2515,86 @@ async function _renderVac(icao, wrap, status) {
   }
   status.innerHTML = `La carte n'a pas pu être chargée ici (relais indisponible). <a href="${pdfUrl}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.`;
 }
+// ── NOTAM par aérodrome (API FAA via le Worker) — affichage décodé en français ──
+const _NOTAM_FR = {
+  'AD':'aérodrome','ACFT':'aéronef','APRON':'aire de trafic','APN':'aire de trafic','APCH':'approche','ARR':'arrivée',
+  'AVBL':'disponible','BLW':'en dessous de','BTN':'entre','CLSD':'fermé','CTN':'prudence','DEP':'départ','DLY':'quotidien',
+  'DRONE':'drone','UAS':'drone','DUE':'en raison de','ELEV':'altitude','EXC':'sauf','EXP':'prévu','FLW':'suivant',
+  'FREQ':'fréquence','GND':'sol','HR':'h','LGT':'balisage lumineux','LGTD':'éclairé','LTD':'limité','MAINT':'maintenance',
+  'NML':'normal','OBST':'obstacle','OPR':'exploitant','PERM':'permanent','PSN':'position','PROHIBITED':'interdit',
+  'RWY':'piste','SFC':'surface','TAX':'circulation au sol','TEMPO':'temporaire','TWY':'voie de circulation','TWR':'tour de contrôle',
+  'UFN':'jusqu\'à nouvel ordre','UNL':'illimité','WEF':'à compter du','WIP':'travaux en cours','WI':'à l\'intérieur de',
+  'ACT':'actif','AMSL':'au-dessus du niveau de la mer','AGL':'au-dessus du sol','MSL':'niveau de la mer','NM':'milles nautiques',
+  'NByNCS':'','O/R':'sur demande','O/T':'autres','RMK':'remarque','SR':'lever du soleil','SS':'coucher du soleil','WKD':'jours ouvrés'
+};
+function _ntEscape(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _ntKey(e){ if(e.key==='Escape') closeNotam(); }
+function closeNotam(){ const ov=document.getElementById('notam-overlay'); if(ov){ ov.classList.remove('open'); ov.innerHTML=''; } document.body.style.overflow=''; document.removeEventListener('keydown',_ntKey); }
+function _ntSetBody(html){ const b=document.getElementById('notam-body'); if(b) b.innerHTML=html; }
+function _fmtNotamDate(s){
+  if(s==null||s==='') return '—';
+  if(/^PERM/i.test(String(s))) return 'permanent';
+  const d=new Date(s);
+  if(isNaN(d.getTime())) return String(s);
+  const p=n=>String(n).padStart(2,'0');
+  return p(d.getUTCDate())+'/'+p(d.getUTCMonth()+1)+'/'+String(d.getUTCFullYear()).slice(2)+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes())+'Z';
+}
+function _decodeNotamText(t){
+  if(!t) return '—';
+  let s=_ntEscape(t);
+  s=s.replace(/\bU\/S\b/gi,'hors service').replace(/\bO\/R\b/gi,'sur demande');
+  const keys=Object.keys(_NOTAM_FR).filter(k=>_NOTAM_FR[k]).sort((a,b)=>b.length-a.length);
+  keys.forEach(k=>{ s=s.replace(new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g'), _NOTAM_FR[k]); });
+  return s;
+}
+function _parseNotams(d){
+  const items=(d&&(d.items||d.features||d.data))||[];
+  const out=[];
+  items.forEach(it=>{
+    const core=it&&it.properties&&it.properties.coreNOTAMData;
+    const n=core&&core.notam;
+    if(!n) return;
+    const tr=core.notamTranslation&&core.notamTranslation[0];
+    out.push({
+      number:n.number||n.id||'',
+      start:n.effectiveStart||n.effectiveStartDate||'',
+      end:n.effectiveEnd||n.effectiveEndDate||'',
+      text:(tr&&tr.formattedText)||n.text||n.icaoText||'',
+      classification:n.classification||''
+    });
+  });
+  return out;
+}
+function _notamCard(n){
+  const validite=_fmtNotamDate(n.start)+' → '+_fmtNotamDate(n.end);
+  return '<div class="nt-card"><div class="nt-hd"><span class="nt-num">'+_ntEscape(n.number||'NOTAM')+'</span><span class="nt-val">'+validite+'</span></div>'
+    +'<div class="nt-fr">'+_decodeNotamText(n.text)+'</div>'
+    +'<details class="nt-raw"><summary>Texte brut (OACI)</summary><pre>'+_ntEscape(n.text)+'</pre></details></div>';
+}
+function _ntSofia(){ return '<a class="nt-sofia" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">Briefing NOTAM officiel (SOFIA) \u2197</a>'; }
+async function openNotam(icao, encName){
+  let name=encName; try{ name=decodeURIComponent(encName); }catch(_){}
+  let ov=document.getElementById('notam-overlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='notam-overlay'; ov.className='vac-overlay'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="vac-modal zone-modal" role="dialog" aria-modal="true">'
+    +'<div class="vac-head" style="border-left:4px solid var(--orange)"><div class="vac-title"><span>NOTAM — '+_ntEscape(name)+'</span> <span class="aero-icao">'+_ntEscape(icao)+'</span></div>'
+    +'<button type="button" class="vac-close" onclick="closeNotam()" aria-label="Fermer">✕</button></div>'
+    +'<div class="vac-body zi-body" id="notam-body"><div class="nt-load"><span class="vac-spin"></span> Chargement des NOTAM…</div></div></div>';
+  ov.onclick=e=>{ if(e.target===ov) closeNotam(); };
+  ov.classList.add('open'); document.body.style.overflow='hidden';
+  document.addEventListener('keydown',_ntKey);
+  const base=(typeof VAC_PROXY==='string'&&VAC_PROXY)?VAC_PROXY:'';
+  if(!base){ _ntSetBody('<div class="nt-err">Worker non configuré (constante VAC_PROXY vide).</div>'); return; }
+  const url=base+(base.indexOf('?')>=0?'&':'?')+'notam='+encodeURIComponent(icao);
+  try{
+    const r=await fetchWithTimeout(url,{},15000);
+    const d=await r.json();
+    if(d&&d.error){ _ntSetBody('<div class="nt-err">'+_ntEscape(d.error)+'</div>'+_ntSofia()); return; }
+    const list=_parseNotams(d);
+    if(!list.length){ _ntSetBody('<div class="nt-empty">Aucun NOTAM actif pour '+_ntEscape(icao)+'.</div>'+_ntSofia()); return; }
+    _ntSetBody('<div class="nt-note">Décodage automatique — vérifiez toujours le texte brut et le briefing officiel.</div>'+list.map(_notamCard).join('')+_ntSofia());
+  }catch(e){ _ntSetBody('<div class="nt-err">NOTAM indisponibles ('+_ntEscape((e&&e.message)||'réseau')+'). Consultez <a href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">SOFIA</a>.</div>'); }
+}
 function openVac(icao, encName) {
   let name = encName; try { name = decodeURIComponent(encName); } catch (_) {}
   const url = vacUrl(icao);
@@ -2949,8 +3039,12 @@ function _loadSupAerodromes() {
       const vacBtn = icao
         ? `<button type="button" class="aero-vac" onclick="openVac('${icao}','${encodeURIComponent(nom).replace(/'/g, '%27')}')">Ouvrir la carte VAC ↗</button>`
         : `<span class="aero-meta">Pas de carte VAC (aucun code OACI)</span>`;
+      // NOTAM : lien direct vers le service officiel FRANÇAIS SOFIA-Briefing (DGAC), sans login ni source US.
+      const ntBtn = icao
+        ? `<a class="aero-vac aero-notam" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">NOTAM (SOFIA) ↗</a>`
+        : '';
       const popup = `<div class="aero-pop"><b>${nom}</b>${icao ? ` <span class="aero-icao">${icao}</span>` : ''}` +
-        `<span class="aero-meta">${meta}</span>${vacBtn}</div>`;
+        `<span class="aero-meta">${meta}</span>${vacBtn}${ntBtn}</div>`;
       L.marker([c.lat, c.lon], {
         icon: L.divIcon({ className: 'aero-marker', html: symFor(p.nature, p.categorie), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] })
       }).addTo(_supAeroLayer).bindPopup(popup);
