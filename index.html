@@ -1177,8 +1177,8 @@ body.night .drone-loader .drone-svg { filter: drop-shadow(0 13px 28px rgba(0,0,0
 .vac-zoombar button:active { transform: scale(.93); }
 
 /* Zoom VAC : rendu transform universel (Firefox inclus) */
-.vac-canvas-wrap { touch-action: none; overflow: hidden; }
-.vac-zoom { zoom: normal; transform-origin: 0 0; will-change: transform; }
+.vac-canvas-wrap { touch-action: auto; overflow: auto; }
+.vac-zoom { zoom: normal; }
 </style>
 </head>
 <body>
@@ -2593,6 +2593,13 @@ function airacFolder(d) {
 function vacUrl(icao) {
   return `https://www.sia.aviation-civile.gouv.fr/media/dvd/${airacFolder()}/Atlas-VAC/PDF_AIPparSSection/VAC/AD/AD-2.${icao}.pdf`;
 }
+let _vacVP0 = null;
+function _vacViewport(on) {
+  const m = document.querySelector('meta[name="viewport"]');
+  if (!m) return;
+  if (on) { if (_vacVP0 == null) _vacVP0 = m.getAttribute('content'); m.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=6.0, user-scalable=yes'); }
+  else { m.setAttribute('content', _vacVP0 || 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); }
+}
 function _vacEsc(e) { if (e.key === 'Escape') closeVac(); }
 // Relais CORS perso optionnel (ex. Cloudflare Worker). Si renseigné, il est essayé en priorité.
 // Le Worker doit récupérer ?url=<PDF> et le renvoyer avec en-tête Access-Control-Allow-Origin: *.
@@ -2626,7 +2633,9 @@ async function _renderVac(icao, wrap, status) {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const base = page.getViewport({ scale: 1 });
-        const scale = Math.min(2.4, Math.max(0.8, ((wrap.clientWidth || 900) - 18) / base.width));
+        const _touchDev = (navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
+        const _fit = Math.min(2.4, Math.max(0.8, ((wrap.clientWidth || 900) - 18) / base.width));
+        const scale = _touchDev ? Math.min(5, _fit * 3) : _fit;
         const vp = page.getViewport({ scale });
         const cv = document.createElement('canvas');
         cv.className = 'vac-page'; cv.width = vp.width; cv.height = vp.height;
@@ -2812,8 +2821,7 @@ function openVac(icao, encName) {
   const useCanvas = isMobile || !VAC_PROXY;
   const body = useCanvas
     ? `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
-         <div class="vac-canvas-wrap" id="vac-scroll"><div class="vac-zoom" id="vac-pages"></div></div>
-         <div class="vac-zoombar"><button type="button" onclick="_vzBtn('in')" aria-label="Zoomer">+</button><button type="button" onclick="_vzBtn('out')" aria-label="Dezoomer">−</button><button type="button" onclick="_vzBtn('reset')" aria-label="Reinitialiser">⟲</button></div>`
+         <div class="vac-canvas-wrap" id="vac-scroll"><div class="vac-zoom" id="vac-pages"></div></div>`
     : `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte VAC ${icao}"></iframe>`;
   ov.innerHTML =
     `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte VAC ${icao}">
@@ -2830,9 +2838,10 @@ function openVac(icao, encName) {
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.addEventListener('keydown', _vacEsc);
-  if (useCanvas) { _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status')); _vacZoomInit(document.getElementById('vac-scroll'), document.getElementById('vac-pages')); }
+  if (useCanvas) { _vacViewport(true); _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status')); }
 }
 function closeVac() {
+  _vacViewport(false);
   const ov = document.getElementById('vac-overlay');
   if (ov) { ov.classList.remove('open'); ov.innerHTML = ''; }
   document.body.style.overflow = '';
