@@ -1546,6 +1546,12 @@ body.night .step-dots{ padding-bottom:10px; border-bottom:1px solid var(--gold-s
 body:not(.night) .module{ background:linear-gradient(180deg,#ffffff,#f5f9fc) !important; }
 body:not(.night) .dcell{ background:linear-gradient(180deg,#ffffff,#f7fafc) !important; }
 
+
+/* NOTAM : renvoi vers les sources officielles (légal) */
+.nt-official{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; padding:14px 16px; border-radius:12px; font-weight:600; font-size:13.5px; text-decoration:none; text-align:center; color:var(--ink); background:var(--stone); border:1px solid var(--gold-soft); box-shadow:var(--sh-1); }
+.nt-official.alt{ font-weight:500; color:var(--ink-soft); }
+body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); }
+.nt-tip{ font-size:11.5px; color:var(--ink-faint); margin-top:12px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -3085,28 +3091,22 @@ function _notamCard(n){
     +'<details class="nt-raw"><summary>Texte brut (OACI)</summary><pre>'+_ntEscape(n.text)+'</pre></details></div>';
 }
 function _ntSofia(){ return '<a class="nt-sofia" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">Briefing NOTAM officiel (SOFIA) \u2197</a>'; }
-async function openNotam(icao, encName){
+function openNotam(icao, encName){
   let name=encName; try{ name=decodeURIComponent(encName); }catch(_){}
   let ov=document.getElementById('notam-overlay');
   if(!ov){ ov=document.createElement('div'); ov.id='notam-overlay'; ov.className='vac-overlay'; document.body.appendChild(ov); }
   ov.innerHTML='<div class="vac-modal zone-modal" role="dialog" aria-modal="true">'
-    +'<div class="vac-head" style="border-left:4px solid var(--orange)"><div class="vac-title"><span>NOTAM — '+_ntEscape(name)+'</span> <span class="aero-icao">'+_ntEscape(icao)+'</span></div>'
-    +'<button type="button" class="vac-close" onclick="closeNotam()" aria-label="Fermer">✕</button></div>'
-    +'<div class="vac-body zi-body" id="notam-body"><div class="nt-load"><span class="vac-spin"></span> Chargement des NOTAM…</div></div></div>';
+    +'<div class="vac-head" style="border-left:4px solid var(--gold)"><div class="vac-title"><span>NOTAM \u2014 '+_ntEscape(name)+'</span> <span class="aero-icao">'+_ntEscape(icao)+'</span></div>'
+    +'<button type="button" class="vac-close" onclick="closeNotam()" aria-label="Fermer">\u2715</button></div>'
+    +'<div class="vac-body zi-body" id="notam-body">'
+      +'<div class="nt-note">Les NOTAM sont diffus\u00e9s par les services officiels. Consultez le briefing officiel pour l\u2019a\u00e9rodrome <strong>'+_ntEscape(icao)+'</strong> :</div>'
+      +'<a class="nt-official" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">Briefing NOTAM officiel \u2014 SOFIA (DGAC) \u2197</a>'
+      +'<a class="nt-official alt" href="https://www.sia.aviation-civile.gouv.fr/" target="_blank" rel="noopener">Site du SIA \u2014 Information a\u00e9ronautique \u2197</a>'
+      +'<div class="nt-tip">Astuce : recherchez le code <strong>'+_ntEscape(icao)+'</strong> sur SOFIA pour obtenir les NOTAM \u00e0 jour.</div>'
+    +'</div></div>';
   ov.onclick=e=>{ if(e.target===ov) closeNotam(); };
   ov.classList.add('open'); document.body.style.overflow='hidden';
   document.addEventListener('keydown',_ntKey);
-  const base=(typeof VAC_PROXY==='string'&&VAC_PROXY)?VAC_PROXY:'';
-  if(!base){ _ntSetBody('<div class="nt-err">Worker non configuré (constante VAC_PROXY vide).</div>'); return; }
-  const url=base+(base.indexOf('?')>=0?'&':'?')+'notam='+encodeURIComponent(icao);
-  try{
-    const r=await fetchWithTimeout(url,{},15000);
-    const d=await r.json();
-    if(d&&d.error){ const raw=String(d.error); const pending=/non configur|autorouter|acc[e\u00e8]s API|refus/i.test(raw); if(pending){ _ntSetBody('<div class="nt-pending">Les NOTAM seront disponibles tr\u00e8s prochainement \u2014 l\'acc\u00e8s aux donn\u00e9es officielles est en cours d\'activation.<br><br>En attendant, consultez le briefing NOTAM officiel :</div>'+_ntSofia()); } else { _ntSetBody('<div class="nt-err">'+_ntEscape(raw)+'</div>'+_ntSofia()); } return; }
-    const list=_parseNotams(d);
-    if(!list.length){ _ntSetBody('<div class="nt-empty">Aucun NOTAM actif pour '+_ntEscape(icao)+'.</div>'+_ntSofia()); return; }
-    _ntSetBody('<div class="nt-note">Décodage automatique — vérifiez toujours le texte brut et le briefing officiel.</div>'+list.map(_notamCard).join('')+_ntSofia());
-  }catch(e){ _ntSetBody('<div class="nt-err">NOTAM indisponibles ('+_ntEscape((e&&e.message)||'réseau')+'). Consultez <a href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">SOFIA</a>.</div>'); }
 }
 // ── Zoom tactile des cartes VAC (mobile) : pincer, déplacer, double-tap, boutons ──
 let _vz = null;
