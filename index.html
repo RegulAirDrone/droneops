@@ -1006,6 +1006,8 @@ body.night{
 .nt-raw summary{ cursor:pointer; font-size:11px; color:var(--ink-faint); }
 .nt-raw pre{ white-space:pre-wrap; word-break:break-word; font-size:11px; color:var(--ink-soft); margin-top:6px; background:var(--paper); padding:8px; border-radius:8px; }
 .nt-load,.nt-empty,.nt-err{ font-size:13px; color:var(--ink-soft); }
+.nt-pending{ font-size:13px; color:var(--ink-soft); line-height:1.5; padding:4px 2px 10px; }
+.nt-pending a{ color:var(--orange); font-weight:600; }
 .nt-err a,.nt-empty a{ color:var(--orange); }
 .aero-notam{ display:block; margin-top:6px; }
 
@@ -1179,6 +1181,161 @@ body.night .drone-loader .drone-svg { filter: drop-shadow(0 13px 28px rgba(0,0,0
 /* Zoom VAC : rendu transform universel (Firefox inclus) */
 .vac-canvas-wrap { touch-action: auto; overflow: auto; }
 .vac-zoom { zoom: normal; }
+/* ═══════════════════════════════════════════════════════
+   FINITIONS GLOBALES — raffinement additif (jour + nuit)
+   Élévation cohérente, rendu de police net, micro-transitions,
+   sélection/scrollbars aux couleurs de l'app, relief du CTA.
+   ═══════════════════════════════════════════════════════ */
+:root{
+  --sh-1: 0 1px 2px rgba(16,26,40,.05), 0 2px 8px rgba(16,26,40,.05);
+  --sh-2: 0 4px 14px rgba(16,26,40,.08), 0 10px 28px rgba(16,26,40,.06);
+  --sh-pop: 0 20px 55px rgba(10,16,24,.22);
+}
+body.night{
+  --sh-1: 0 1px 2px rgba(0,0,0,.45), 0 3px 12px rgba(0,0,0,.38);
+  --sh-2: 0 6px 20px rgba(0,0,0,.5), 0 14px 40px rgba(0,0,0,.4);
+  --sh-pop: 0 24px 64px rgba(0,0,0,.62);
+}
+/* Rendu de police plus net partout */
+body{ -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+/* Sélection de texte & curseur aux couleurs de l'app */
+::selection{ background: var(--orange-d); color: var(--ink); }
+body{ caret-color: var(--orange); }
+/* Anneau de focus accessible et élégant */
+:focus-visible{ outline: 2px solid var(--orange); outline-offset: 2px; }
+/* Barres de défilement fines et thématisées */
+*{ scrollbar-width: thin; scrollbar-color: var(--stone-2) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background: var(--stone-2); border-radius:99px; border:3px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-thumb:hover{ background: var(--ink-faint); }
+/* Micro-transitions homogènes sur les éléments interactifs */
+button, a, .field input, .field select, .field textarea, .module, .commune-opt, .lmod, .pill, .btn-details, .btn-new, .btn-suivant, .btn-prev, .btn-geoloc {
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .2s ease, transform .12s ease, color .18s ease;
+}
+/* Profondeur discrète sous la barre supérieure fixe */
+.topbar{ box-shadow: 0 6px 18px rgba(16,26,40,.045); }
+body.night .topbar{ box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+/* Modules : élévation douce + bordures adoucies (accent gauche préservé) */
+.module{ box-shadow: var(--sh-1); border-top-color: var(--stone); border-right-color: var(--stone); border-bottom-color: var(--stone); }
+.module:hover{ box-shadow: var(--sh-2); }
+/* Boutons secondaires : léger relief tactile */
+.btn-suivant, .btn-new, .btn-details, .btn-geoloc{ box-shadow: var(--sh-1); }
+.btn-suivant:active, .btn-new:active, .btn-details:active, .btn-geoloc:active{ transform: scale(.97); }
+/* Champs : anneau de focus doux en couleur d'accent */
+.field input:focus, .field select:focus, .field textarea:focus{ box-shadow: 0 0 0 3px var(--orange-d); }
+/* CTA principal : dégradé subtil + élévation, presse plus vivante */
+.btn-analyse{ background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0)), var(--orange); box-shadow: var(--sh-2); }
+.btn-analyse:active{ box-shadow: var(--sh-1); transform: scale(.98); }
+/* Fenêtres modales : ombre portée profonde et premium */
+.vac-modal, .zone-modal{ box-shadow: var(--sh-pop); }
+/* ═══════════════════════════════════════════════════════
+   FINITIONS 2 — raffinement des composants (additif)
+   Arête lumineuse, halos de statut, badges instrument,
+   relief au survol (PC), écran de chargement soigné.
+   ═══════════════════════════════════════════════════════ */
+:root{ --edge: inset 0 1px 0 rgba(255,255,255,.65); }
+body.night{ --edge: inset 0 1px 0 rgba(255,255,255,.045); }
+
+/* Modules & cellules : fine arête lumineuse en haut = effet panneau */
+.module{ box-shadow: var(--sh-1), var(--edge); }
+.dcell{ border-color: var(--stone); box-shadow: var(--edge); }
+
+/* Pastille de statut : halo concentrique dans la couleur du verdict */
+.module.go   .mod-dot{ box-shadow: 0 0 0 4px var(--green-d); }
+.module.warn .mod-dot{ box-shadow: 0 0 0 4px var(--amber-d); }
+.module.nogo .mod-dot{ box-shadow: 0 0 0 4px var(--red-d); }
+.module.info .mod-dot{ box-shadow: 0 0 0 4px var(--orange-d); }
+
+/* Badges de verdict : liseré net + allure « instrument » */
+.mod-badge{ text-transform: uppercase; letter-spacing: .05em; box-shadow: inset 0 0 0 1px currentColor; }
+.go .mod-badge, .warn .mod-badge, .nogo .mod-badge, .info .mod-badge{ box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent); }
+
+/* Icônes d'alerte & valeurs alignées */
+.malert-ico{ box-shadow: var(--sh-1); }
+.dcell .val, .kv-cell .kv-val, .ds-cell .ds-val, .topbar-time{ font-variant-numeric: tabular-nums; }
+
+/* Écran de chargement : lignes en relief, étape active mise en avant */
+.lmod{ box-shadow: var(--sh-1); }
+.lmod.active{ box-shadow: 0 0 0 1px var(--orange-d), var(--sh-1); }
+
+/* Halo d'accent discret sous le CTA la nuit */
+body.night .btn-analyse{ box-shadow: var(--sh-2), 0 0 22px color-mix(in srgb, var(--orange) 30%, transparent); }
+
+/* Relief au survol — PC uniquement (n'affecte pas le tactile) */
+@media (hover: hover) and (pointer: fine){
+  .btn-analyse:hover{ transform: translateY(-1px); }
+  .btn-suivant:hover, .btn-new:hover, .btn-details:hover, .btn-geoloc:hover{ transform: translateY(-1px); box-shadow: var(--sh-2); }
+  .mtbl tbody tr:hover td{ background: var(--stone); }
+  a:hover{ opacity: .82; }
+}
+/* ═══════════════════════════════════════════════════════
+   FINITIONS 3 — PAGE D'ACCUEIL (hero premium immersif)
+   Fond ciel en couches, halo rotatif, puce eyebrow,
+   titre agrandi, CTA pulsant, puces de fonctionnalités.
+   ═══════════════════════════════════════════════════════ */
+/* Fond immersif — JOUR (aube douce, reste lisible) */
+#screen-cover{
+  background:
+    radial-gradient(115% 78% at 50% -12%, #e9f3f7 0%, transparent 58%),
+    radial-gradient(85% 65% at 84% 16%, rgba(11,124,140,.11), transparent 60%),
+    radial-gradient(80% 60% at 12% 96%, rgba(168,93,0,.06), transparent 58%),
+    linear-gradient(180deg, #ffffff 0%, #eef4f8 100%);
+}
+/* Fond immersif — NUIT (crépuscule profond, dans l'esprit de l'emblème) */
+body.night #screen-cover{
+  background:
+    radial-gradient(120% 80% at 50% -12%, #12232f 0%, transparent 58%),
+    radial-gradient(88% 66% at 82% 14%, rgba(78,200,182,.16), transparent 60%),
+    radial-gradient(72% 60% at 14% 98%, rgba(255,150,60,.09), transparent 55%),
+    linear-gradient(180deg, #0b0f14 0%, #06090d 100%);
+}
+/* Emblème plus présent + halo rotatif derrière */
+#screen-cover .cover-scene{ padding:22px 18px 12px; isolation:isolate; }
+#screen-cover .cover-svg{ position:relative; z-index:1; max-height:40vh; }
+#screen-cover .cover-scene::after{
+  content:""; position:absolute; z-index:0; left:50%; top:48%;
+  width:330px; height:330px; transform:translate(-50%,-50%);
+  background:conic-gradient(from 0deg, transparent 0 18%, var(--orange) 33%, transparent 52% 100%);
+  border-radius:50%; opacity:.42; filter:blur(2px);
+  -webkit-mask:radial-gradient(circle, transparent 45%, #000 47%, #000 49.5%, transparent 51%);
+  mask:radial-gradient(circle, transparent 45%, #000 47%, #000 49.5%, transparent 51%);
+  animation:coverHalo 9s linear infinite;
+}
+@keyframes coverHalo{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+/* Eyebrow → puce cerclée avec point lumineux */
+#screen-cover .cover-eyebrow{
+  display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
+  padding:6px 14px; border-radius:99px;
+  background:var(--orange-d); border:1px solid var(--orange-d);
+  color:var(--orange); letter-spacing:.2em;
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+}
+#screen-cover .cover-eyebrow::before{
+  content:""; width:6px; height:6px; border-radius:50%;
+  background:var(--orange); box-shadow:0 0 9px var(--orange);
+}
+/* Titre agrandi et plus percutant */
+#screen-cover .cover-title h1{ font-size:38px; letter-spacing:-.03em; }
+body.night #screen-cover .cover-title h1{ text-shadow:0 2px 34px rgba(78,200,182,.28); }
+#screen-cover .cover-title p{ font-size:13.5px; margin-top:7px; }
+/* CTA plus imposant + pulsation lumineuse */
+#screen-cover .cover-cta{ font-size:16px; padding:20px; letter-spacing:.01em; animation:ctaPulse 2.8s ease-in-out infinite; }
+@keyframes ctaPulse{
+  0%,100%{ box-shadow:0 12px 30px var(--orange-d), inset 0 1px 0 rgba(255,255,255,.32); }
+  50%{ box-shadow:0 16px 44px var(--orange-d), 0 0 0 4px var(--orange-d), inset 0 1px 0 rgba(255,255,255,.32); }
+}
+/* Rangée de puces de fonctionnalités */
+#screen-cover .cover-feats{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+#screen-cover .cvf{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--disp); font-size:11.5px; font-weight:600; color:var(--ink-soft);
+  padding:8px 14px; border-radius:99px;
+  background:var(--paper); border:1px solid var(--stone-2); box-shadow:var(--sh-1);
+}
+#screen-cover .cvf i{ width:6px; height:6px; border-radius:50%; background:var(--orange); box-shadow:0 0 7px var(--orange); }
+@media (prefers-reduced-motion: reduce){
+  #screen-cover .cover-scene::after, #screen-cover .cover-cta{ animation:none; }
+}
 </style>
 </head>
 <body>
@@ -1215,7 +1372,12 @@ body.night .drone-loader .drone-svg { filter: drop-shadow(0 13px 28px rgba(0,0,0
     </div>
 
     <button class="cover-cta" onclick="showScreen('screen-form')">Préparer mon vol →</button>
-    <p class="cover-copy">© 2026 Profenvol — Tous droits réservés. Reproduction et réutilisation interdites sans autorisation.</p>
+    <div class="cover-feats">
+        <span class="cvf"><i></i>Météo AROME HD</span>
+        <span class="cvf"><i></i>Espace aérien</span>
+        <span class="cvf"><i></i>Cartes VAC</span>
+      </div>
+      <p class="cover-copy">© 2026 Profenvol — Tous droits réservés. Reproduction et réutilisation interdites sans autorisation.</p>
   </div>
 </div>
 
@@ -2733,7 +2895,7 @@ async function openNotam(icao, encName){
   try{
     const r=await fetchWithTimeout(url,{},15000);
     const d=await r.json();
-    if(d&&d.error){ _ntSetBody('<div class="nt-err">'+_ntEscape(d.error)+'</div>'+_ntSofia()); return; }
+    if(d&&d.error){ const raw=String(d.error); const pending=/non configur|autorouter|acc[e\u00e8]s API|refus/i.test(raw); if(pending){ _ntSetBody('<div class="nt-pending">Les NOTAM seront disponibles tr\u00e8s prochainement \u2014 l\'acc\u00e8s aux donn\u00e9es officielles est en cours d\'activation.<br><br>En attendant, consultez le briefing NOTAM officiel :</div>'+_ntSofia()); } else { _ntSetBody('<div class="nt-err">'+_ntEscape(raw)+'</div>'+_ntSofia()); } return; }
     const list=_parseNotams(d);
     if(!list.length){ _ntSetBody('<div class="nt-empty">Aucun NOTAM actif pour '+_ntEscape(icao)+'.</div>'+_ntSofia()); return; }
     _ntSetBody('<div class="nt-note">Décodage automatique — vérifiez toujours le texte brut et le briefing officiel.</div>'+list.map(_notamCard).join('')+_ntSofia());
