@@ -1591,15 +1591,20 @@ body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06)
 #notam-overlay .nt-official{ color:#eef2f7 !important; background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02)) !important; }
 /* Carte Leaflet — contrôles, couches, popups */
 .leaflet-container{ background:#0e131b !important; }
-.leaflet-bar a, .leaflet-control-layers-toggle{ background:#161c26 !important; color:#e7edf3 !important; }
+.leaflet-bar a{ background:#161c26 !important; color:#e7edf3 !important; }
 .leaflet-bar a{ border-bottom:1px solid rgba(255,255,255,.12) !important; }
-.leaflet-control-layers{ background:#141a24 !important; color:#dfe6ee !important; border:1px solid rgba(255,255,255,.1) !important; box-shadow:0 8px 22px rgba(0,0,0,.5) !important; }
+.leaflet-control-layers-expanded{ background:#141a24 !important; color:#dfe6ee !important; border:1px solid rgba(255,255,255,.1) !important; box-shadow:0 8px 22px rgba(0,0,0,.5) !important; }
 .leaflet-control-layers-expanded, .leaflet-control-layers label{ color:#dfe6ee !important; }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip{ background:#161c26 !important; color:#e7edf3 !important; }
 .leaflet-popup-content, .leaflet-popup-content b, .leaflet-popup-content strong{ color:#e7edf3 !important; }
 .leaflet-popup-content a{ color:var(--gold) !important; }
 .leaflet-control-attribution{ background:rgba(18,24,34,.72) !important; color:#8a95a1 !important; }
 .leaflet-control-attribution a{ color:var(--gold) !important; }
+
+/* Puces accueil : une seule ligne sur smartphone */
+#screen-cover .cover-feats{ flex-wrap:nowrap; gap:6px; }
+#screen-cover .cvf{ font-size:9px; padding:6px 8px; letter-spacing:.01em; white-space:nowrap; gap:5px; }
+#screen-cover .cvf i{ width:3px; height:3px; }
 </style>
 </head>
 <body>
