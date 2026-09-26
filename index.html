@@ -3044,9 +3044,42 @@ function airacFolder(d) {
   const dd = String(eff.getUTCDate()).padStart(2, '0');
   return `eAIP_${dd}_${MON[eff.getUTCMonth()]}_${eff.getUTCFullYear()}`;
 }
-// URL directe de la carte VAC (PDF) d'un aérodrome par son code OACI.
-function vacUrl(icao) {
-  return `https://www.sia.aviation-civile.gouv.fr/media/dvd/${airacFolder()}/Atlas-VAC/PDF_AIPparSSection/VAC/AD/AD-2.${icao}.pdf`;
+// URL directe de la carte VAC (PDF) d'un aérodrome, ou VAC H d'une hélistation, par son code OACI.
+// Structure SIA : cartes avion sous Atlas-VAC/.../VAC/AD/AD-2.{icao}.pdf,
+// cartes hélistation sous Atlas-VAC/.../VACH/AD/AD-3.{icao}.pdf (AIP France, section AD 3).
+function vacUrl(icao, isHeli) {
+  return isHeli
+    ? `https://www.sia.aviation-civile.gouv.fr/media/dvd/${airacFolder()}/Atlas-VAC/PDF_AIPparSSection/VACH/AD/AD-3.${icao}.pdf`
+    : `https://www.sia.aviation-civile.gouv.fr/media/dvd/${airacFolder()}/Atlas-VAC/PDF_AIPparSSection/VAC/AD/AD-2.${icao}.pdf`;
+}
+// Référentiel statique SIA "Codes des hélistations - Métropole" (GEN 0.4.VACH, éd. 12 juin 2025) :
+// nom normalisé (majuscules, sans accent/ponctuation) -> identifiant VAC H courant (ex. LF454).
+// Sert de repli quand le flux IGN ne fournit aucun code OACI pour une hélistation — cas de la
+// quasi-totalité des hélistations hospitalières, qui n'ont pas de vrai code OACI (contrairement
+// aux hélisurfaces situées sur un aérodrome, qui réutilisent le code OACI de celui-ci et n'ont pas
+// besoin de ce repli). Table figée à la date de l'édition SIA ci-dessus ; à revérifier si le SIA
+// publie une mise à jour de ce référentiel.
+const HELI_VACH = {"ABBEVILLE CENTRE HOSPITALIER":"LF001","AIX EN PROVENCE CENTRE HOSPITALIER":"LF236","AJACCIO CENTRE HOSPITALIER":"LF482","ALBERTVILLE CENTRE HOSPITALIER":"LF004","ALBERTVILLE CRS ALPES":"LF005","ALENCON CENTRE HOSPITALIER":"LF007","ALES CENTRE HOSPITALIER":"LF434","ALPES LEMAN CENTRE HOSPITALIER":"LF433","AMBERT CENTRE HOSPITALIER":"LF465","AMBOISE CENTRE HOSPITALIER":"LF402","AMIENS CENTRE HOSPITALIER UNIVERSITAIRE SUD 1":"LF439","AMIENS CENTRE HOSPITALIER UNIVERSITAIRE SUD 2":"LF008","AMILLY CENTRE HOSPITALIER":"LF233","ANGERS CENTRE HOSPITALIER":"LF255","ANGOULEME CENTRE HOSPITALIER":"LF010","ANNECY CENTRE HOSPITALIER":"LF012","ANNONAY CENTRE HOSPITALIER":"LF013","ANTIBES PORT VAUBAN":"LF014","APT CENTRE HOSPITALIER":"LF002","ARCACHON POLE SANTE":"LF454","ARCHAMPS TECHNOPOLE":"LF015","ARCS 2000":"LF364","ARGENTAN CENTRE HOSPITALIER":"LF288","ARRAS CENTRE HOSPITALIER":"LF396","AUBENAS CENTRE HOSPITALIER":"LF018","AUBERIVE":"LF035","AUCH CENTRE HOSPITALIER":"LF291","AULNAY SOUS BOIS CENTRE HOSPITALIER":"LF240","AURILLAC CENTRE HOSPITALIER":"LF462","AUXERRE CENTRE HOSPITALIER":"LF294","AVIGNON CENTRE HOSPITALIER":"LF019","BAGNOLS SUR CEZE CENTRE HOSPITALIER":"LF457","BASTIA CENTRE HOSPITALIER":"LF404","BAYONNE CENTRE HOSPITALIER DE LA COTE BASQUE":"LF022","BEAUVAIS CENTRE HOSPITALIER":"LF446","BELLE ILE EN MER CENTRE HOSPITALIER":"LF281","BERCK SUR MER CENTRE HOSPITALIER HELIO MARIN":"LF024","BESANCON CHU JEAN MINJOZ":"LF443","BEZIERS HOPITAL MONTIMARAN":"LF027","BLAYE CENTRE HOSPITALIER SAINT NICOLAS DE BLAYE":"LF379","BLOIS CENTRE HOSPITALIER":"LF029","BORDEAUX HAUT LEVEQUE CENTRE HOSPITALIER":"LF397","BORDEAUX PELLEGRIN CENTRE HOSPITALIER":"LF304","BORDEAUX ROBERT PICQUE HOPITAL MILITAIRE":"LF305","BOULOGNE SUR MER CENTRE HOSPITALIER":"LF257","BOURG EN BRESSE CENTRE HOSPITALIER":"LF463","BOURG SAINT MAURICE CENTRE HOSPITALIER":"LF016","BOURGES CENTRE HOSPITALIER":"LF271","BOURGOIN JALLIEU CENTRE HOSPITALIER OUDOT":"LF419","BREST AMIRAUTE":"LF036","BREST CENTRE HOSPITALIER LA CAVALE BLANCHE":"LFWF","BRIANCON":"LF038","BRIGNOLES HOPITAL JEAN MARCEL":"LF275","CAEN CENTRE HOSPITALIER":"LF040","CALAIS CENTRE HOSPITALIER":"LF459","CALVI CENTRE HOSPITALIER":"LF405","CANNES BROUSSAILLES HOPITAL":"LF432","CANNES QUAI DU LARGE":"LFTL","CARCASSONNE MONTREDON CENTRE HOSPITALIER":"LF011","CARPENTRAS CENTRE HOSPITALIER":"LF425","CASTRES HAUTERIVE CENTRE HOSPITALIER":"LF422","CERBERE":"LF046","CHALLANS":"LF266","CHALON SUR SAONE CENTRE HOSPITALIER W MOREY":"LF308","CHAMBERY CENTRE HOSPITALIER":"LF052","CHAMONIX CENTRE HOSPITALIER":"LF309","CHAMONIX SECURITE":"LF056","CHARLEVILLE MEZIERES CENTRE HOSPITALIER":"LF374","CHARTRES CENTRE HOSPITALIER":"LFWB","CHATEAUROUX CENTRE HOSPITALIER":"LF252","CHATELLERAULT CENTRE HOSPITALIER":"LF312","CHATILLON SUR SEINE CENTRE HOSPITALIER":"LF238","CHAUNY CENTRE HOSPITALIER":"LF060","CHERBOURG ARSENAL PREMAR":"LF062","CHIVA FOIX CENTRE HOSPITALIER":"LF313","CHOLET CENTRE HOSPITALIER":"LF064","CLAMART HOPITAL D INSTRUCTION DES ARMEES DE PERCY":"LF066","CLERMONT FERRAND ESTAING":"LF428","CLERMONT FERRAND SAINT JACQUES":"LF427","COGNAC CHATEAUBERNARD":"LFBG","COLMAR HOPITAL PASTEUR":"LFWM","COLMAR MEYENHEIM":"LF471","CORBEIL ESSONNES CENTRE HOSPITALIER SUD FRANCILIEN":"LF447","CREIL CENTRE HOSPITALIER LAENNEC":"LF299","CRETEIL CENTRE HOSPITALIER HENRI MONDOR":"LF075","DAX AZUR":"LF368","DAX CAME":"LF373","DAX CASTETS":"LF369","DAX CENTRE HOSPITALIER":"LF078","DAX HERM":"LF370","DAX PONTONX":"LF371","DAX TINON":"LF372","DIEPPE CENTRE HOSPITALIER":"LF452","DIGNE LES BAINS H1 CENTRE HOSPITALIER":"LF412","DIGNE LES BAINS H2 CENTRE HOSPITALIER":"LF413","DIJON BOURGOGNE H1 CENTRE HOSPITALIER UNIVERSITAIRE":"LF438","DIJON BOURGOGNE H2 CENTRE HOSPITALIER UNIVERSITAIRE":"LF483","DINAN CENTRE HOSPITALIER":"LF330","DOLE CENTRE HOSPITALIER":"LF385","DOUAI CENTRE HOSPITALIER":"LF026","DREUX CENTRE HOSPITALIER":"LFWD","DUNKERQUE CENTRE HOSPITALIER":"LF300","ECHIROLLES CLINIQUE DES CEDRES":"LF006","EPINAL EMILE DURKHEIM CENTRE HOSPITALIER":"LF025","EVREUX CENTRE HOSPITALIER":"LF408","FECAMP CENTRE HOSPITALIER":"LF267","FLERS CENTRE HOSPITALIER":"LF481","FLINS":"LF095","FONTAINEBLEAU CENTRE HOSPITALIER":"LF100","FOURMIES CENTRE HOSPITALIER":"LF473","FREJUS HOPITAL BONNET":"LF276","GAP HOPITAL":"LF098","GER":"LF435","GIEN CENTRE HOSPITALIER":"LF410","GRASSE HOPITAL CLAVARY":"LF273","GRENOBLE HOPITAL NORD":"LF102","GRIMAUD":"LF103","GUERET CENTRE HOSPITALIER":"LF399","HELISTATION HOSPITAL NOSTRA SENYORA DE MERITXELL":"LFTX","HELISTATION TERRA GUINDALDES":"LFTG","HOPITAL NORD FRANCHE COMTE":"LF034","ILE D YEU PORT JOINVILLE":"LF108","ISSOUDUN CENTRE HOSPITALIER":"LF398","ISTRES S E P":"LF110","JIVA HILL PARK HOTEL":"LF041","KREMLIN BICETRE CENTRE HOSPITALIER":"LF442","L AIGLE CENTRE HOSPITALIER":"LF322","LA PLAGNE":"LF478","LA ROCHE SUR YON CENTRE HOSPITALIER":"LF117","LA ROCHELLE CENTRE HOSPITALIER":"LF323","LACANAU LE HUGA":"LF116","LANGON CENTRE HOSPITALIER":"LF409","LANNION CENTRE HOSPITALIER":"LF118","LAON SEMILLY CENTRE HOSPITALIER":"LF467","LE BLANC CENTRE HOSPITALIER":"LF460","LE CREUSOT CENTRE HOSPITALIER HOTEL DIEU":"LF120","LE HAVRE CENTRE HOSPITALIER":"LF326","LE MANS CENTRE HOSPITALIER":"LF464","LE PLESSIS ROBINSON CENTRE CHIRURGICAL MARIE LANNELONGUE":"LF400","LE PUY EN VELAY CENTRE HOSPITALIER":"LF280","LILLE CENTRE HOSPITALIER REGIONAL":"LF123","LIMOGES CENTRE HOSPITALIER":"LF124","LOCHES CENTRE HOSPITALIER":"LF403","LONS LE SAUNIER CENTRE HOSPITALIER":"LF387","LORIENT BRETAGNE SUD CENTRE HOSPITALIER":"LF328","LYON CENTRE HOSPITALIER SUD":"LF418","LYON GROUPEMENT HOSPITALIER EST":"LF417","LYON HOPITAL EDOUARD HERRIOT":"LF128","LYON LA SAUVEGARDE":"LF129","MACON CENTRE HOSPITALIER":"LF336","MAGNY COURS CIRCUIT AUTOMOBILE":"LF292","MANOSQUE CENTRE HOSPITALIER":"LF426","MARGAUX RELAIS DE MARGAUX":"LF135","MARNE LA VALLEE CENTRE HOSPITALIER":"LF458","MARSEILLE HOPITAL DE LA TIMONE":"LF137","MARSEILLE HOPITAL NORD":"LF136","MARSEILLE LAVERAN HOPITAL MILITAIRE":"LF039","MARTIGUES CENTRE HOSPITALIER":"LF430","MAUBEUGE CENTRE HOSPITALIER":"LF486","MELUN SANTEPOLE":"LF455","MENDE CENTRE HOSPITALIER":"LF444","METZ FRESCATY":"LF470","METZ MERCY CENTRE HOSPITALIER":"LF453","MONACO CENTRE HOSPITALIER PRINCESSE GRACE":"LF468","MONACO HELISTATION":"LNMC","MONT DE LANS LES DEUX ALPES":"LF143","MONT DE MARSAN":"LFBM","MONT DE MARSAN CENTRE HOSPITALIER":"LF144","MONTCEAU LES MINES CENTRE HOSPITALIER":"LF301","MONTLUCON CENTRE HOSPITALIER":"LF032","MONTPELLIER LAPEYRONIE CHR":"LF436","MOUTIERS CENTRE HOSPITALIER":"LF148","MULHOUSE CENTRE HOSPITALIER DE MOENCHSBERG":"LFWO","NANCY BRABOIS CENTRE HOSPITALIER":"LF341","NANCY HOPITAL CENTRAL":"LF231","NANTES QUAI MONCOUSU CENTRE HOSPITALIER":"LF375","NARBONNE SAINT CRESCENT CENTRE HOSPITALIER":"LF424","NEVERS CENTRE HOSPITALIER":"LF343","NICE HOPITAL L ARCHET 2":"LF153","NICE HOPITAL LENVAL":"LF274","NICE HOPITAL PASTEUR 2":"LF461","NIMES CAREMEAU CENTRE HOSPITALIER":"LF391","NIORT CENTRE HOSPITALIER":"LF154","NORD DEUX SEVRES CENTRE HOSPITALIER":"LF469","NOUVELLE CLINIQUE TOURS PLUS SAINT GATIEN ALLIANCE":"LF475","OLORON SAINTE MARIE CENTRE HOSPITALIER":"LF344","ORANGE CENTRE HOSPITALIER":"LF441","ORLEANS CENTRE HOSPITALIER":"LF345","PARAY LE MONIAL CENTRE HOSPITALIER":"LF293","PARIS CENTRE HOSPITALIER LA PITIE SALPETRIERE":"LF346","PARIS CENTRE HOSPITALIER LARIBOISIERE":"LF347","PARIS ISSY LES MOULINEAUX VALERIE ANDRE":"LFPI","PAU CENTRE HOSPITALIER":"LF162","PERIGUEUX CENTRE HOSPITALIER":"LF164","PERPIGNAN CENTRE HOSPITALIER":"LF445","POISSY CENTRE HOSPITALIER":"LF241","POITIERS CENTRE HOSPITALIER":"LF167","PONTARLIER CENTRE HOSPITALIER":"LF168","PONTOISE CENTRE HOSPITALIER RENE DUBOS":"LF353","PORTO VECCHIO":"LF406","PRECHAC":"LF277","QUIMPER CORNOUAILLE":"LF172","RANG DU FLIERS CENTRE HOSPITALIER":"LF173","REIMS CENTRE HOSPITALIER REGIONAL":"LF174","RENNES PONTCHAILLOU ALPHA CENTRE HOSPITALIER":"LF354","RENNES PONTCHAILLOU BRAVO CENTRE HOSPITALIER":"LF485","ROANNE CENTRE HOSPITALIER":"LF376","RODEZ BOURRAN CENTRE HOSPITALIER":"LF355","ROMANS CENTRE HOSPITALIER":"LF178","ROMORANTIN CENTRE HOSPITALIER":"LF268","ROUEN CENTRE HOSPITALIER":"LF179","ROYAN CENTRE HOSPITALIER":"LF290","SAINT AVOLD CENTRE HOSPITALIER":"LF181","SAINT BRIEUC CENTRE HOSPITALIER":"LF182","SAINT CHAMOND CENTRE HOSPITALIER":"LF183","SAINT CYR L ECOLE":"LF411","SAINT DIZIER CENTRE HOSPITALIER":"LF184","SAINT ETIENNE HOPITAL NORD":"LF421","SAINT FLOUR CENTRE HOSPITALIER":"LF009","SAINT JEAN DE MAURIENNE CENTRE HOSPITALIER":"LF021","SAINT MALO CENTRE HOSPITALIER":"LF192","SAINT NAZAIRE CENTRE HOSPITALIER":"LF195","SAINT OMER CENTRE HOSPITALIER":"LF272","SAINT OUEN L AUMONE HELIPORT HELI INDUSTRIES":"LF251","SAINT QUENTIN CENTRE HOSPITALIER":"LF437","SAINTES CENTRE HOSPITALIER":"LF201","SALLANCHES CENTRE HOSPITALIER":"LF202","SARAN POLE SANTE ORELIANCE":"LF127","SARLAT LA CANEDA CENTRE HOSPITALIER":"LF360","SAUMUR CENTRE HOSPITALIER":"LF244","SAVOIE HELICOPTERES":"LF466","SELESTAT CENTRE HOSPITALIER":"LF393","SEMUR EN AUXOIS CENTRE HOSPITALIER":"LF361","SENS CENTRE DE SECOURS PRINCIPAL":"LF296","SENS CENTRE HOSPITALIER":"LF297","SETE HELISTATION DES HOPITAUX DU BASSIN DE THAU":"LF456","STRASBOURG HAUTEPIERRE":"LFWH","STRASBOURG N H C":"LFWN","THIONVILLE BEL AIR CENTRE HOSPITALIER":"LF479","TIGNES HELISTATION LES BOISSES":"LF420","TONNERRE CENTRE HOSPITALIER":"LF450","TOULON SAINTE ANNE HOPITAL MILITAIRE":"LF377","TOULON SAINTE MUSSE HOPITAL":"LF449","TOULOUSE PURPAN":"LF362","TOULOUSE RANGUEIL PECH DAVID":"LF253","TOURS TROUSSEAU 2":"LF366","VAL D ISERE LA DAILLE":"LF218","VAL D ISERE TETE DE SOLAISE":"LF219","VAL THORENS":"LF031","VALENCE CENTRE HOSPITALIER":"LF221","VALENCIENNES CENTRE HOSPITALIER":"LF395","VANNES CENTRE HOSPITALIER BRETAGNE ATLANTIQUE":"LF222","VARCES QUARTIER REYNIES":"LF223","VENDOME CENTRE HOSPITALIER":"LF390","VERNEUIL SUR AVRE CENTRE HOSPITALIER":"LF388","VERSAILLES CENTRE HOSPITALIER":"LF451","VESOUL CENTRE HOSPITALIER":"LF401","VICHY CENTRE HOSPITALIER":"LF028","VILLEFRANCHE HOPITAL NORD OUEST":"LF226","VILLENEUVE SUR LOT CENTRE HOSPITALIER":"LF484","VONNAS HOTEL GEORGES BLANC":"LF229"};
+function _normHeliName(s) {
+  return (s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .trim();
+}
+// Résout le code VAC H d'une hélistation par son nom, uniquement si la correspondance est certaine :
+// égalité exacte après normalisation, ou inclusion non ambiguë (un seul candidat possible dans les
+// deux sens). En cas de doute (plusieurs candidats, ou aucun), ne renvoie rien plutôt que de risquer
+// d'ouvrir la carte d'une autre hélistation.
+function _heliVachCode(nom) {
+  const n = _normHeliName(nom);
+  if (!n) return null;
+  if (HELI_VACH[n]) return HELI_VACH[n];
+  const candidates = new Set();
+  for (const k in HELI_VACH) {
+    if (k.length >= 8 && (n.indexOf(k) >= 0 || k.indexOf(n) >= 0)) candidates.add(HELI_VACH[k]);
+  }
+  return candidates.size === 1 ? [...candidates][0] : null;
 }
 let _vacVP0 = null;
 function _vacViewport(on) {
@@ -3073,8 +3106,8 @@ function _ensurePdfJs() {
   return _pdfjsP;
 }
 // Récupère le PDF via un relais CORS et le rend page par page dans la modale (aucun stockage).
-async function _renderVac(icao, wrap, status) {
-  const pdfUrl = vacUrl(icao);
+async function _renderVac(icao, wrap, status, isHeli) {
+  const pdfUrl = vacUrl(icao, isHeli);
   const builders = [];
   if (typeof VAC_PROXY === 'string' && VAC_PROXY) builders.push(u => VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(u));
   builders.push(u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
@@ -3257,9 +3290,10 @@ function _vzBtn(f) {
   _vz.clamp(); _vz.apply();
 }
 
-function openVac(icao, encName) {
+function openVac(icao, encName, isHeli) {
   let name = encName; try { name = decodeURIComponent(encName); } catch (_) {}
-  const url = vacUrl(icao);
+  const url = vacUrl(icao, isHeli);
+  const label = isHeli ? 'VAC H' : 'VAC';
   let ov = document.getElementById('vac-overlay');
   if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
   // Avec relais perso (VAC_PROXY) : cadre natif via le relais (le plus fiable).
@@ -3269,11 +3303,11 @@ function openVac(icao, encName) {
   const isMobile = /Android|iPhone|iPod|Mobile|Silk/i.test(navigator.userAgent) || _coarse || (_touch && window.innerWidth < 900);
   const useCanvas = isMobile || !VAC_PROXY;
   const body = useCanvas
-    ? `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte VAC…</div>
+    ? `<div class="vac-status" id="vac-status"><span class="vac-spin"></span> Chargement de la carte ${label}…</div>
          <div class="vac-canvas-wrap" id="vac-scroll"><div class="vac-zoom" id="vac-pages"></div></div>`
-    : `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte VAC ${icao}"></iframe>`;
+    : `<iframe class="vac-frame" src="${VAC_PROXY + (VAC_PROXY.indexOf('?') >= 0 ? '' : '?url=') + encodeURIComponent(url)}" title="Carte ${label} ${icao}"></iframe>`;
   ov.innerHTML =
-    `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte VAC ${icao}">
+    `<div class="vac-modal" role="dialog" aria-modal="true" aria-label="Carte ${label} ${icao}">
        <div class="vac-head">
          <div class="vac-title"><span>${name}</span> <span class="aero-icao">${icao}</span></div>
          <button type="button" class="vac-close" onclick="closeVac()" aria-label="Fermer">✕</button>
@@ -3287,7 +3321,7 @@ function openVac(icao, encName) {
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.addEventListener('keydown', _vacEsc);
-  if (useCanvas) { _vacViewport(true); _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status')); }
+  if (useCanvas) { _vacViewport(true); _renderVac(icao, document.getElementById('vac-pages'), document.getElementById('vac-status'), isHeli); }
 }
 function closeVac() {
   _vacViewport(false);
@@ -3703,10 +3737,18 @@ function _loadSupAerodromes() {
       const c = geomRepPoint(f.geometry); if (!c) return;
       const nom = p.toponyme || p.nature || 'Aérodrome';
       const icao = p.code_icao || '';
+      const natLower = (p.nature || '').toLowerCase();
+      const isHeli = natLower.indexOf('héli') >= 0 || natLower.indexOf('heli') >= 0;
       const meta = `${p.nature || ''}${p.categorie ? ' · ' + p.categorie : ''}`;
-      const vacBtn = icao
-        ? `<button type="button" class="aero-vac" onclick="openVac('${icao}','${encodeURIComponent(nom).replace(/'/g, '%27')}')">Ouvrir la carte VAC ↗</button>`
-        : `<span class="aero-meta">Pas de carte VAC (aucun code OACI)</span>`;
+      // Les hélistations ont leur propre carte (VAC H, section AD 3 du SIA) — même bouton, même traitement que les aérodromes.
+      // Code à utiliser pour la carte : le code OACI IGN s'il existe (aérodromes, et hélisurfaces
+      // situées sur un aérodrome qui réutilisent son code) ; sinon, pour une hélistation, le code
+      // VAC H résolu par nom dans le référentiel SIA statique (cf. HELI_VACH plus haut). L'étiquette
+      // OACI affichée dans la popup et le lien NOTAM restent, eux, strictement liés au vrai code IGN.
+      const vacCode = icao || (isHeli ? (_heliVachCode(nom) || '') : '');
+      const vacBtn = vacCode
+        ? `<button type="button" class="aero-vac" onclick="openVac('${vacCode}','${encodeURIComponent(nom).replace(/'/g, '%27')}',${isHeli})">Ouvrir la carte ${isHeli ? 'VAC H' : 'VAC'} ↗</button>`
+        : `<span class="aero-meta">Pas de carte ${isHeli ? 'VAC H' : 'VAC'} (${isHeli ? 'nom non reconnu dans le référentiel SIA' : 'aucun code OACI'})</span>`;
       // NOTAM : lien direct vers le service officiel FRANÇAIS SOFIA-Briefing (DGAC), sans login ni source US.
       const ntBtn = icao
         ? `<a class="aero-vac aero-notam" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">NOTAM (SOFIA) ↗</a>`
