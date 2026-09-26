@@ -1686,6 +1686,10 @@ body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06)
 .lyr-sw::after{ content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#c2ccd6; transition:transform .2s ease, background .2s ease; }
 .lyr-over.active .lyr-sw{ background:var(--gold); }
 .lyr-over.active .lyr-sw::after{ transform:translateX(16px); background:#0e131b; }
+
+/* Bouton AZBA flottant (bas-droite de la carte) */
+.azba-fab{ position:absolute; right:10px; bottom:24px; z-index:1000; display:inline-block; height:34px; line-height:34px; padding:0 14px; border-radius:10px; font-family:var(--disp); font-weight:700; font-size:12.5px; letter-spacing:.04em; white-space:nowrap; color:#e7edf3 !important; background:#161c26; border:1px solid var(--gold-soft); box-shadow:0 4px 14px rgba(0,0,0,.45); text-decoration:none; }
+.azba-fab:hover{ background:#20293a; color:#d6a869 !important; }
 </style>
 </head>
 <body>
@@ -4022,9 +4026,13 @@ function ensureSupAipMap() {
     _supBanner = L.control({ position: 'bottomleft' });
     _supBanner.onAdd = () => { const div = L.DomUtil.create('div', 'supaip-banner'); div.innerHTML = ''; return div; };
     _supBanner.addTo(_supMap);
-    const azbaCtl = L.control({ position: 'bottomright' });
-    azbaCtl.onAdd = () => { const d = L.DomUtil.create('div', 'leaflet-bar azba-ctl'); d.innerHTML = '<a href="https://www.sia.aviation-civile.gouv.fr/azbaEx/?lang=fr" target="_blank" rel="noopener" title="Activation des zones de basse altitude (RTBA) \u2014 carte officielle SIA, temps r\u00e9el">AZBA \u2197</a>'; L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; };
-    azbaCtl.addTo(_supMap);
+    // Bouton AZBA — élément flottant (fiable, bas-droite, jamais rogné)
+    const azbaBtn = L.DomUtil.create('a', 'azba-fab', _supMap.getContainer());
+    azbaBtn.href = 'https://www.sia.aviation-civile.gouv.fr/azbaEx/?lang=fr';
+    azbaBtn.target = '_blank'; azbaBtn.rel = 'noopener';
+    azbaBtn.title = 'Activation des zones de basse altitude (RTBA) — carte officielle SIA, temps réel';
+    azbaBtn.innerHTML = 'AZBA ↗';
+    L.DomEvent.disableClickPropagation(azbaBtn); L.DomEvent.disableScrollPropagation(azbaBtn);
     _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); });
     _supMap.on('popupopen', () => { _popupOpen = true; });
     _supMap.on('popupclose', () => { _popupOpen = false; });
