@@ -769,6 +769,20 @@ body.night .supaip-banner { background: rgba(30,30,32,.92); }
 .aero-pop b { color: var(--ink); font-size: 13px; }
 .aero-icao { display: inline-block; font-family: var(--disp); font-weight: 700; font-size: 11px; color: var(--orange); background: var(--orange-d); padding: 1px 7px; border-radius: 99px; margin-left: 4px; }
 .aero-pop .aero-meta { display: block; font-size: 11px; color: var(--ink-soft); margin: 3px 0 6px; }
+.aero-pop .aero-sia { margin-top: -3px; font-variant-numeric: tabular-nums; }
+.aero-pop .aero-meta .vac-spin { width: 10px; height: 10px; border-width: 1.5px; vertical-align: -1px; margin-right: 4px; }
+.vac-note { flex: none; padding: 8px 12px; font-size: 12px; line-height: 1.45; border-top: 1px solid rgba(127,127,127,.18); border-left: 3px solid var(--gold, #b1832f); }
+.vac-note strong { color: var(--gold, #b1832f); }
+#vac-overlay .vac-modal.hp-modal { width: min(560px, 94vw); height: min(80vh, 720px); }
+.hp-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px; }
+.hp-intro { margin: 0; font-size: 12.5px; line-height: 1.5; opacity: .82; }
+.hp-q { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 9px 11px; border-radius: 6px; border: 1px solid rgba(127,127,127,.38); background: rgba(127,127,127,.08); color: inherit; outline: none; }
+.hp-q:focus { border-color: var(--gold, #b1832f); }
+.hp-list { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid rgba(127,127,127,.2); }
+.hp-row { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 4px; background: none; border: 0; border-bottom: 1px solid rgba(127,127,127,.16); color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.hp-row:hover { background: rgba(127,127,127,.1); }
+.hp-code { flex: none; font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--gold, #b1832f); }
+.hp-empty { padding: 14px 4px; font-size: 13px; opacity: .7; }
 .aero-pop .aero-vac { display: inline-block; font-family: var(--disp); font-weight: 700; font-size: 12px; color: var(--orange); text-decoration: none; background: none; padding: 0; }
 .carto-legend { font-size: 11px; color: var(--ink-soft); line-height: 1.5; background: var(--paper); border: 1px solid var(--stone-2); border-radius: 16px; padding: 12px 14px; }
 .carto-legend b { color: var(--ink); }
@@ -1632,6 +1646,45 @@ body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06)
 /* Popup carreau CDG */
 .cdg-pop{ font-size:13px; color:#e7edf3; text-align:center; padding:2px 4px; }
 .cdg-pop b{ color:#ffe0a0; font-size:15px; letter-spacing:.02em; }
+
+/* Bouton AZBA (accès carte officielle SIA) */
+.azba-ctl a{ display:block; padding:0 10px; height:30px; line-height:30px; font-family:var(--disp); font-weight:700; font-size:12px; letter-spacing:.04em; color:#e7edf3 !important; background:#161c26; text-decoration:none; }
+.azba-ctl a:hover{ background:#20293a; color:var(--gold) !important; }
+/* Mentions légales & sources */
+.cover-legal{ display:block; margin:6px auto 0; background:none; border:none; color:#8a95a1; font-size:11px; text-decoration:underline; cursor:pointer; font-family:inherit; letter-spacing:.02em; }
+.cover-legal:hover{ color:#c9a15a; }
+#legal-overlay .vac-modal{ background:linear-gradient(180deg,#161c26,#0e131b) !important; color:#e7edf3 !important; border:1px solid rgba(255,255,255,.08); }
+#legal-overlay .vac-head{ border-bottom:1px solid var(--gold-soft) !important; }
+#legal-overlay .vac-title{ color:#eef2f7 !important; }
+#legal-overlay .vac-close{ color:#9aa6b2 !important; }
+.lg-body{ font-size:12.5px; line-height:1.55; color:#c2ccd6; padding:4px 2px; }
+.lg-body h4{ font-family:var(--disp); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#c9a15a; margin:14px 0 6px; }
+.lg-body p{ margin:0 0 8px; }
+.lg-body a{ color:#d6a869; }
+.lg-src{ margin:0 0 6px; padding-left:18px; }
+.lg-src li{ margin-bottom:7px; }
+.lg-note{ font-size:10.5px; color:#8a95a1; margin-top:12px; line-height:1.45; }
+/* Panneau de couches tactile (carte) */
+.lyr-ctl{ position:relative; }
+.lyr-btn{ display:flex; align-items:center; gap:7px; height:38px; padding:0 13px; border-radius:10px; cursor:pointer; font-family:var(--disp); font-weight:700; font-size:13px; color:#e7edf3; background:#161c26; border:1px solid rgba(255,255,255,.12); box-shadow:0 4px 14px rgba(0,0,0,.4); }
+.lyr-btn svg{ width:18px; height:18px; fill:none; stroke:#c9a15a; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+.lyr-ctl.open .lyr-btn{ color:#d6a869; border-color:var(--gold-soft); }
+.lyr-panel{ display:none; position:absolute; top:44px; right:0; width:252px; max-width:80vw; max-height:64vh; overflow:auto; padding:6px; border-radius:14px; background:linear-gradient(180deg,#161c26,#0e131b); border:1px solid rgba(255,255,255,.1); box-shadow:0 18px 44px rgba(0,0,0,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.lyr-ctl.open .lyr-panel{ display:block; }
+.lyr-hd{ font-family:var(--disp); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#c9a15a; padding:10px 8px 4px; }
+.lyr-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; padding:11px 10px; border:none; background:none; cursor:pointer; border-radius:10px; text-align:left; }
+.lyr-row:active{ background:rgba(255,255,255,.06); }
+.lyr-row.active{ background:rgba(201,161,90,.1); }
+.lyr-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.lyr-txt b{ font-family:var(--disp); font-size:13px; font-weight:600; color:#e7edf3; }
+.lyr-txt i{ font-style:normal; font-size:10.5px; color:#8a95a1; }
+.lyr-radio{ width:18px; height:18px; border-radius:50%; border:2px solid #5a6672; flex:none; position:relative; }
+.lyr-base.active .lyr-radio{ border-color:var(--gold); }
+.lyr-base.active .lyr-radio::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--gold); }
+.lyr-sw{ width:38px; height:22px; border-radius:99px; background:#333d49; flex:none; position:relative; transition:background .2s ease; }
+.lyr-sw::after{ content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#c2ccd6; transition:transform .2s ease, background .2s ease; }
+.lyr-over.active .lyr-sw{ background:var(--gold); }
+.lyr-over.active .lyr-sw::after{ transform:translateX(16px); background:#0e131b; }
 </style>
 </head>
 <body>
@@ -1671,6 +1724,7 @@ body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06)
      <button class="cover-cta" onclick="showScreen('screen-form')">Préparer mon vol <span>→</span></button>
      <div class="cover-feats"><span class="cvf"><i></i>Météo AROME HD</span><span class="cvf"><i></i>Espace aérien</span><span class="cvf"><i></i>Cartes VAC</span></div>
      <p class="cover-copy">© 2026 Profenvol — Tous droits réservés. Reproduction et réutilisation interdites sans autorisation.</p>
+     <button type="button" class="cover-legal" onclick="openMentions()">Mentions légales &amp; sources</button>
    </div>
  </div>
 
@@ -3067,19 +3121,104 @@ function _normHeliName(s) {
     .replace(/[^A-Z0-9]+/g, ' ')
     .trim();
 }
-// Résout le code VAC H d'une hélistation par son nom, uniquement si la correspondance est certaine :
-// égalité exacte après normalisation, ou inclusion non ambiguë (un seul candidat possible dans les
-// deux sens). En cas de doute (plusieurs candidats, ou aucun), ne renvoie rien plutôt que de risquer
-// d'ouvrir la carte d'une autre hélistation.
-function _heliVachCode(nom) {
+// ── Résolution du code VAC H d'une hélistation IGN dans le référentiel SIA ──
+// Les libellés IGN et SIA diffèrent souvent (« Héliport du Centre Hospitalier » côté IGN,
+// « SAINT BRIEUC CENTRE HOSPITALIER » côté SIA). Résolution par étapes, du plus sûr au moins sûr,
+// en ne retenant JAMAIS un résultat ambigu :
+//   1. égalité exacte des libellés normalisés ;
+//   2. inclusion d'un libellé dans l'autre, candidat unique ;
+//   3. mots distinctifs : tous les mots propres du nom IGN (hors « héliport », « centre hospitalier »…)
+//      présents dans un seul libellé SIA (départagé par la commune si besoin) ;
+//   4. nom purement générique d'établissement de santé (« Héliport du CH ») : un seul libellé SIA
+//      hospitalier commençant par la commune où se trouve l'hélistation.
+// Les étapes 2 à 4 sont signalées comme « rapprochement » dans la visionneuse, avec le libellé SIA retenu.
+const _HELI_STOP = new Set('HELIPORT HELIPORTS HELISTATION HELISTATIONS HELISURFACE HELISURFACES HELIPAD HELIPADS DZ AIRE ZONE POSE POSER ATTERRISSAGE PLATEFORME PLATE FORME DU DE DES LA LE LES L D ET SUR EN AU AUX A'.split(' '));
+const _HELI_MED = new Set('CENTRE HOSPITALIER HOSPITALIERE HOSPITALIERS HOSPITALIERES HOPITAL HOPITAUX HOSPITAL CH CHU CHR CHG CHI CHS CHRU GH GHT UNIVERSITAIRE REGIONAL REGIONALE INTERCOMMUNAL GENERAL CLINIQUE POLE SANTE MEDICAL SAMU SMUR URGENCES'.split(' '));
+function _heliTok(s) {
+  return _normHeliName(s).split(' ').filter(Boolean)
+    .map(t => t === 'ST' ? 'SAINT' : t === 'STE' ? 'SAINTE' : t)
+    .filter(t => !_HELI_STOP.has(t));
+}
+function _heliDistinct(toks) { return toks.filter(t => !_HELI_MED.has(t) && t.length >= 3 && !/^\d+$/.test(t) && !/^H\d+$/.test(t)); }
+function _heliIsMed(toks) { return toks.some(t => _HELI_MED.has(t)); }
+let _HELI_IDX = null;
+function _heliIndex() {
+  if (!_HELI_IDX) _HELI_IDX = Object.keys(HELI_VACH).map(k => { const t = _heliTok(k); return { k, code: HELI_VACH[k], set: new Set(t), med: _heliIsMed(t) }; });
+  return _HELI_IDX;
+}
+function _heliOne(list, via) { return list.length === 1 ? { code: list[0].code, key: list[0].k, via } : null; }
+function _heliResolve(nom, commune) {
   const n = _normHeliName(nom);
   if (!n) return null;
-  if (HELI_VACH[n]) return HELI_VACH[n];
-  const candidates = new Set();
-  for (const k in HELI_VACH) {
-    if (k.length >= 8 && (n.indexOf(k) >= 0 || k.indexOf(n) >= 0)) candidates.add(HELI_VACH[k]);
+  if (HELI_VACH[n]) return { code: HELI_VACH[n], key: n, via: 'exact' };
+  const idx = _heliIndex();
+  const toks = _heliTok(nom), D = _heliDistinct(toks);
+  // Inclusion sur mots entiers, seulement si le nom IGN porte au moins un mot distinctif
+  // (évite qu'un simple « Héliport » ou « Centre hospitalier » soit rattaché à un site au hasard).
+  if (D.length) {
+    const w = ' ' + n + ' ';
+    const inc = _heliOne(idx.filter(e => e.k.length >= 8 && (w.indexOf(' ' + e.k + ' ') >= 0 || (' ' + e.k + ' ').indexOf(w) >= 0)), 'nom');
+    if (inc) return inc;
   }
-  return candidates.size === 1 ? [...candidates][0] : null;
+  const cn = commune ? _normHeliName(commune) : '';
+  const inCommune = e => !!cn && (e.k === cn || e.k.indexOf(cn + ' ') === 0);
+  if (D.length) {
+    let c = idx.filter(e => D.every(t => e.set.has(t)));
+    // Nom réduit à un nom de ville (« Héliport de Chambéry ») sans mention d'établissement de santé :
+    // on ne le rattache pas d'office à l'hôpital de cette ville.
+    const onlyTown = e => { const kt = _heliTok(e.k); return D.every((t, i) => kt[i] === t); };
+    if (!_heliIsMed(toks)) c = c.filter(e => !(e.med && onlyTown(e)));
+    if (c.length > 1 && cn) c = c.filter(inCommune);
+    return _heliOne(c, 'mots');
+  }
+  if (!_heliIsMed(toks) || !cn) return null;
+  return _heliOne(idx.filter(e => e.med && inCommune(e)), 'commune');
+}
+// Commune d'un point (API Découpage administratif), mise en cache — interrogée seulement au clic.
+const _heliCommuneCache = new Map();
+function _heliCommune(lat, lon) {
+  const key = lat.toFixed(4) + ',' + lon.toFixed(4);
+  if (!_heliCommuneCache.has(key)) {
+    _heliCommuneCache.set(key, fetchWithTimeout(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lon}&fields=nom&format=json`, {}, 6000)
+      .then(r => r.ok ? r.json() : []).then(a => (a && a[0] && a[0].nom) || '').catch(() => { _heliCommuneCache.delete(key); return ''; }));
+  }
+  return _heliCommuneCache.get(key);
+}
+// Sélecteur manuel : recherche dans le référentiel SIA quand aucune correspondance certaine n'existe.
+function openHeliPicker(encName, encCommune) {
+  let name = encName, commune = encCommune || '';
+  try { name = decodeURIComponent(encName); } catch (_) {}
+  try { commune = decodeURIComponent(commune); } catch (_) {}
+  let ov = document.getElementById('vac-overlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'vac-overlay'; ov.className = 'vac-overlay'; document.body.appendChild(ov); }
+  ov.innerHTML =
+    `<div class="vac-modal hp-modal" role="dialog" aria-modal="true" aria-label="Référentiel SIA des hélistations">
+       <div class="vac-head">
+         <div class="vac-title"><span>Référentiel SIA — hélistations</span> <span class="aero-icao">VAC H</span></div>
+         <button type="button" class="vac-close" onclick="closeVac()" aria-label="Fermer">✕</button>
+       </div>
+       <div class="hp-body">
+         <p class="hp-intro">Aucune correspondance certaine pour <strong>${_ntEscape(name)}</strong>${commune ? ` (commune : ${_ntEscape(commune)})` : ''}. Choisissez l'hélistation dans le référentiel SIA (métropole), puis vérifiez l'intitulé et la position sur la carte. Si le site n'y figure pas, aucune VAC H n'est publiée.</p>
+         <input type="search" class="hp-q" id="hp-q" placeholder="Ville ou établissement (ex. Bordeaux, Pellegrin)" autocomplete="off" value="${_ntEscape(commune)}">
+         <div class="hp-list" id="hp-list"></div>
+       </div>
+     </div>`;
+  const list = document.getElementById('hp-list'), q = document.getElementById('hp-q');
+  const note = encodeURIComponent(`Sélection manuelle dans le référentiel SIA pour l'hélistation IGN « ${name} ». Vérifiez que la carte correspond bien au site visé.`);
+  const render = () => {
+    const terms = _normHeliName(q.value).split(' ').filter(Boolean);
+    const rows = _heliIndex().filter(e => terms.every(t => e.k.indexOf(t) >= 0)).sort((a, b) => a.k.localeCompare(b.k));
+    list.innerHTML = rows.length
+      ? rows.slice(0, 120).map(e => `<button type="button" class="hp-row" onclick="openVac('${e.code}','${encodeURIComponent(e.k).replace(/'/g, '%27')}',true,'${note.replace(/'/g, '%27')}')"><span>${_ntEscape(e.k)}</span><span class="hp-code">${e.code}</span></button>`).join('')
+      : `<div class="hp-empty">Aucune hélistation du référentiel SIA ne correspond à cette recherche.</div>`;
+  };
+  q.addEventListener('input', render);
+  render();
+  ov.onclick = e => { if (e.target === ov) closeVac(); };
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', _vacEsc);
+  setTimeout(() => { try { q.focus(); } catch (_) {} }, 50);
 }
 let _vacVP0 = null;
 function _vacViewport(on) {
@@ -3204,6 +3343,37 @@ function _notamCard(n){
     +'<details class="nt-raw"><summary>Texte brut (OACI)</summary><pre>'+_ntEscape(n.text)+'</pre></details></div>';
 }
 function _ntSofia(){ return '<a class="nt-sofia" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">Briefing NOTAM officiel (SOFIA) \u2197</a>'; }
+// ── Mentions légales & sources ──
+function _legalKey(e){ if(e.key==='Escape') closeMentions(); }
+function closeMentions(){ const ov=document.getElementById('legal-overlay'); if(ov){ ov.classList.remove('open'); ov.innerHTML=''; } document.body.style.overflow=''; document.removeEventListener('keydown',_legalKey); }
+function openMentions(){
+  let ov=document.getElementById('legal-overlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='legal-overlay'; ov.className='vac-overlay'; document.body.appendChild(ov); }
+  let cycle=''; try{ cycle=airacFolder().replace('eAIP_','').replace(/_/g,' '); }catch(_){}
+  ov.innerHTML=`<div class="vac-modal zone-modal" role="dialog" aria-modal="true" aria-label="Mentions légales et sources">`
+    +`<div class="vac-head"><div class="vac-title"><span>Mentions légales &amp; sources</span></div>`
+    +`<button type="button" class="vac-close" onclick="closeMentions()" aria-label="Fermer">✕</button></div>`
+    +`<div class="vac-body zi-body lg-body">`
+      +`<h4>Avertissement</h4>`
+      +`<p>Profenvol est une <strong>aide</strong> à la préparation de vol, <strong>sans valeur officielle</strong>. Elle ne se substitue pas aux publications officielles (AIP, NOTAM, SUP AIP…) ni aux vérifications du télépilote, <strong>seul responsable</strong> de la sécurité et de la conformité de son vol.</p>`
+      +`<h4>Sources &amp; attributions</h4>`
+      +`<ul class="lg-src">`
+        +`<li><strong>Cartes VAC, VAC H (hélistations), carroyage, référentiel hélistations</strong> — Service de l'Information Aéronautique (SIA), sous <a href="https://www.sia.aviation-civile.gouv.fr/produits-numeriques-en-libre-disposition.html" target="_blank" rel="noopener">Licence Ouverte</a>. Données SIA téléchargées sur <a href="https://www.sia.aviation-civile.gouv.fr" target="_blank" rel="noopener">sia.aviation-civile.gouv.fr</a>${cycle?`, cycle AIRAC ${cycle}`:''}.</li>`
+        +`<li><strong>Restrictions drone &amp; fonds cartographiques</strong> — © IGN / Géoplateforme (data.geopf.fr).</li>`
+        +`<li><strong>Carte aéronautique OACI</strong> — © IGN / SIA-DGAC.</li>`
+        +`<li><strong>Météo</strong> — <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (modèle AROME, Météo-France).</li>`
+        +`<li><strong>Activité géomagnétique (indice Kp)</strong> — NOAA SWPC.</li>`
+        +`<li><strong>NOTAM</strong> — briefing officiel <a href="https://sofia-briefing.aviation-civile.gouv.fr" target="_blank" rel="noopener">SOFIA</a> (DGAC).</li>`
+        +`<li><strong>AZBA (activation RTBA)</strong> — carte officielle <a href="https://www.sia.aviation-civile.gouv.fr/schedules" target="_blank" rel="noopener">SIA</a>.</li>`
+        +`<li><strong>Cartographie</strong> — bibliothèque Leaflet.</li>`
+      +`</ul>`
+      +`<p class="lg-note">La mention de la source SIA ne confère aucun caractère officiel à cette réutilisation et ne suggère aucune caution du SIA (art. L.322-1 CRPA).</p>`
+      +`<p class="lg-note">© 2026 Profenvol — Tous droits réservés.</p>`
+    +`</div></div>`;
+  ov.onclick=e=>{ if(e.target===ov) closeMentions(); };
+  ov.classList.add('open'); document.body.style.overflow='hidden';
+  document.addEventListener('keydown',_legalKey);
+}
 function openNotam(icao, encName){
   let name=encName; try{ name=decodeURIComponent(encName); }catch(_){}
   let ov=document.getElementById('notam-overlay');
@@ -3290,8 +3460,9 @@ function _vzBtn(f) {
   _vz.clamp(); _vz.apply();
 }
 
-function openVac(icao, encName, isHeli) {
+function openVac(icao, encName, isHeli, encNote) {
   let name = encName; try { name = decodeURIComponent(encName); } catch (_) {}
+  let note = ''; if (encNote) { try { note = decodeURIComponent(encNote); } catch (_) { note = encNote; } }
   const url = vacUrl(icao, isHeli);
   const label = isHeli ? 'VAC H' : 'VAC';
   let ov = document.getElementById('vac-overlay');
@@ -3314,6 +3485,7 @@ function openVac(icao, encName, isHeli) {
        </div>
        <div class="vac-body">
          ${body}
+         ${note ? `<div class="vac-note"><strong>À vérifier</strong> — ${_ntEscape(note)}</div>` : ''}
          <div class="vac-fallback">Carte officielle SIA, cycle <strong>${airacFolder().replace('eAIP_', '').replace(/_/g, ' ')}</strong>. <a href="${url}" target="_blank" rel="noopener">Ouvrir le PDF dans un onglet</a>.</div>
        </div>
      </div>`;
@@ -3733,7 +3905,7 @@ function _loadSupAerodromes() {
     };
     (d.features || []).forEach(f => {
       const p = f.properties || {};
-      if (p.fictif || p.etat_de_l_objet === 'Détruit') return;
+      if ((p.fictif && !/h[e\u00e9]li/i.test(p.nature || '')) || p.etat_de_l_objet === 'Détruit') return; // garder les héliports (hospitaliers) même marqués fictifs par IGN
       const c = geomRepPoint(f.geometry); if (!c) return;
       const nom = p.toponyme || p.nature || 'Aérodrome';
       const icao = p.code_icao || '';
@@ -3745,19 +3917,40 @@ function _loadSupAerodromes() {
       // situées sur un aérodrome qui réutilisent son code) ; sinon, pour une hélistation, le code
       // VAC H résolu par nom dans le référentiel SIA statique (cf. HELI_VACH plus haut). L'étiquette
       // OACI affichée dans la popup et le lien NOTAM restent, eux, strictement liés au vrai code IGN.
-      const vacCode = icao || (isHeli ? (_heliVachCode(nom) || '') : '');
-      const vacBtn = vacCode
-        ? `<button type="button" class="aero-vac" onclick="openVac('${vacCode}','${encodeURIComponent(nom).replace(/'/g, '%27')}',${isHeli})">Ouvrir la carte ${isHeli ? 'VAC H' : 'VAC'} ↗</button>`
-        : `<span class="aero-meta">Pas de carte ${isHeli ? 'VAC H' : 'VAC'} (${isHeli ? 'nom non reconnu dans le référentiel SIA' : 'aucun code OACI'})</span>`;
+      const encNom = encodeURIComponent(nom).replace(/'/g, '%27');
       // NOTAM : lien direct vers le service officiel FRANÇAIS SOFIA-Briefing (DGAC), sans login ni source US.
       const ntBtn = icao
         ? `<a class="aero-vac aero-notam" href="https://sofia-briefing.aviation-civile.gouv.fr/sofia/pages/notamsearchaero.html" target="_blank" rel="noopener">NOTAM (SOFIA) ↗</a>`
         : '';
-      const popup = `<div class="aero-pop"><b>${nom}</b>${icao ? ` <span class="aero-icao">${icao}</span>` : ''}` +
-        `<span class="aero-meta">${meta}</span>${vacBtn}${ntBtn}</div>`;
-      L.marker([c.lat, c.lon], {
+      const head = `<div class="aero-pop"><b>${nom}</b>${icao ? ` <span class="aero-icao">${icao}</span>` : ''}<span class="aero-meta">${meta}</span>`;
+      const heliRef = isHeli && !icao;   // hélistation sans code OACI IGN → référentiel SIA
+      const vacBlock = (res, commune, pending) => {
+        if (!heliRef) return icao
+          ? `<button type="button" class="aero-vac" onclick="openVac('${icao}','${encNom}',${isHeli})">Ouvrir la carte ${isHeli ? 'VAC H' : 'VAC'} ↗</button>`
+          : `<span class="aero-meta">Pas de carte VAC (aucun code OACI)</span>`;
+        if (pending) return `<span class="aero-meta"><span class="vac-spin"></span> Identification de la VAC H…</span>`;
+        if (res) {
+          const note = res.via === 'exact' ? '' : encodeURIComponent(
+            `Hélistation identifiée par rapprochement (${res.via === 'commune' ? 'établissement de santé + commune' : 'nom'}) : IGN « ${nom} » → SIA « ${res.key} » (${res.code}).`).replace(/'/g, '%27');
+          return `<span class="aero-meta aero-sia">Réf. SIA ${res.code}${res.via === 'exact' ? '' : ` · ${_ntEscape(res.key)}`}</span>` +
+            `<button type="button" class="aero-vac" onclick="openVac('${res.code}','${encNom}',true${note ? `,'${note}'` : ''})">Ouvrir la carte VAC H ↗</button>`;
+        }
+        return `<span class="aero-meta">Aucune correspondance certaine dans le référentiel SIA</span>` +
+          `<button type="button" class="aero-vac" onclick="openHeliPicker('${encNom}','${encodeURIComponent(commune || '').replace(/'/g, '%27')}')">Chercher la VAC H ↗</button>`;
+      };
+      const res0 = heliRef ? _heliResolve(nom) : null;
+      const html = (res, commune, pending) => head + vacBlock(res, commune, pending) + ntBtn + '</div>';
+      const mk = L.marker([c.lat, c.lon], {
         icon: L.divIcon({ className: 'aero-marker', html: symFor(p.nature, p.categorie), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] })
-      }).addTo(_supAeroLayer).bindPopup(popup);
+      }).addTo(_supAeroLayer).bindPopup(html(res0, '', heliRef && !res0));
+      // Non résolue sur le seul nom : au clic, on récupère la commune du point et on réessaie.
+      if (heliRef && !res0) {
+        let done = false;
+        mk.on('popupopen', () => {
+          if (done) return; done = true;
+          _heliCommune(c.lat, c.lon).then(commune => mk.setPopupContent(html(_heliResolve(nom, commune), commune, false)));
+        });
+      }
     });
   }).catch(() => {});
 }
@@ -3785,25 +3978,55 @@ function ensureSupAipMap() {
     _supAeroLayer = L.layerGroup();
     const oaciAeroLayer = L.layerGroup([oaciLayer, _supAeroLayer]);
     _cdgLayer = L.geoJSON(CDG_GRID, { style: { color:'#e0483b', weight:1.3, opacity:.85, fillColor:'#e0483b', fillOpacity:.06 }, onEachFeature: (ft,ly)=>{ const l=ft.properties&&ft.properties.label; if(l){ ly.bindTooltip(l,{permanent:true,direction:'center',className:'cdg-lbl'}); ly.bindPopup('<div class="cdg-pop">Carreau <b>'+l+'</b></div>'); } } });
-    L.control.layers(
-      { 'Plan IGN': planLayer, 'Satellite': satLayer },
-      {
-        'Restrictions drone (officiel · DGAC/IGN)': _dgacLayer,
-        'Aérodromes + Carte OACI (SIA/IGN)': oaciAeroLayer,
-        'Carroyage CDG (ADP)': _cdgLayer
-      },
-      { collapsed: true }
-    ).addTo(_supMap);
+    // Panneau de couches tactile (remplace le sélecteur Leaflet par défaut) — pensé smartphone
+    const _lyrBase = [
+      { id:'plan', label:'Plan IGN', sub:'Fond carte', layer: planLayer },
+      { id:'sat', label:'Satellite', sub:'Photo aérienne', layer: satLayer }
+    ];
+    const _lyrOver = [
+      { id:'dgac', label:'Restrictions drone', sub:'Officiel · DGAC / IGN', layer:_dgacLayer, load:_loadDgacZones },
+      { id:'aero', label:'Aérodromes + Carte OACI', sub:'VAC cliquables · SIA / IGN', layer:oaciAeroLayer, load:_loadSupAerodromes },
+      { id:'cdg', label:'Carroyage CDG', sub:'Grille ADP', layer:_cdgLayer }
+    ];
+    let _curBase = 'plan';
+    const lyrCtl = L.control({ position:'topright' });
+    lyrCtl.onAdd = () => {
+      const wrap = L.DomUtil.create('div', 'lyr-ctl');
+      const btn = L.DomUtil.create('button', 'lyr-btn', wrap);
+      btn.type = 'button'; btn.setAttribute('aria-label', 'Choisir les couches');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg><span>Couches</span>';
+      const panel = L.DomUtil.create('div', 'lyr-panel', wrap);
+      let html = '<div class="lyr-hd">Fond de carte</div>';
+      _lyrBase.forEach(b => { html += '<button type="button" class="lyr-row lyr-base' + (b.id===_curBase?' active':'') + '" data-base="' + b.id + '"><span class="lyr-txt"><b>' + b.label + '</b><i>' + b.sub + '</i></span><span class="lyr-radio"></span></button>'; });
+      html += '<div class="lyr-hd">Couches</div>';
+      _lyrOver.forEach(o => { const on = _supMap.hasLayer(o.layer); html += '<button type="button" class="lyr-row lyr-over' + (on?' active':'') + '" data-over="' + o.id + '"><span class="lyr-txt"><b>' + o.label + '</b><i>' + o.sub + '</i></span><span class="lyr-sw"></span></button>'; });
+      panel.innerHTML = html;
+      L.DomEvent.disableClickPropagation(wrap); L.DomEvent.disableScrollPropagation(wrap);
+      btn.addEventListener('click', () => wrap.classList.toggle('open'));
+      panel.querySelectorAll('[data-base]').forEach(el => el.addEventListener('click', () => {
+        const id = el.getAttribute('data-base'); if (id === _curBase) return;
+        const cur = _lyrBase.find(b => b.id === _curBase); if (cur) _supMap.removeLayer(cur.layer);
+        const nb = _lyrBase.find(b => b.id === id); _supMap.addLayer(nb.layer); if (nb.layer.bringToBack) nb.layer.bringToBack(); _curBase = id;
+        panel.querySelectorAll('.lyr-base').forEach(x => x.classList.toggle('active', x.getAttribute('data-base') === id));
+      }));
+      panel.querySelectorAll('[data-over]').forEach(el => el.addEventListener('click', () => {
+        const o = _lyrOver.find(x => x.id === el.getAttribute('data-over'));
+        if (_supMap.hasLayer(o.layer)) { _supMap.removeLayer(o.layer); el.classList.remove('active'); }
+        else { _supMap.addLayer(o.layer); el.classList.add('active'); if (o.load) o.load(); }
+      }));
+      _supMap.on('click', () => wrap.classList.remove('open'));
+      return wrap;
+    };
+    lyrCtl.addTo(_supMap);
     _supBanner = L.control({ position: 'bottomleft' });
     _supBanner.onAdd = () => { const div = L.DomUtil.create('div', 'supaip-banner'); div.innerHTML = ''; return div; };
     _supBanner.addTo(_supMap);
+    const azbaCtl = L.control({ position: 'topright' });
+    azbaCtl.onAdd = () => { const d = L.DomUtil.create('div', 'leaflet-bar azba-ctl'); d.innerHTML = '<a href="https://www.sia.aviation-civile.gouv.fr/azbaEx/?lang=fr" target="_blank" rel="noopener" title="Activation des zones de basse altitude (RTBA) \u2014 carte officielle SIA, temps r\u00e9el">AZBA \u2197</a>'; L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; };
+    azbaCtl.addTo(_supMap);
     _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); });
     _supMap.on('popupopen', () => { _popupOpen = true; });
     _supMap.on('popupclose', () => { _popupOpen = false; });
-    _supMap.on('overlayadd', e => {
-      if (e.layer === _dgacLayer) _loadDgacZones();
-      if (e.layer === oaciAeroLayer) _loadSupAerodromes();
-    });
     _supOverlay = L.layerGroup().addTo(_supMap);
   }
   _supOverlay.clearLayers();
