@@ -1715,6 +1715,14 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 #screen-loading .loading-label{ font-family:var(--disp); font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
 #screen-loading .loading-modules{ gap:8px; }
 #screen-loading .lmod{ border-radius:12px; padding:12px 14px; }
+
+/* Icônes panneau couches + points masqués */
+#screen-supaip .step-dots{ display:none !important; }
+.lyr-row{ justify-content:flex-start !important; }
+.lyr-txt{ flex:1; }
+.lyr-ic{ flex:none; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.lyr-ic svg{ width:20px; height:20px; fill:none; stroke:#9aa6b2; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.lyr-row.active .lyr-ic svg{ stroke:var(--gold); }
 </style>
 </head>
 <body>
@@ -4012,13 +4020,13 @@ function ensureSupAipMap() {
     _cdgLayer = L.geoJSON(CDG_GRID, { style: { color:'#e0483b', weight:1.3, opacity:.85, fillColor:'#e0483b', fillOpacity:.06 }, onEachFeature: (ft,ly)=>{ const l=ft.properties&&ft.properties.label; if(l){ ly.bindTooltip(l,{permanent:true,direction:'center',className:'cdg-lbl'}); ly.bindPopup('<div class="cdg-pop">Carreau <b>'+l+'</b></div>'); } } });
     // Panneau de couches tactile (remplace le sélecteur Leaflet par défaut) — pensé smartphone
     const _lyrBase = [
-      { id:'plan', label:'Plan IGN', sub:'', layer: planLayer },
-      { id:'sat', label:'Satellite', sub:'', layer: satLayer }
+      { id:'plan', label:'Plan IGN', sub:'', layer: planLayer, ic:'<svg viewBox="0 0 24 24"><polygon points="9 4 3 7 3 20 9 17 15 20 21 17 21 4 15 7 9 4"/><line x1="9" y1="4" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="20"/></svg>' },
+      { id:'sat', label:'Satellite', sub:'', layer: satLayer, ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>' }
     ];
     const _lyrOver = [
-      { id:'dgac', label:'Restrictions drone', sub:'Officiel · DGAC / IGN', layer:_dgacLayer, load:_loadDgacZones },
-      { id:'aero', label:'Aérodromes + Carte OACI', sub:'VAC cliquables · SIA / IGN', layer:oaciAeroLayer, load:_loadSupAerodromes },
-      { id:'cdg', label:'Carroyage CDG', sub:'Grille ADP', layer:_cdgLayer }
+      { id:'dgac', label:'Restrictions drone', sub:'Officiel · DGAC / IGN', layer:_dgacLayer, load:_loadDgacZones, ic:'<svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/><path d="M9.2 12l1.9 1.9 3.7-4"/></svg>' },
+      { id:'aero', label:'Aérodromes + Carte OACI', sub:'VAC cliquables · SIA / IGN', layer:oaciAeroLayer, load:_loadSupAerodromes, ic:'<svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-4.8V3.6a1.6 1.6 0 0 0-3.2 0V9.2L2 14v2l7.8-2.4V19l-2.1 1.6V22l3.9-1.1L15.5 22v-1.4L13.4 19v-5.4z"/></svg>' },
+      { id:'cdg', label:'Carroyage CDG', sub:'Grille ADP', layer:_cdgLayer, ic:'<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><line x1="9.2" y1="3.5" x2="9.2" y2="20.5"/><line x1="14.8" y1="3.5" x2="14.8" y2="20.5"/><line x1="3.5" y1="9.2" x2="20.5" y2="9.2"/><line x1="3.5" y1="14.8" x2="20.5" y2="14.8"/></svg>' }
     ];
     let _curBase = 'plan';
     const lyrCtl = L.control({ position:'topright' });
@@ -4029,9 +4037,9 @@ function ensureSupAipMap() {
       btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg><span>Couches</span>';
       const panel = L.DomUtil.create('div', 'lyr-panel', wrap);
       let html = '<div class="lyr-hd">Fond de carte</div>';
-      _lyrBase.forEach(b => { html += '<button type="button" class="lyr-row lyr-base' + (b.id===_curBase?' active':'') + '" data-base="' + b.id + '"><span class="lyr-txt"><b>' + b.label + '</b>' + (b.sub ? '<i>' + b.sub + '</i>' : '') + '</span><span class="lyr-radio"></span></button>'; });
+      _lyrBase.forEach(b => { html += '<button type="button" class="lyr-row lyr-base' + (b.id===_curBase?' active':'') + '" data-base="' + b.id + '"><span class="lyr-ic">' + b.ic + '</span><span class="lyr-txt"><b>' + b.label + '</b>' + (b.sub ? '<i>' + b.sub + '</i>' : '') + '</span><span class="lyr-radio"></span></button>'; });
       html += '<div class="lyr-hd">Couches</div>';
-      _lyrOver.forEach(o => { const on = _supMap.hasLayer(o.layer); html += '<button type="button" class="lyr-row lyr-over' + (on?' active':'') + '" data-over="' + o.id + '"><span class="lyr-txt"><b>' + o.label + '</b><i>' + o.sub + '</i></span><span class="lyr-sw"></span></button>'; });
+      _lyrOver.forEach(o => { const on = _supMap.hasLayer(o.layer); html += '<button type="button" class="lyr-row lyr-over' + (on?' active':'') + '" data-over="' + o.id + '"><span class="lyr-ic">' + o.ic + '</span><span class="lyr-txt"><b>' + o.label + '</b><i>' + o.sub + '</i></span><span class="lyr-sw"></span></button>'; });
       panel.innerHTML = html;
       L.DomEvent.disableClickPropagation(wrap); L.DomEvent.disableScrollPropagation(wrap);
       btn.addEventListener('click', () => wrap.classList.toggle('open'));
