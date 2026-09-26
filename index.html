@@ -1648,7 +1648,8 @@ body.night .nt-official{ background:linear-gradient(180deg,rgba(255,255,255,.06)
 .cdg-pop b{ color:#ffe0a0; font-size:15px; letter-spacing:.02em; }
 
 /* Bouton AZBA (accès carte officielle SIA) */
-.azba-ctl a{ display:block; padding:0 10px; height:30px; line-height:30px; font-family:var(--disp); font-weight:700; font-size:12px; letter-spacing:.04em; color:#e7edf3 !important; background:#161c26; text-decoration:none; }
+.azba-ctl a{ display:block; width:auto !important; min-width:0; white-space:nowrap; padding:0 12px; height:30px; line-height:30px; font-family:var(--disp); font-weight:700; font-size:12px; letter-spacing:.04em; color:#e7edf3 !important; background:#161c26; text-decoration:none; }
+.azba-ctl.leaflet-bar{ width:auto; }
 .azba-ctl a:hover{ background:#20293a; color:var(--gold) !important; }
 /* Mentions légales & sources */
 .cover-legal{ display:block; margin:6px auto 0; background:none; border:none; color:#8a95a1; font-size:11px; text-decoration:underline; cursor:pointer; font-family:inherit; letter-spacing:.02em; }
@@ -4021,7 +4022,7 @@ function ensureSupAipMap() {
     _supBanner = L.control({ position: 'bottomleft' });
     _supBanner.onAdd = () => { const div = L.DomUtil.create('div', 'supaip-banner'); div.innerHTML = ''; return div; };
     _supBanner.addTo(_supMap);
-    const azbaCtl = L.control({ position: 'topright' });
+    const azbaCtl = L.control({ position: 'bottomright' });
     azbaCtl.onAdd = () => { const d = L.DomUtil.create('div', 'leaflet-bar azba-ctl'); d.innerHTML = '<a href="https://www.sia.aviation-civile.gouv.fr/azbaEx/?lang=fr" target="_blank" rel="noopener" title="Activation des zones de basse altitude (RTBA) \u2014 carte officielle SIA, temps r\u00e9el">AZBA \u2197</a>'; L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; };
     azbaCtl.addTo(_supMap);
     _supMap.on('moveend', () => { if (_popupOpen) return; _loadDgacZones(); _loadSupAerodromes(); });
