@@ -1747,6 +1747,286 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 .lyr-ic svg{ width:20px; height:20px; fill:none; stroke:#9aa6b2; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .lyr-row.active .lyr-ic svg{ stroke:var(--gold); }
 </style>
+<style id="sky-theme">
+/* ═══════════════════════════════════════════════════════════════
+   THÈME « SKY » — refonte visuelle (graphite marine + bleu lumineux)
+   Couche de surcharge : placée après toutes les autres règles.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#EEF3F9; --paper:#FFFFFF; --stone:#E4EBF4; --stone-2:#C5D2E2;
+  --ink:#0B1626; --ink-soft:#3D5370; --ink-faint:#6A7F99;
+  --orange:#1F6FE0; --orange-d:rgba(31,111,224,.12);
+  --green:#138A4B; --green-d:rgba(19,138,75,.12); --amber:#B26A00; --amber-d:rgba(178,106,0,.12); --red:#C62D2D; --red-d:rgba(198,45,45,.11);
+  --btn-text:#FFFFFF; --gold:#1F6FE0; --gold-soft:rgba(31,111,224,.38);
+  --sky-a:#2F7BFF; --sky-b:#1A56D6; --sky-glow:rgba(47,123,255,.35); --sky-line:rgba(31,111,224,.18);
+  --sky-card:linear-gradient(160deg,#FFFFFF,#F4F8FD);
+  --sky-bg:radial-gradient(120% 70% at 50% -10%, #DCE8F8 0%, #EEF3F9 55%, #E6EDF6 100%);
+}
+body.night{
+  --bg:#08111F; --paper:#0F1C31; --stone:#132440; --stone-2:#22395C;
+  --ink:#E8F0FA; --ink-soft:#A3B8D3; --ink-faint:#6B84A6;
+  --orange:#4D9BFF; --orange-d:rgba(77,155,255,.15);
+  --green:#3DD68C; --green-d:rgba(61,214,140,.14); --amber:#F2B14A; --amber-d:rgba(242,177,74,.14); --red:#FF6B6B; --red-d:rgba(255,107,107,.14);
+  --btn-text:#FFFFFF; --glow:0 0 12px; --gold:#5FA2FF; --gold-soft:rgba(95,162,255,.45);
+  --sky-line:rgba(110,170,255,.18);
+  --sky-card:linear-gradient(160deg,rgba(24,41,68,.86),rgba(11,22,40,.86));
+  --sky-bg:radial-gradient(120% 60% at 50% -5%, #17325A 0%, #0B1830 45%, #060D19 100%);
+}
+html body{ background:var(--sky-bg) fixed; }
+html body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z M28 64 L28 97' fill='none' stroke='%234D9BFF' stroke-opacity='.10' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-image:radial-gradient(90% 60% at 50% 30%, #000 0%, transparent 80%); mask-image:radial-gradient(90% 60% at 50% 30%, #000 0%, transparent 80%); }
+html body:not(.night)::before{ opacity:.35; }
+
+/* Barre du haut */
+html body .topbar{ background:rgba(8,17,31,.72); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3); border-bottom:1px solid var(--sky-line); box-shadow:0 8px 24px rgba(0,0,0,.25); }
+html body:not(.night) .topbar{ background:rgba(255,255,255,.78); box-shadow:0 6px 18px rgba(16,40,80,.08); }
+html body .topbar-brand{ font-family:var(--disp); letter-spacing:.16em; text-transform:uppercase; font-size:14px; font-weight:700; }
+html body .topbar-brand .dot{ width:20px; height:20px; border-radius:0; background:none; box-shadow:none; position:relative; }
+html body .topbar-brand .dot::before{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,#9CC8FF,#2F7BFF); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); filter:drop-shadow(0 0 6px rgba(77,155,255,.8)); }
+html body .topbar-brand .dot::after{ content:""; position:absolute; inset:4px; background:var(--bg); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+html body .topbar-time{ background:rgba(77,155,255,.10); border:1px solid var(--sky-line); color:var(--orange); }
+html body .theme-toggle{ background:rgba(77,155,255,.08); border:1px solid var(--sky-line); }
+
+/* Accueil */
+html body #screen-cover{ background:transparent !important; }
+html body #screen-cover::before, html body #screen-cover::after{ display:none !important; }
+html body #screen-cover .pcover-bg{ display:none !important; }
+.sky-cover{ gap:20px !important; }
+.sky-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; margin-top:4px; }
+.sky-emblem{ width:min(300px,78vw); height:auto; display:block; overflow:visible; }
+.sky-word{ font-family:var(--disp); font-size:clamp(34px,10vw,46px); font-weight:700; letter-spacing:.06em; line-height:1; margin-top:2px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#DDE7F3 42%,#8FA6C2 58%,#E9F0F8 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(77,155,255,.25)); }
+html body:not(.night) .sky-word{ background:linear-gradient(180deg,#2A3F5E 0%,#0B1626 50%,#3A5578 100%); -webkit-background-clip:text; background-clip:text; filter:none; }
+.sky-sub{ font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); }
+.sky-sub b{ color:var(--orange); font-weight:600; }
+html body .cover-feats{ display:flex; justify-content:center; flex-wrap:wrap; gap:8px; }
+html body .cover-feats .cvf{ font-size:11.5px; color:var(--ink-soft); padding:6px 11px; border-radius:99px; border:1px solid var(--sky-line); background:rgba(77,155,255,.07); }
+html body .cover-feats .cvf i{ background:var(--orange) !important; box-shadow:0 0 8px var(--orange); }
+
+/* Boutons principaux */
+html body #screen-cover .cover-cta, html body .btn-analyse, html body .btn-suivant{
+  background:linear-gradient(180deg,var(--sky-a),var(--sky-b)) !important; color:#fff !important; border:1px solid rgba(140,190,255,.45) !important;
+  border-radius:14px !important; box-shadow:0 0 0 1px rgba(47,123,255,.25), 0 12px 30px var(--sky-glow), inset 0 1px 0 rgba(255,255,255,.28) !important;
+  letter-spacing:.02em; }
+html body .btn-prev, html body .btn-close, html body .btn-new, html body .btn-back-new, html body .btn-back-verdict{ border:1px solid var(--sky-line) !important; border-radius:14px !important; }
+
+/* Cartes / modules */
+html body .section-card, html body .module, html body .drone-specs, html body .cover-warn, html body .alt-warn{
+  background:var(--sky-card) !important; border:1px solid var(--sky-line) !important; border-radius:18px !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05) !important; }
+html body:not(.night) .section-card, html body:not(.night) .module, html body:not(.night) .drone-specs, html body:not(.night) .cover-warn, html body:not(.night) .alt-warn{ box-shadow:0 8px 22px rgba(16,40,80,.08) !important; }
+html body .cover-warn{ border-left:3px solid var(--amber) !important; }
+html body .section-icon{ background:rgba(77,155,255,.12) !important; border:1px solid var(--sky-line); color:var(--orange); }
+html body .section-title, html body .mod-title{ letter-spacing:.06em; text-transform:uppercase; font-size:12px; }
+html body .field input, html body .field select, html body .field textarea{ background:rgba(8,17,31,.35) !important; border:1px solid var(--sky-line) !important; border-radius:12px !important; }
+html body:not(.night) .field input, html body:not(.night) .field select, html body:not(.night) .field textarea{ background:#F6F9FD !important; }
+html body .field input:focus, html body .field select:focus{ border-color:var(--orange) !important; box-shadow:0 0 0 3px var(--orange-d) !important; }
+html body .dcell, html body .ds-cell, html body .hs-cell{ background:rgba(77,155,255,.05) !important; border:1px solid var(--sky-line) !important; border-radius:12px !important; }
+html body .hs-cell.center{ border-color:var(--orange) !important; background:var(--orange-d) !important; }
+html body .malert{ border-radius:12px !important; }
+html body .step-eyebrow{ color:var(--orange) !important; letter-spacing:.18em; }
+html body .step-dots .on, html body .step-dots span.on{ background:var(--orange) !important; box-shadow:0 0 8px var(--orange); }
+html body .cta-bar{ background:linear-gradient(180deg,transparent,rgba(8,17,31,.85) 40%) !important; border-top:none !important; }
+html body:not(.night) .cta-bar{ background:linear-gradient(180deg,transparent,rgba(238,243,249,.95) 40%) !important; }
+
+/* Chargement */
+html body #screen-loading{ gap:18px !important; }
+.sky-loader{ width:min(250px,64vw); margin:0 auto; }
+.sky-loader-svg{ width:100%; height:auto; display:block; overflow:visible; filter:drop-shadow(0 0 22px rgba(47,123,255,.25)); }
+.sky-loader .sky-orbit{ transform-origin:0 0; animation:skyOrbit 6s linear infinite; }
+.sky-loader .sky-spin{ transform-origin:0 0; animation:skyOrbit 3.2s linear infinite reverse; }
+@keyframes skyOrbit{ to{ transform:rotate(360deg); } }
+.sky-load-ttl{ font-family:var(--disp); font-size:17px; font-weight:600; color:var(--ink); }
+.sky-bar{ width:min(320px,80vw); height:8px; border-radius:99px; background:rgba(77,155,255,.12); border:1px solid var(--sky-line); overflow:hidden; margin:0 auto; }
+.sky-bar i{ display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,#2F7BFF,#9CC8FF); box-shadow:0 0 12px rgba(77,155,255,.7); transition:width .5s cubic-bezier(.4,0,.2,1); }
+html body .load-pct{ font-family:var(--disp); font-size:13px !important; font-weight:600; color:var(--orange) !important; margin:0 !important; }
+html body .loading-label{ font-size:12.5px !important; color:var(--ink-faint) !important; text-transform:none !important; letter-spacing:.01em !important; font-weight:500 !important; }
+html body .lmod{ border-radius:12px !important; border:1px solid var(--sky-line) !important; background:rgba(77,155,255,.06) !important; }
+html body .lmod.done{ background:var(--green-d) !important; }
+html body .lmod.fail{ background:var(--amber-d) !important; }
+@media (prefers-reduced-motion: reduce){ .sky-loader .sky-orbit, .sky-loader .sky-spin{ animation:none; } }
+
+/* Carte */
+html body .lyr-hd{ color:var(--gold) !important; }
+html body .lyr-row.active{ background:rgba(77,155,255,.12) !important; }
+html body .azba-fab, html body .vacs-fab{ border-color:rgba(110,170,255,.45) !important; background:rgba(12,22,40,.92) !important; }
+</style>
+<style id="sky-v2">
+/* ═══════════════════════════════════════════════════════════════
+   SKY v2 — composants signature (boutons, rail d'étapes, modules)
+   ═══════════════════════════════════════════════════════════════ */
+:root{ --pv-r:16px; --pv-ease:cubic-bezier(.22,.8,.24,1); --pv-hair:rgba(31,111,224,.16); --pv-hair-2:rgba(31,111,224,.28); --pv-surface:#FFFFFF; --pv-surface-2:#F3F7FC; --pv-well:#E9F0F9; }
+body.night{ --pv-hair:rgba(120,170,255,.13); --pv-hair-2:rgba(120,170,255,.26); --pv-surface:#0F1D33; --pv-surface-2:#0C182B; --pv-well:rgba(6,13,25,.55); }
+html body svg{ stroke-linecap:round; stroke-linejoin:round; }
+
+/* ── Bouton de commande (CTA) ─────────────────────────────── */
+.pv-cta{ position:relative; isolation:isolate; display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; min-height:62px; padding:10px 10px 10px 22px; border-radius:var(--pv-r); cursor:pointer; text-align:left; color:#fff;
+  border:1px solid transparent;
+  background:
+    linear-gradient(180deg,#2C6FF0 0%,#1B4FC4 100%) padding-box,
+    linear-gradient(180deg,rgba(190,220,255,.85),rgba(60,120,255,.25) 60%,rgba(20,60,160,.6)) border-box;
+  box-shadow:0 1px 0 rgba(255,255,255,.22) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 14px 28px -12px rgba(47,123,255,.75), 0 2px 6px rgba(4,12,30,.35);
+  transition:transform .18s var(--pv-ease), box-shadow .25s var(--pv-ease), filter .2s; overflow:hidden; font-family:var(--body); }
+.pv-cta::before{ content:""; position:absolute; inset:0; z-index:-1; background:
+    radial-gradient(120% 140% at 0% 0%, rgba(255,255,255,.22), transparent 45%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 7px); pointer-events:none; }
+.pv-cta::after{ content:""; position:absolute; top:0; bottom:0; left:-40%; width:30%; z-index:-1; background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent); transform:skewX(-20deg); transition:left .7s var(--pv-ease); pointer-events:none; }
+.pv-cta-txt{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.pv-cta-k{ font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:rgba(220,235,255,.78); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pv-cta-l{ font-family:var(--disp); font-size:17px; font-weight:600; letter-spacing:-.005em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pv-cta-go{ flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:rgba(4,16,44,.28); box-shadow:inset 0 0 0 1px rgba(200,225,255,.28), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .25s var(--pv-ease), background .2s; }
+.pv-cta-go svg{ width:20px; height:20px; fill:none; stroke:#fff; stroke-width:2; }
+@media (hover:hover){ .pv-cta:hover{ filter:brightness(1.06); box-shadow:0 1px 0 rgba(255,255,255,.22) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 18px 34px -12px rgba(47,123,255,.85), 0 2px 6px rgba(4,12,30,.35); } .pv-cta:hover::after{ left:120%; } .pv-cta:hover .pv-cta-go{ transform:translateX(2px); } }
+.pv-cta:active{ transform:translateY(1px) scale(.992); }
+.pv-cta:focus-visible{ outline:2px solid #9CC8FF; outline-offset:3px; }
+.pv-cta:disabled{ opacity:.5; cursor:progress; filter:saturate(.6); }
+.pv-cta--hero{ min-height:70px; }
+.pv-cta--hero .pv-cta-l{ font-size:19px; }
+.pv-cta--hero .pv-cta-go{ width:50px; height:50px; border-radius:14px; }
+.pv-cta--nav{ min-height:56px; padding-left:18px; }
+.pv-cta--nav .pv-cta-l{ font-size:15.5px; }
+.pv-cta--nav .pv-cta-go{ width:40px; height:40px; border-radius:11px; }
+
+/* ── Bouton icône secondaire ──────────────────────────────── */
+.pv-ib{ flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:64px; min-height:56px; padding:6px 4px; border-radius:var(--pv-r); cursor:pointer;
+  color:var(--ink-soft); background:var(--pv-surface); border:1px solid var(--pv-hair-2); box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px -10px rgba(0,0,0,.6); transition:color .2s, border-color .2s, transform .15s var(--pv-ease), background .2s; }
+.pv-ib svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; }
+.pv-ib span{ font-size:9.5px; font-weight:600; letter-spacing:.02em; line-height:1.1; text-align:center; }
+@media (hover:hover){ .pv-ib:hover{ color:var(--ink); border-color:var(--orange); } }
+.pv-ib:active{ transform:scale(.96); }
+
+/* ── Barre de navigation d'étapes ─────────────────────────── */
+html body .detail-nav{ display:flex; align-items:stretch; gap:8px; padding:10px 14px calc(12px + var(--safe-b)) !important; flex-wrap:nowrap !important;
+  background:linear-gradient(180deg,rgba(8,17,31,0),rgba(8,17,31,.88) 34%) !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; border-top:none !important; }
+html body:not(.night) .detail-nav{ background:linear-gradient(180deg,rgba(238,243,249,0),rgba(238,243,249,.95) 34%) !important; }
+html body .detail-nav .pv-cta{ flex:1; }
+html body #screen-supaip .detail-nav{ padding:8px 12px calc(8px + var(--safe-b)) !important; background:rgba(8,17,31,.82) !important; -webkit-backdrop-filter:blur(12px) !important; backdrop-filter:blur(12px) !important; }
+html body #screen-supaip .detail-nav button{ padding:inherit; font-size:inherit; }
+html body #screen-supaip .detail-nav .pv-cta{ min-height:52px; padding:8px 8px 8px 16px; border-radius:14px; }
+html body #screen-supaip .detail-nav .pv-ib{ min-height:52px; width:58px; border-radius:14px; padding:4px; }
+
+/* ── Rail d'étapes ────────────────────────────────────────── */
+html body .step-head{ padding:16px 18px 6px !important; }
+html body .step-eyebrow{ font-size:10px !important; letter-spacing:.2em !important; color:var(--ink-faint) !important; }
+html body .step-title{ font-size:23px !important; font-weight:600 !important; letter-spacing:-.015em; margin-top:4px; }
+.pv-rail{ display:flex; align-items:center; gap:0; margin-top:14px; }
+.pv-node{ display:flex; align-items:center; gap:7px; flex:none; color:var(--ink-faint); }
+.pv-node i{ font-style:normal; font-family:var(--disp); font-size:10px; font-weight:600; width:24px; height:24px; border-radius:7px; display:grid; place-items:center; border:1px solid var(--pv-hair-2); background:var(--pv-surface); font-variant-numeric:tabular-nums; }
+.pv-node span{ font-size:11px; font-weight:600; letter-spacing:.02em; white-space:nowrap; }
+.pv-node.done{ color:var(--ink-soft); }
+.pv-node.done i{ border-color:transparent; background:var(--orange-d); color:var(--orange); }
+.pv-node.on{ color:var(--ink); }
+.pv-node.on i{ border-color:transparent; color:#fff; background:linear-gradient(180deg,#3B82FF,#1D55D0); box-shadow:0 0 0 3px var(--orange-d), 0 4px 12px -4px rgba(47,123,255,.9); }
+.pv-link{ flex:1; height:1px; margin:0 8px; min-width:10px; background:var(--pv-hair-2); position:relative; }
+.pv-link.done{ background:linear-gradient(90deg,var(--orange),var(--pv-hair-2)); }
+@media (max-width:380px){ .pv-node:not(.on) span{ display:none; } }
+
+/* ── Cartes de saisie ─────────────────────────────────────── */
+html body .section-card{ border-radius:20px !important; position:relative; }
+html body .section-card::before{ content:""; position:absolute; left:20px; right:20px; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(120,175,255,.55),transparent); pointer-events:none; }
+html body .section-head{ padding:18px 20px 6px !important; gap:12px !important; }
+html body .section-icon{ width:36px !important; height:36px !important; border-radius:11px !important; }
+html body .section-icon .ic, html body .section-icon svg{ width:17px; height:17px; }
+html body .section-title{ display:flex; align-items:baseline; gap:9px; font-family:var(--disp); font-size:15px !important; font-weight:600 !important; letter-spacing:-.005em !important; text-transform:none !important; color:var(--ink) !important; }
+html body .section-title::before{ display:none !important; }
+.sec-num{ font-style:normal; font-size:11px; font-weight:600; color:var(--orange); letter-spacing:.06em; font-variant-numeric:tabular-nums; }
+.sec-hint{ margin-left:auto; font-size:11px; color:var(--ink-faint); }
+html body .section-body{ padding:8px 20px 20px !important; gap:16px !important; }
+html body .field label{ font-size:10.5px !important; font-weight:600 !important; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint) !important; }
+html body .field input, html body .field select, html body .field textarea{ font-family:var(--body) !important; font-size:15px !important; font-weight:500 !important; padding:13px 15px !important; min-height:48px; box-shadow:inset 0 1px 2px rgba(0,0,0,.25) !important; }
+html body:not(.night) .field input, html body:not(.night) .field select{ box-shadow:inset 0 1px 2px rgba(16,40,80,.06) !important; }
+html body .field-hint{ font-size:11px !important; color:var(--ink-faint) !important; }
+
+/* Bouton géolocalisation : puce de commande */
+html body .btn-geoloc{ align-self:flex-start; display:inline-flex !important; align-items:center; gap:8px; width:auto !important; padding:9px 14px 9px 11px !important; border-radius:11px !important; font-size:12.5px !important; font-weight:600 !important; color:var(--orange) !important; background:var(--orange-d) !important; border:1px solid var(--pv-hair-2) !important; box-shadow:none !important; }
+html body .btn-geoloc svg{ margin:0 !important; }
+
+/* ── Modules de résultats ─────────────────────────────────── */
+html body .module{ border-radius:20px !important; border-left-width:1px !important; overflow:hidden; position:relative; }
+html body .module::before{ content:""; position:absolute; left:0; top:20px; height:26px; width:3px; border-radius:0 3px 3px 0; background:var(--orange); }
+html body .module.go::before{ background:var(--green); box-shadow:0 0 12px var(--green); }
+html body .module.warn::before{ background:var(--amber); box-shadow:0 0 12px var(--amber); }
+html body .module.nogo::before{ background:var(--red); box-shadow:0 0 12px var(--red); }
+html body .mod-hdr{ padding:16px 18px 14px 20px !important; gap:12px !important; border-bottom:1px solid var(--pv-hair); }
+html body .module.closed .mod-hdr{ border-bottom-color:transparent; }
+html body .mod-dot-ring{ width:28px !important; height:28px !important; border-radius:9px !important; background:var(--pv-well) !important; box-shadow:inset 0 0 0 1px var(--pv-hair-2); }
+html body .mod-dot{ width:8px !important; height:8px !important; box-shadow:0 0 0 3px rgba(255,255,255,.04), 0 0 10px currentColor; }
+html body .go .mod-dot{ color:var(--green); } html body .warn .mod-dot{ color:var(--amber); } html body .nogo .mod-dot{ color:var(--red); } html body .info .mod-dot{ color:var(--orange); }
+html body .mod-title{ font-size:14.5px !important; font-weight:600 !important; letter-spacing:-.005em !important; text-transform:none !important; }
+html body .mod-badge{ font-size:9.5px !important; font-weight:700 !important; letter-spacing:.14em; padding:5px 9px !important; border-radius:7px !important; background:transparent !important; box-shadow:inset 0 0 0 1px currentColor; }
+html body .mod-chev{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; color:var(--ink-faint) !important; font-size:0 !important; }
+html body .mod-chev svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; }
+html body .mod-body{ padding:16px 18px 18px 20px !important; }
+html body .dcells{ gap:8px !important; }
+html body .dcell{ padding:11px 13px !important; position:relative; }
+html body .dcell .lbl{ font-size:9.5px !important; letter-spacing:.13em !important; color:var(--ink-faint) !important; }
+html body .dcell .val{ font-size:18px !important; font-weight:600 !important; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+html body .dcell .sub{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+html body .malert{ gap:12px !important; padding:12px 14px !important; font-size:12.8px !important; line-height:1.55 !important; border:1px solid currentColor; border-color:color-mix(in srgb, currentColor 28%, transparent) !important; }
+html body .malert > span:last-child{ color:var(--ink-soft); }
+html body .malert > span:last-child strong{ color:var(--ink); }
+html body .malert-ico{ width:24px !important; height:24px !important; border-radius:8px !important; background:color-mix(in srgb, currentColor 14%, transparent) !important; box-shadow:none !important; margin-top:0 !important; }
+html body .malert-ico svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.2; }
+html body .src-links{ gap:6px !important; margin-top:14px !important; padding-top:12px; border-top:1px dashed var(--pv-hair-2); }
+html body .src-link{ display:inline-flex !important; align-items:center; gap:5px; padding:6px 9px 6px 11px !important; border-radius:9px !important; font-size:11.5px !important; font-weight:600 !important; color:var(--ink-soft) !important; background:transparent !important; border:1px solid var(--pv-hair-2) !important; text-decoration:none; }
+html body .src-link svg{ width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2.2; opacity:.7; }
+@media (hover:hover){ html body .src-link:hover{ color:var(--orange) !important; border-color:var(--orange) !important; } }
+html body .mtbl td{ background:var(--pv-well) !important; }
+html body .kp-num{ font-weight:600 !important; letter-spacing:-.03em; }
+html body .kp-track{ background:var(--pv-well) !important; box-shadow:inset 0 0 0 1px var(--pv-hair); }
+
+/* ── Accueil ──────────────────────────────────────────────── */
+html body .cover-feats .cvf{ border-radius:8px !important; font-size:11px !important; letter-spacing:.02em; }
+.sky-word{ font-weight:600 !important; letter-spacing:.09em !important; }
+
+/* ── Écran de fin ─────────────────────────────────────────── */
+html body .closed-ic{ width:64px !important; height:64px !important; border-radius:20px !important; display:grid !important; place-items:center; background:var(--green-d) !important; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--green) 40%, transparent), 0 0 30px -6px var(--green) !important; font-size:0 !important; }
+html body .closed-ic svg{ width:30px; height:30px; fill:none; stroke:var(--green); stroke-width:2.4; }
+html body .closed-inner .pv-cta{ margin-top:8px; }
+
+/* ── Spécifications drone ─────────────────────────────────── */
+html body .drone-specs-name{ font-family:var(--disp); font-weight:600 !important; }
+html body .drone-specs-class{ border-radius:7px !important; font-size:10px !important; letter-spacing:.08em; }
+html body .section-title{ padding-left:0 !important; }
+html body .section-icon .ic, html body .section-icon svg{ stroke:var(--orange) !important; }
+html body .geo-status:empty{ display:none; }
+.pv-pagehead{ padding:8px 4px 2px; }
+.pv-pagehead p{ margin-top:6px; font-size:12.5px; line-height:1.55; color:var(--ink-faint); max-width:46ch; }
+html body .dcell .val.go{ color:var(--ink) !important; }
+html body .dcell .lbl{ display:flex; align-items:center; gap:6px; }
+html body .dcell:has(.val.go) .lbl::after, html body .dcell:has(.val.warn) .lbl::after, html body .dcell:has(.val.nogo) .lbl::after{ content:""; width:6px; height:6px; border-radius:50%; margin-left:auto; flex:none; }
+html body .dcell:has(.val.go) .lbl::after{ background:var(--green); box-shadow:0 0 6px var(--green); }
+html body .dcell:has(.val.warn) .lbl::after{ background:var(--amber); box-shadow:0 0 6px var(--amber); }
+html body .dcell:has(.val.nogo) .lbl::after{ background:var(--red); box-shadow:0 0 6px var(--red); }
+html body .dcell:has(.val.warn){ border-color:color-mix(in srgb, var(--amber) 35%, transparent) !important; }
+html body .dcell:has(.val.nogo){ border-color:color-mix(in srgb, var(--red) 40%, transparent) !important; }
+.hs-meter{ height:26px; width:6px; margin:6px auto 0; border-radius:3px; background:var(--pv-well); box-shadow:inset 0 0 0 1px var(--pv-hair); display:flex; align-items:flex-end; overflow:hidden; }
+.hs-meter i{ display:block; width:100%; border-radius:3px; background:var(--ink-faint); }
+.hs-meter i.go{ background:linear-gradient(180deg,#5BE3A3,var(--green)); } .hs-meter i.warn{ background:var(--amber); } .hs-meter i.nogo{ background:var(--red); }
+.kp-seg{ display:grid; grid-template-columns:repeat(9,1fr); gap:4px; margin:14px 0 7px; }
+.kp-seg i{ height:10px; border-radius:3px; background:var(--pv-well); box-shadow:inset 0 0 0 1px var(--pv-hair); overflow:hidden; display:block; }
+.kp-seg i b{ display:block; height:100%; border-radius:3px; }
+.kp-seg i.zg b{ background:linear-gradient(180deg,#5BE3A3,var(--green)); box-shadow:0 0 8px rgba(61,214,140,.6); }
+.kp-seg i.za b{ background:var(--amber); box-shadow:0 0 8px var(--amber); }
+.kp-seg i.zr b{ background:var(--red); box-shadow:0 0 8px var(--red); }
+html body .kp-num{ font-size:46px !important; }
+html body .kp-lbls{ position:relative; display:block !important; height:14px; }
+html body .kp-lbls span{ position:absolute; top:0; transform:translateX(-50%); white-space:nowrap; }
+html body .kp-lbls span:nth-child(1){ left:0; transform:none; } html body .kp-lbls span:nth-child(2){ left:33.3%; } html body .kp-lbls span:nth-child(3){ left:55.6%; } html body .kp-lbls span:nth-child(4){ left:77.8%; } html body .kp-lbls span:nth-child(5){ left:auto; right:0; transform:none; }
+html body #vac-overlay .vac-modal{ background:linear-gradient(180deg,#0F1D33,#0A1426) !important; border:1px solid var(--pv-hair-2) !important; box-shadow:0 30px 80px rgba(0,0,0,.6) !important; }
+html body:not(.night) #vac-overlay .vac-modal{ background:#fff !important; }
+html body .hp-row{ padding:11px 6px !important; border-radius:10px; border-bottom:1px solid var(--pv-hair) !important; }
+html body .hp-name{ display:flex; align-items:center; gap:11px; min-width:0; }
+html body .hp-kind{ flex:none; width:30px; height:22px; border-radius:6px; display:grid; place-items:center; font-style:normal; font-size:9.5px; font-weight:700; letter-spacing:.06em; opacity:1 !important; }
+html body .hp-kind.a{ color:var(--orange); background:var(--orange-d); }
+html body .hp-kind.h{ color:#F06B7A; background:rgba(240,107,122,.14); }
+html body .hp-code{ font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:11.5px !important; font-weight:600 !important; color:var(--ink-soft) !important; padding:3px 7px; border-radius:6px; border:1px solid var(--pv-hair-2); }
+html body .hp-q{ border-radius:12px !important; padding:12px 14px !important; border:1px solid var(--pv-hair-2) !important; background:var(--pv-well) !important; }
+html body .hp-chips button{ border-radius:9px !important; border-color:var(--pv-hair-2) !important; }
+html body .hp-chips button.on{ border-color:var(--orange) !important; background:var(--orange-d) !important; color:var(--orange); }
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--paper)"/><stop offset="1" stop-color="var(--stone)"/></linearGradient><linearGradient id="gArm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ink-faint)"/><stop offset="1" stop-color="var(--ink-soft)"/></linearGradient><radialGradient id="gProp" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="var(--ink-soft)" stop-opacity="0.32"/><stop offset="0.7" stop-color="var(--ink-soft)" stop-opacity="0.10"/><stop offset="1" stop-color="var(--ink-soft)" stop-opacity="0"/></radialGradient><radialGradient id="gBell" cx="0.4" cy="0.35" r="0.75"><stop offset="0" stop-color="var(--ink-faint)"/><stop offset="1" stop-color="var(--ink)"/></radialGradient><radialGradient id="gGimbal" cx="0.4" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--ink-soft)"/><stop offset="1" stop-color="var(--ink)"/></radialGradient><radialGradient id="gLens" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="var(--orange)"/><stop offset="1" stop-color="#062a2f"/></radialGradient><radialGradient id="gHalo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="var(--orange)" stop-opacity="0.28"/><stop offset="0.6" stop-color="var(--orange)" stop-opacity="0.08"/><stop offset="1" stop-color="var(--orange)" stop-opacity="0"/></radialGradient><linearGradient id="eSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12233b"/><stop offset="0.45" stop-color="#274b63"/><stop offset="0.72" stop-color="#c98a3a"/><stop offset="1" stop-color="#f0c070"/></linearGradient><linearGradient id="eCity" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b07a34"/><stop offset="1" stop-color="#7d4f22"/></linearGradient><linearGradient id="eMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9edf1"/><stop offset="0.28" stop-color="#9aa6b2"/><stop offset="0.5" stop-color="#c3ccd5"/><stop offset="0.72" stop-color="#7f8b98"/><stop offset="1" stop-color="#dfe5ea"/></linearGradient><linearGradient id="ePod" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9c2cc"/><stop offset="0.5" stop-color="#8b95a1"/><stop offset="1" stop-color="#5c6570"/></linearGradient><linearGradient id="eDuct" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3cbd4"/><stop offset="0.5" stop-color="#828d99"/><stop offset="1" stop-color="#aab4bf"/></linearGradient><radialGradient id="eLens" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#7fdfe0"/><stop offset="0.6" stop-color="#1b6f78"/><stop offset="1" stop-color="#05252b"/></radialGradient><radialGradient id="eGlow" cx="0.5" cy="0.42" r="0.6"><stop offset="0" stop-color="#f6d79a" stop-opacity="0.5"/><stop offset="1" stop-color="#f6d79a" stop-opacity="0"/></radialGradient><clipPath id="eClip"><circle cx="0" cy="0" r="103"/></clipPath><g id="eRingTex"><line x1="105.0" y1="0.0" x2="119.0" y2="0.0" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="104.9" y1="5.5" x2="118.8" y2="6.2" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="104.4" y1="11.0" x2="118.3" y2="12.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="103.7" y1="16.4" x2="117.5" y2="18.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="102.7" y1="21.8" x2="116.4" y2="24.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="101.4" y1="27.2" x2="114.9" y2="30.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="99.9" y1="32.4" x2="113.2" y2="36.8" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="98.0" y1="37.6" x2="111.1" y2="42.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="95.9" y1="42.7" x2="108.7" y2="48.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="93.6" y1="47.7" x2="106.0" y2="54.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="90.9" y1="52.5" x2="103.1" y2="59.5" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="88.1" y1="57.2" x2="99.8" y2="64.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="84.9" y1="61.7" x2="96.3" y2="69.9" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="81.6" y1="66.1" x2="92.5" y2="74.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="78.0" y1="70.3" x2="88.4" y2="79.6" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="74.2" y1="74.2" x2="84.1" y2="84.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="70.3" y1="78.0" x2="79.6" y2="88.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="66.1" y1="81.6" x2="74.9" y2="92.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="61.7" y1="84.9" x2="69.9" y2="96.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="57.2" y1="88.1" x2="64.8" y2="99.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="52.5" y1="90.9" x2="59.5" y2="103.1" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="47.7" y1="93.6" x2="54.0" y2="106.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="42.7" y1="95.9" x2="48.4" y2="108.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="37.6" y1="98.0" x2="42.6" y2="111.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="32.4" y1="99.9" x2="36.8" y2="113.2" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="27.2" y1="101.4" x2="30.8" y2="114.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="21.8" y1="102.7" x2="24.7" y2="116.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="16.4" y1="103.7" x2="18.6" y2="117.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="11.0" y1="104.4" x2="12.4" y2="118.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="5.5" y1="104.9" x2="6.2" y2="118.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="0.0" y1="105.0" x2="0.0" y2="119.0" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-5.5" y1="104.9" x2="-6.2" y2="118.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-11.0" y1="104.4" x2="-12.4" y2="118.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-16.4" y1="103.7" x2="-18.6" y2="117.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-21.8" y1="102.7" x2="-24.7" y2="116.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-27.2" y1="101.4" x2="-30.8" y2="114.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-32.4" y1="99.9" x2="-36.8" y2="113.2" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-37.6" y1="98.0" x2="-42.6" y2="111.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-42.7" y1="95.9" x2="-48.4" y2="108.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-47.7" y1="93.6" x2="-54.0" y2="106.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-52.5" y1="90.9" x2="-59.5" y2="103.1" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-57.2" y1="88.1" x2="-64.8" y2="99.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-61.7" y1="84.9" x2="-69.9" y2="96.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-66.1" y1="81.6" x2="-74.9" y2="92.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-70.3" y1="78.0" x2="-79.6" y2="88.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-74.2" y1="74.2" x2="-84.1" y2="84.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-78.0" y1="70.3" x2="-88.4" y2="79.6" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-81.6" y1="66.1" x2="-92.5" y2="74.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-84.9" y1="61.7" x2="-96.3" y2="69.9" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-88.1" y1="57.2" x2="-99.8" y2="64.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-90.9" y1="52.5" x2="-103.1" y2="59.5" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-93.6" y1="47.7" x2="-106.0" y2="54.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-95.9" y1="42.7" x2="-108.7" y2="48.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-98.0" y1="37.6" x2="-111.1" y2="42.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-99.9" y1="32.4" x2="-113.2" y2="36.8" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-101.4" y1="27.2" x2="-114.9" y2="30.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-102.7" y1="21.8" x2="-116.4" y2="24.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-103.7" y1="16.4" x2="-117.5" y2="18.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-104.4" y1="11.0" x2="-118.3" y2="12.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-104.9" y1="5.5" x2="-118.8" y2="6.2" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-105.0" y1="0.0" x2="-119.0" y2="0.0" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-104.9" y1="-5.5" x2="-118.8" y2="-6.2" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-104.4" y1="-11.0" x2="-118.3" y2="-12.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-103.7" y1="-16.4" x2="-117.5" y2="-18.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-102.7" y1="-21.8" x2="-116.4" y2="-24.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-101.4" y1="-27.2" x2="-114.9" y2="-30.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-99.9" y1="-32.4" x2="-113.2" y2="-36.8" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-98.0" y1="-37.6" x2="-111.1" y2="-42.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-95.9" y1="-42.7" x2="-108.7" y2="-48.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-93.6" y1="-47.7" x2="-106.0" y2="-54.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-90.9" y1="-52.5" x2="-103.1" y2="-59.5" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-88.1" y1="-57.2" x2="-99.8" y2="-64.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-84.9" y1="-61.7" x2="-96.3" y2="-69.9" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-81.6" y1="-66.1" x2="-92.5" y2="-74.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-78.0" y1="-70.3" x2="-88.4" y2="-79.6" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-74.2" y1="-74.2" x2="-84.1" y2="-84.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-70.3" y1="-78.0" x2="-79.6" y2="-88.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-66.1" y1="-81.6" x2="-74.9" y2="-92.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-61.7" y1="-84.9" x2="-69.9" y2="-96.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-57.2" y1="-88.1" x2="-64.8" y2="-99.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-52.5" y1="-90.9" x2="-59.5" y2="-103.1" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-47.7" y1="-93.6" x2="-54.0" y2="-106.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-42.7" y1="-95.9" x2="-48.4" y2="-108.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-37.6" y1="-98.0" x2="-42.6" y2="-111.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-32.4" y1="-99.9" x2="-36.8" y2="-113.2" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-27.2" y1="-101.4" x2="-30.8" y2="-114.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-21.8" y1="-102.7" x2="-24.7" y2="-116.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-16.4" y1="-103.7" x2="-18.6" y2="-117.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-11.0" y1="-104.4" x2="-12.4" y2="-118.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="-5.5" y1="-104.9" x2="-6.2" y2="-118.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="-0.0" y1="-105.0" x2="-0.0" y2="-119.0" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="5.5" y1="-104.9" x2="6.2" y2="-118.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="11.0" y1="-104.4" x2="12.4" y2="-118.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="16.4" y1="-103.7" x2="18.6" y2="-117.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="21.8" y1="-102.7" x2="24.7" y2="-116.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="27.2" y1="-101.4" x2="30.8" y2="-114.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="32.4" y1="-99.9" x2="36.8" y2="-113.2" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="37.6" y1="-98.0" x2="42.6" y2="-111.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="42.7" y1="-95.9" x2="48.4" y2="-108.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="47.7" y1="-93.6" x2="54.0" y2="-106.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="52.5" y1="-90.9" x2="59.5" y2="-103.1" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="57.2" y1="-88.1" x2="64.8" y2="-99.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="61.7" y1="-84.9" x2="69.9" y2="-96.3" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="66.1" y1="-81.6" x2="74.9" y2="-92.5" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="70.3" y1="-78.0" x2="79.6" y2="-88.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="74.2" y1="-74.2" x2="84.1" y2="-84.1" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="78.0" y1="-70.3" x2="88.4" y2="-79.6" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="81.6" y1="-66.1" x2="92.5" y2="-74.9" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="84.9" y1="-61.7" x2="96.3" y2="-69.9" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="88.1" y1="-57.2" x2="99.8" y2="-64.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="90.9" y1="-52.5" x2="103.1" y2="-59.5" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="93.6" y1="-47.7" x2="106.0" y2="-54.0" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="95.9" y1="-42.7" x2="108.7" y2="-48.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="98.0" y1="-37.6" x2="111.1" y2="-42.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="99.9" y1="-32.4" x2="113.2" y2="-36.8" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="101.4" y1="-27.2" x2="114.9" y2="-30.8" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="102.7" y1="-21.8" x2="116.4" y2="-24.7" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="103.7" y1="-16.4" x2="117.5" y2="-18.6" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="104.4" y1="-11.0" x2="118.3" y2="-12.4" stroke="#6d7883" stroke-width="0.6" opacity="0.32"/><line x1="104.9" y1="-5.5" x2="118.8" y2="-6.2" stroke="#f2f5f8" stroke-width="0.6" opacity="0.32"/><line x1="116.0" y1="0.0" x2="120.0" y2="0.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="115.6" y1="10.1" x2="119.5" y2="10.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="114.2" y1="20.1" x2="118.2" y2="20.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="112.0" y1="30.0" x2="115.9" y2="31.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="109.0" y1="39.7" x2="112.8" y2="41.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="105.1" y1="49.0" x2="108.8" y2="50.7" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="100.5" y1="58.0" x2="103.9" y2="60.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="95.0" y1="66.5" x2="98.3" y2="68.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="88.9" y1="74.6" x2="91.9" y2="77.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="82.0" y1="82.0" x2="84.9" y2="84.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="74.6" y1="88.9" x2="77.1" y2="91.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="66.5" y1="95.0" x2="68.8" y2="98.3" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="58.0" y1="100.5" x2="60.0" y2="103.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="49.0" y1="105.1" x2="50.7" y2="108.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="39.7" y1="109.0" x2="41.0" y2="112.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="30.0" y1="112.0" x2="31.1" y2="115.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="20.1" y1="114.2" x2="20.8" y2="118.2" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="10.1" y1="115.6" x2="10.5" y2="119.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="0.0" y1="116.0" x2="0.0" y2="120.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-10.1" y1="115.6" x2="-10.5" y2="119.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-20.1" y1="114.2" x2="-20.8" y2="118.2" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-30.0" y1="112.0" x2="-31.1" y2="115.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-39.7" y1="109.0" x2="-41.0" y2="112.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-49.0" y1="105.1" x2="-50.7" y2="108.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-58.0" y1="100.5" x2="-60.0" y2="103.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-66.5" y1="95.0" x2="-68.8" y2="98.3" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-74.6" y1="88.9" x2="-77.1" y2="91.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-82.0" y1="82.0" x2="-84.9" y2="84.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-88.9" y1="74.6" x2="-91.9" y2="77.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-95.0" y1="66.5" x2="-98.3" y2="68.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-100.5" y1="58.0" x2="-103.9" y2="60.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-105.1" y1="49.0" x2="-108.8" y2="50.7" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-109.0" y1="39.7" x2="-112.8" y2="41.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-112.0" y1="30.0" x2="-115.9" y2="31.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-114.2" y1="20.1" x2="-118.2" y2="20.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-115.6" y1="10.1" x2="-119.5" y2="10.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-116.0" y1="0.0" x2="-120.0" y2="0.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-115.6" y1="-10.1" x2="-119.5" y2="-10.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-114.2" y1="-20.1" x2="-118.2" y2="-20.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-112.0" y1="-30.0" x2="-115.9" y2="-31.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-109.0" y1="-39.7" x2="-112.8" y2="-41.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-105.1" y1="-49.0" x2="-108.8" y2="-50.7" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-100.5" y1="-58.0" x2="-103.9" y2="-60.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-95.0" y1="-66.5" x2="-98.3" y2="-68.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-88.9" y1="-74.6" x2="-91.9" y2="-77.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-82.0" y1="-82.0" x2="-84.9" y2="-84.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-74.6" y1="-88.9" x2="-77.1" y2="-91.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-66.5" y1="-95.0" x2="-68.8" y2="-98.3" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-58.0" y1="-100.5" x2="-60.0" y2="-103.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-49.0" y1="-105.1" x2="-50.7" y2="-108.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-39.7" y1="-109.0" x2="-41.0" y2="-112.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-30.0" y1="-112.0" x2="-31.1" y2="-115.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-20.1" y1="-114.2" x2="-20.8" y2="-118.2" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-10.1" y1="-115.6" x2="-10.5" y2="-119.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="-0.0" y1="-116.0" x2="-0.0" y2="-120.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="10.1" y1="-115.6" x2="10.5" y2="-119.5" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="20.1" y1="-114.2" x2="20.8" y2="-118.2" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="30.0" y1="-112.0" x2="31.1" y2="-115.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="39.7" y1="-109.0" x2="41.0" y2="-112.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="49.0" y1="-105.1" x2="50.7" y2="-108.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="58.0" y1="-100.5" x2="60.0" y2="-103.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="66.5" y1="-95.0" x2="68.8" y2="-98.3" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="74.6" y1="-88.9" x2="77.1" y2="-91.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="82.0" y1="-82.0" x2="84.9" y2="-84.9" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="88.9" y1="-74.6" x2="91.9" y2="-77.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="95.0" y1="-66.5" x2="98.3" y2="-68.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="100.5" y1="-58.0" x2="103.9" y2="-60.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="105.1" y1="-49.0" x2="108.8" y2="-50.7" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="109.0" y1="-39.7" x2="112.8" y2="-41.0" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="112.0" y1="-30.0" x2="115.9" y2="-31.1" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="114.2" y1="-20.1" x2="118.2" y2="-20.8" stroke="#333d47" stroke-width="1" opacity="0.5"/><line x1="115.6" y1="-10.1" x2="119.5" y2="-10.5" stroke="#333d47" stroke-width="1" opacity="0.5"/></g><filter id="eNoise" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><linearGradient id="eProg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ff0e4"/><stop offset="1" stop-color="var(--orange)"/></linearGradient><radialGradient id="eHead" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#bff6ec"/><stop offset="1" stop-color="var(--orange)"/></radialGradient></defs></svg>
@@ -1766,24 +2046,55 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="screen active" id="screen-cover">
    <div class="pcover-bg" aria-hidden="true"><div class="pcv-toplight"></div><div class="pcv-floor"></div><div class="pcv-gloss"></div><div class="pcv-vig"></div><div class="pcv-grain"></div></div>
-   <div class="cover-inner">
+   <div class="cover-inner sky-cover">
+     <div class="sky-hero">
+<svg class="sky-emblem" viewBox="0 0 260 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Emblème Profenvol — drone sur hexagone">
+  <defs>
+    <linearGradient id="skHexS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE3FF"/><stop offset=".55" stop-color="#5FA2FF"/><stop offset="1" stop-color="#2463D8"/></linearGradient>
+    <linearGradient id="skHexF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16294A" stop-opacity=".92"/><stop offset="1" stop-color="#0A1426" stop-opacity=".96"/></linearGradient>
+    <linearGradient id="skBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#B9CAE0"/></linearGradient>
+    <radialGradient id="skHalo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3D8BFF" stop-opacity=".45"/><stop offset="1" stop-color="#3D8BFF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="skDisc" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#DDEBFF" stop-opacity=".55"/><stop offset=".7" stop-color="#8CB8FF" stop-opacity=".18"/><stop offset="1" stop-color="#8CB8FF" stop-opacity="0"/></radialGradient>
+    <filter id="skGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="skHexClip"><polygon points="130,62 178,90 178,146 130,174 82,146 82,90"/></clipPath>
+    <marker id="skArr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#7FB3FF"/></marker>
+  </defs>
+  <ellipse cx="130" cy="118" rx="112" ry="86" fill="url(#skHalo)"/>
+  <!-- orbites -->
+  <path d="M34 128 C 30 82, 92 52, 150 56" fill="none" stroke="#6FA8FF" stroke-width="1.6" stroke-opacity=".65" marker-end="url(#skArr)"/>
+  <path d="M226 108 C 232 154, 172 184, 112 182" fill="none" stroke="#6FA8FF" stroke-width="1.6" stroke-opacity=".65" marker-end="url(#skArr)"/>
+  <circle cx="34" cy="128" r="2.6" fill="#9CC4FF"/><circle cx="226" cy="108" r="2.6" fill="#9CC4FF"/>
+  <!-- repère GPS -->
+  <g transform="translate(44 96)" opacity=".85"><path d="M0 14 C-7 6,-7 -2,0 -2 C7 -2,7 6,0 14 Z" fill="none" stroke="#9CC4FF" stroke-width="1.6"/><circle cx="0" cy="3" r="2" fill="#9CC4FF"/></g>
+  <!-- hexagone -->
+  <polygon points="130,62 178,90 178,146 130,174 82,146 82,90" fill="url(#skHexF)"/>
+  <g clip-path="url(#skHexClip)" stroke="#3D7FE8" stroke-opacity=".55" stroke-width="1.1" fill="none">
+    <path d="M96 128 l10 -6 10 6 0 12 -10 6 -10 -6 z"/><path d="M116 140 l10 -6 10 6 0 12 -10 6 -10 -6 z"/><path d="M136 128 l10 -6 10 6 0 12 -10 6 -10 -6 z"/><path d="M156 140 l10 -6 10 6 0 12 -10 6 -10 -6 z"/><path d="M116 116 l10 -6 10 6 0 12 -10 6 -10 -6 z" stroke-opacity=".3"/><path d="M96 152 l10 -6 10 6 0 12 -10 6 -10 -6 z"/><path d="M136 152 l10 -6 10 6 0 12 -10 6 -10 -6 z"/>
+  </g>
+  <path d="M130 106 L146 140 L130 132 L114 140 Z" fill="#EAF2FF" opacity=".95" filter="url(#skGlow)"/>
+  <polygon points="130,62 178,90 178,146 130,174 82,146 82,90" fill="none" stroke="url(#skHexS)" stroke-width="5" stroke-linejoin="round" filter="url(#skGlow)"/>
+  <polygon points="130,71 170,94 170,142 130,165 90,142 90,94" fill="none" stroke="#9CC4FF" stroke-opacity=".25" stroke-width="1"/>
+  <!-- drone -->
+  <g transform="translate(130 52)" filter="url(#skGlow)">
+    <g stroke="#DCE8F8" stroke-width="5" stroke-linecap="round"><line x1="-12" y1="-4" x2="-46" y2="-20"/><line x1="12" y1="-4" x2="46" y2="-20"/><line x1="-12" y1="6" x2="-50" y2="14"/><line x1="12" y1="6" x2="50" y2="14"/></g>
+    <ellipse cx="-50" cy="-22" rx="22" ry="5.5" fill="url(#skDisc)"/><ellipse cx="50" cy="-22" rx="22" ry="5.5" fill="url(#skDisc)"/><ellipse cx="-54" cy="13" rx="23" ry="6" fill="url(#skDisc)"/><ellipse cx="54" cy="13" rx="23" ry="6" fill="url(#skDisc)"/>
+    <g fill="#F4F8FF"><circle cx="-47" cy="-21" r="3.6"/><circle cx="47" cy="-21" r="3.6"/><circle cx="-51" cy="14" r="3.8"/><circle cx="51" cy="14" r="3.8"/></g>
+    <g stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity=".9"><line x1="-64" y1="-23" x2="-30" y2="-19"/><line x1="30" y1="-23" x2="64" y2="-19"/><line x1="-70" y1="12" x2="-32" y2="15"/><line x1="32" y1="12" x2="70" y2="15"/></g>
+    <path d="M-16 -8 Q0 -16 16 -8 L19 8 Q0 17 -19 8 Z" fill="url(#skBody)" stroke="#8FB0D8" stroke-width="1"/>
+    <path d="M-9 -4 Q0 -9 9 -4 L10 2 Q0 6 -10 2 Z" fill="#203A60" opacity=".85"/>
+    <circle cx="0" cy="12" r="4.2" fill="#14223A" stroke="#9CC4FF" stroke-width="1.2"/><circle cx="0" cy="12" r="1.6" fill="#5FA2FF"/>
+  </g>
+</svg>
+
+       <h1 class="sky-word">PROFENVOL</h1>
+       <div class="sky-sub">Préparation de mission <b>drone</b></div>
+     </div>
+     <button type="button" class="pv-cta pv-cta--hero" onclick="showScreen('screen-form')"><span class="pv-cta-txt"><span class="pv-cta-k">Nouvelle mission</span><span class="pv-cta-l">Préparer mon vol</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
+     <div class="cover-feats"><span class="cvf"><i></i>Météo AROME HD</span><span class="cvf"><i></i>Espace aérien</span><span class="cvf"><i></i>Cartes VAC</span></div>
      <div class="cover-warn">
        <div class="cover-warn-hd"><span class="cover-warn-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9 16.5H3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><span class="cover-warn-ttl">Avertissement</span></div>
        <div class="cover-warn-tx"><strong>Aide</strong> à la préparation de vol — sans valeur officielle. Ne remplace pas les <strong>vérifications manuelles</strong> ni les <strong>publications officielles</strong> (SIA, NOTAM…). Le télépilote reste <strong>seul responsable</strong> de la sécurité et de la conformité de son vol.</div>
      </div>
-     <div class="cover-hero">
-       <div class="cover-medwrap">
-         <div class="cover-med"><div class="cover-halo" aria-hidden="true"></div><svg class="cover-svg" viewBox="-135 -135 270 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Emblème Profenvol — drone au-dessus d une ville"><defs><linearGradient id="rdMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef2f6"/><stop offset="0.28" stop-color="#9aa6b2"/><stop offset="0.5" stop-color="#c9d2db"/><stop offset="0.72" stop-color="#79858f"/><stop offset="1" stop-color="#e4e9ee"/></linearGradient><linearGradient id="rdSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1f38"/><stop offset="0.42" stop-color="#274b63"/><stop offset="0.7" stop-color="#c98a3a"/><stop offset="1" stop-color="#f3c877"/></linearGradient><linearGradient id="rdDuct" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d3dae1"/><stop offset="0.5" stop-color="#828d99"/><stop offset="1" stop-color="#b3bdc7"/></linearGradient><radialGradient id="rdPod" cx="0.4" cy="0.28" r="0.85"><stop offset="0" stop-color="#d8dee5"/><stop offset="0.45" stop-color="#8b95a1"/><stop offset="1" stop-color="#3a424c"/></radialGradient><radialGradient id="rdLens" cx="0.38" cy="0.32" r="0.75"><stop offset="0" stop-color="#a9f0ee"/><stop offset="0.55" stop-color="#1b6f78"/><stop offset="1" stop-color="#04191d"/></radialGradient><radialGradient id="rdGlow" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#f6d79a" stop-opacity="0.55"/><stop offset="1" stop-color="#f6d79a" stop-opacity="0"/></radialGradient><radialGradient id="rdBlade" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#dfe6ee" stop-opacity="0"/><stop offset="0.42" stop-color="#dfe6ee" stop-opacity="0.34"/><stop offset="0.82" stop-color="#dfe6ee" stop-opacity="0.12"/><stop offset="1" stop-color="#dfe6ee" stop-opacity="0"/></radialGradient><linearGradient id="rdGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.65"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.06"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient><clipPath id="rdClip"><circle cx="0" cy="0" r="103"/></clipPath><filter id="rdSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter></defs><ellipse cx="0" cy="126" rx="80" ry="12" fill="#05070c" opacity="0.45" filter="url(#rdSoft)"/><circle cx="0" cy="0" r="120" fill="url(#rdMetal)"/><path d="M-85 -85 A120 120 0 0 1 85 -85" fill="none" stroke="#ffffff" stroke-width="2.4" opacity="0.6" stroke-linecap="round"/><path d="M85 85 A120 120 0 0 1 -85 85" fill="none" stroke="#0a0e14" stroke-width="2.6" opacity="0.4" stroke-linecap="round"/><circle cx="0" cy="0" r="112" fill="none" stroke="#dfe6ee" stroke-width="3.4" stroke-dasharray="0.7 6.6" opacity="0.55"/><circle cx="0" cy="0" r="105" fill="#0d1626"/><g clip-path="url(#rdClip)"><rect x="-105" y="-105" width="210" height="210" fill="url(#rdSky)"/><circle cx="0" cy="40" r="26" fill="#ffdf9e" opacity="0.5"/><path d="M-105 8 Q-60 -8 -18 4 Q30 16 105 -2 L105 20 L-105 20 Z" fill="#1a3550" opacity="0.5"/><path d="M-105 62 L-105 105 L105 105 L105 58 L92 58 L92 44 L84 44 L84 58 L74 58 L74 34 L66 34 L66 58 L54 58 L54 48 L44 48 L44 26 L36 26 L36 58 L24 58 L24 42 L14 42 L14 58 L2 58 L2 30 L-8 30 L-8 58 L-20 58 L-20 46 L-30 46 L-30 58 L-42 58 L-42 38 L-52 38 L-52 58 L-64 58 L-64 50 L-74 50 L-74 58 L-86 58 L-86 42 L-96 42 L-96 62 Z" fill="#b5813d"/><path d="M-105 66 Q-60 58 -20 64 Q30 71 105 62 L105 78 Q40 86 -20 79 Q-64 74 -105 82 Z" fill="#12314c"/><path d="M-70 72 q10 -7 20 0 M-46 72 q10 -7 20 0" stroke="#caa066" stroke-width="2" fill="none" opacity="0.7"/><g fill="#ffe6b0"><rect x="63" y="40" width="1.6" height="1.6"/><rect x="68" y="46" width="1.6" height="1.6"/><rect x="34" y="32" width="1.6" height="1.6"/><rect x="38" y="40" width="1.6" height="1.6"/><rect x="-6" y="36" width="1.6" height="1.6"/><rect x="-2" y="44" width="1.6" height="1.6"/><rect x="-50" y="44" width="1.6" height="1.6"/><rect x="-84" y="48" width="1.6" height="1.6"/></g><rect x="-105" y="-105" width="210" height="130" fill="#0a1424" opacity="0.28"/></g><circle cx="0" cy="0" r="105" fill="none" stroke="#0a1420" stroke-width="4" opacity="0.5"/><circle cx="0" cy="0" r="108" fill="none" stroke="url(#rdMetal)" stroke-width="2.6"/><ellipse class="rd-shadow" cx="0" cy="52" rx="46" ry="9" fill="#05080e" opacity="0.34" filter="url(#rdSoft)"/><g class="rd-drift"><g class="rd-bob"><path d="M0 -6 L-84 -46" stroke="url(#rdDuct)" stroke-width="11" stroke-linecap="round"/><path d="M0 -6 L84 -46" stroke="url(#rdDuct)" stroke-width="11" stroke-linecap="round"/><path d="M0 2 L-56 16" stroke="url(#rdDuct)" stroke-width="12.5" stroke-linecap="round"/><path d="M0 2 L56 16" stroke="url(#rdDuct)" stroke-width="12.5" stroke-linecap="round"/><path d="M0 -6 L-84 -46" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.28"/><path d="M0 -6 L84 -46" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.28"/><g><circle cx="-84" cy="-46" r="25" fill="url(#rdDuct)"/><circle cx="-84" cy="-46" r="20" fill="#11171e"/><path d="M-104 -60 A25 25 0 0 1 -70 -66" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="-84" cy="-46" r="19" fill="url(#rdBlade)"/><g transform="translate(-84 -46)"><g class="rd-rotor"><path d="M-18 0 A18 18 0 0 1 18 0" stroke="#e6ecf2" stroke-width="2" fill="none" opacity="0.16"/><path d="M9 -15.6 A18 18 0 0 1 9 15.6" stroke="#e6ecf2" stroke-width="2" fill="none" opacity="0.16"/></g></g><circle cx="-84" cy="-46" r="4" fill="#e7edf3"/></g><g><circle cx="84" cy="-46" r="25" fill="url(#rdDuct)"/><circle cx="84" cy="-46" r="20" fill="#11171e"/><path d="M64 -60 A25 25 0 0 1 98 -66" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="84" cy="-46" r="19" fill="url(#rdBlade)"/><g transform="translate(84 -46)"><g class="rd-rotor rev"><path d="M-18 0 A18 18 0 0 1 18 0" stroke="#e6ecf2" stroke-width="2" fill="none" opacity="0.16"/><path d="M9 -15.6 A18 18 0 0 1 9 15.6" stroke="#e6ecf2" stroke-width="2" fill="none" opacity="0.16"/></g></g><circle cx="84" cy="-46" r="4" fill="#e7edf3"/></g><circle cx="-74" cy="-30" r="3.2" fill="#37e06a" class="rd-nav"/><circle cx="74" cy="-30" r="3.2" fill="#ff5064" class="rd-nav rd-nav2"/><g><circle cx="-56" cy="16" r="30" fill="url(#rdDuct)"/><circle cx="-56" cy="16" r="24.5" fill="#11171e"/><path d="M-80 2 A30 30 0 0 1 -37 -4" stroke="#f3f6f9" stroke-width="1.7" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="-56" cy="16" r="23.5" fill="url(#rdBlade)"/><g transform="translate(-56 16)"><g class="rd-rotor rev"><path d="M-22 0 A22 22 0 0 1 22 0" stroke="#e6ecf2" stroke-width="2.2" fill="none" opacity="0.15"/><path d="M11 -19 A22 22 0 0 1 11 19" stroke="#e6ecf2" stroke-width="2.2" fill="none" opacity="0.15"/></g></g><circle cx="-56" cy="16" r="4.5" fill="#e7edf3"/></g><g><circle cx="56" cy="16" r="30" fill="url(#rdDuct)"/><circle cx="56" cy="16" r="24.5" fill="#11171e"/><path d="M32 2 A30 30 0 0 1 75 -4" stroke="#f3f6f9" stroke-width="1.7" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="56" cy="16" r="23.5" fill="url(#rdBlade)"/><g transform="translate(56 16)"><g class="rd-rotor"><path d="M-22 0 A22 22 0 0 1 22 0" stroke="#e6ecf2" stroke-width="2.2" fill="none" opacity="0.15"/><path d="M11 -19 A22 22 0 0 1 11 19" stroke="#e6ecf2" stroke-width="2.2" fill="none" opacity="0.15"/></g></g><circle cx="56" cy="16" r="4.5" fill="#e7edf3"/></g><path d="M-20 -30 C-20 -44 -11 -50 0 -50 C11 -50 20 -44 20 -30 L20 -2 C20 10 12 17 0 21 C-12 17 -20 10 -20 -2 Z" fill="url(#rdPod)" stroke="#3d454f" stroke-width="1"/><path d="M-15 -40 C-13 -47 13 -47 15 -40 L12 -20 C8 -14 -8 -14 -12 -20 Z" fill="url(#rdGloss)"/><path d="M0 -49 L0 19" stroke="#2b323b" stroke-width="0.8" opacity="0.5"/><ellipse cx="0" cy="-38" rx="12" ry="8" fill="#cfd7df" opacity="0.5"/><path d="M-18 -30 C-18 -42 -10 -47 0 -47" stroke="#eef4fa" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><rect x="-8" y="17" width="16" height="10" rx="4" fill="url(#rdPod)" stroke="#3d454f" stroke-width="1"/><circle cx="0" cy="31" r="9" fill="#232a33"/><circle cx="0" cy="31" r="8.4" fill="none" stroke="#4b545e" stroke-width="1"/><circle cx="0" cy="31" r="5.4" fill="url(#rdLens)"/><circle cx="-1.8" cy="29.2" r="1.6" fill="#eafcff" opacity="0.9"/></g></g><circle cx="0" cy="0" r="120" fill="none" stroke="#5b6672" stroke-width="1" opacity="0.55"/></svg></div>
-         <div class="cover-reflect"></div>
-       </div>
-     </div>
-     <div class="cover-title">
-       <div class="cover-kicker">PRÉPARATION DE VOL · DRONE</div>
-       <div class="cover-rule"><span></span><b></b><span></span></div>
-       <p>Météo, espace aérien &amp; cartes VAC — en quelques secondes.</p>
-     </div>
-     <button class="cover-cta" onclick="showScreen('screen-form')">Préparer mon vol <span>→</span></button>
-     <div class="cover-feats"><span class="cvf"><i></i>Météo AROME HD</span><span class="cvf"><i></i>Espace aérien</span><span class="cvf"><i></i>Cartes VAC</span></div>
      <p class="cover-copy">© 2026 Profenvol — Tous droits réservés. Reproduction et réutilisation interdites sans autorisation.</p>
      <button type="button" class="cover-legal" onclick="openMentions()">Mentions légales &amp; sources</button>
    </div>
@@ -1794,12 +2105,13 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-form">
   <div class="form-scroll">
+    <div class="pv-pagehead"><div class="step-eyebrow">Nouvelle mission</div><div class="step-title">Paramètres du vol</div><p>Renseignez le lieu, le drone et le créneau : l'analyse croise ensuite météo, géomagnétisme et espace aérien.</p></div>
 
     <!-- Zone de vol -->
     <div class="section-card section-card--locate">
       <div class="section-head">
         <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-        <span class="section-title">Zone de vol</span>
+        <span class="section-title"><em class="sec-num">01</em>Zone de vol</span><span class="sec-hint">Où volez-vous ?</span>
       </div>
       <div class="section-body">
         <div class="field" style="position:relative;">
@@ -1808,7 +2120,7 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
             oninput="onCommuneInput()" onfocus="onCommuneInput()" />
           <div class="commune-suggestions" id="commune-suggestions"></div>
           <span class="field-hint">Tapez 3 lettres, ou utilisez votre position GPS</span>
-          <button type="button" class="btn-geoloc" id="btn-geoloc" onclick="useMyLocation()">📍 Utiliser ma position</button>
+          <button type="button" class="btn-geoloc" id="btn-geoloc" onclick="useMyLocation()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>Utiliser ma position</button>
           <span class="geo-status" id="geo-status"></span>
         </div>
         <div class="field-row">
@@ -1833,7 +2145,7 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
     <div class="section-card">
       <div class="section-head">
         <span class="section-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg></span>
-        <span class="section-title">Mission</span>
+        <span class="section-title"><em class="sec-num">02</em>Mission</span><span class="sec-hint">Drone &amp; créneau</span>
       </div>
       <div class="section-body">
         <div class="field">
@@ -1860,9 +2172,7 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
   </div><!-- /form-scroll -->
 
   <div class="cta-bar">
-    <button class="btn-analyse" id="btn-analyse" onclick="runAnalysis()">
-      Analyser la mission
-    </button>
+    <button type="button" class="pv-cta" id="btn-analyse" onclick="runAnalysis()"><span class="pv-cta-txt"><span class="pv-cta-k">Météo · KP · Espace aérien</span><span class="pv-cta-l">Analyser la mission</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><path d="M12 12l6-6"/></svg></span></button>
   </div>
 </div>
 
@@ -1870,11 +2180,29 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 <!-- SCREEN 2 — CHARGEMENT                                 -->
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-loading">
-  <div class="drone-loader" aria-hidden="true">
-    <svg viewBox="0 0 220 150" class="drone-svg" xmlns="http://www.w3.org/2000/svg"><g transform="translate(110 76) scale(0.58)"><circle cx="0" cy="0" r="125" fill="none" stroke="var(--stone-2)" stroke-width="6" opacity="0.3"/><circle id="loadRing" cx="0" cy="0" r="125" fill="none" stroke="url(#eProg)" stroke-width="6" stroke-linecap="round" transform="rotate(-90 0 0)" stroke-dasharray="785" stroke-dashoffset="785" style="transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); filter:drop-shadow(0 0 4px var(--orange))"/><circle id="loadHead" cx="0" cy="-125" r="5" fill="url(#eHead)" opacity="0" style="filter:drop-shadow(0 0 7px var(--orange)); transition:opacity .3s"/><circle cx="0" cy="0" r="118" fill="url(#eGlow)"/><circle cx="0" cy="0" r="120" fill="url(#eMetal)"/><circle cx="0" cy="0" r="112" fill="#182230"/><use href="#eRingTex"/><path d="M-84 -84 A118 118 0 0 1 84 -84" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/><path d="M84 84 A118 118 0 0 1 -84 84" stroke="#131b24" stroke-width="2" fill="none" opacity="0.35" stroke-linecap="round"/><g clip-path="url(#eClip)"><rect x="-104" y="-104" width="208" height="208" fill="url(#eSky)"/><path d="M-104 34 Q-52 14 0 30 Q52 46 104 28 L104 104 L-104 104 Z" fill="#33506b" opacity="0.55"/><rect x="-104" y="70" width="208" height="14" fill="#4f7ba1" opacity="0.5"/><rect x="-100" y="38" width="14" height="66" fill="url(#eCity)"/><rect x="-84" y="48" width="10" height="56" fill="url(#eCity)"/><rect x="-72" y="30" width="12" height="74" fill="url(#eCity)"/><rect x="-58" y="42" width="16" height="62" fill="url(#eCity)"/><rect x="-40" y="24" width="11" height="80" fill="url(#eCity)"/><rect x="-27" y="44" width="9" height="60" fill="url(#eCity)"/><rect x="-16" y="34" width="13" height="70" fill="url(#eCity)"/><rect x="0" y="16" width="10" height="88" fill="url(#eCity)"/><rect x="12" y="38" width="14" height="66" fill="url(#eCity)"/><rect x="28" y="6" width="12" height="98" fill="url(#eCity)"/><rect x="44" y="24" width="16" height="80" fill="url(#eCity)"/><rect x="62" y="34" width="11" height="70" fill="url(#eCity)"/><rect x="76" y="14" width="14" height="90" fill="url(#eCity)"/><rect x="92" y="40" width="12" height="64" fill="url(#eCity)"/><rect x="-97" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-91" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-97" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-91" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-97" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-91" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-81" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-69" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-63" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-69" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-63" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-69" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-63" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-69" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-63" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-55" y="48" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-49" y="48" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-55" y="56" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-49" y="56" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-37" y="30" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-37" y="38" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-37" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-37" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-24" y="50" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-24" y="58" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-13" y="40" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-7" y="40" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-13" y="48" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-7" y="48" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-13" y="56" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="-7" y="56" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="3" y="22" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="3" y="30" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="3" y="38" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="3" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="3" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="15" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="21" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="15" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="21" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="15" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="21" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="12" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="12" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="20" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="20" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="28" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="28" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="31" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="37" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="47" y="30" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="53" y="30" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="47" y="38" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="53" y="38" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="47" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="53" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="47" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="53" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="65" y="40" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="65" y="48" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="65" y="56" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="20" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="20" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="28" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="28" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="36" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="44" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="52" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="79" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="85" y="60" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="95" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="101" y="46" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="95" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><rect x="101" y="54" width="2" height="2" fill="#f4d59a" opacity="0.5"/><g opacity="0.9"><rect x="-96" y="72" width="70" height="3" fill="#8a5c28"/><path d="M-92 75 A6 6 0 0 1 -80 75 M-78 75 A6 6 0 0 1 -66 75 M-64 75 A6 6 0 0 1 -52 75 M-50 75 A6 6 0 0 1 -38 75" fill="none" stroke="#8a5c28" stroke-width="2"/></g><rect x="-104" y="-104" width="208" height="208" filter="url(#eNoise)" opacity="0.10" style="mix-blend-mode:overlay"/></g><circle cx="0" cy="0" r="103" fill="none" stroke="#0b1420" stroke-width="5" opacity="0.4"/><circle cx="0" cy="0" r="106" fill="none" stroke="url(#eMetal)" stroke-width="3"/><circle cx="0" cy="0" r="120" fill="none" stroke="#5b6672" stroke-width="1" opacity="0.6"/><path d="M0 -14 L-88 -50" stroke="url(#eDuct)" stroke-width="11" stroke-linecap="round"/><path d="M0 -14 L88 -50" stroke="url(#eDuct)" stroke-width="11" stroke-linecap="round"/><path d="M0 -6 L-58 12" stroke="url(#eDuct)" stroke-width="13" stroke-linecap="round"/><path d="M0 -6 L58 12" stroke="url(#eDuct)" stroke-width="13" stroke-linecap="round"/><circle cx="-88" cy="-50" r="24" fill="url(#eDuct)"/><path d="M-104.8 -64.4 A24 24 0 0 1 -76.0 -68.0" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="-88" cy="-50" r="19" fill="#20272f"/><g transform="translate(-88 -50)"><g class="rotor" opacity="0.5"><rect x="-17" y="-1.4" width="34" height="2.8" rx="1.4" fill="#aeb8c2"/><rect x="-1.4" y="-17" width="2.8" height="34" rx="1.4" fill="#aeb8c2"/></g></g><circle cx="-88" cy="-50" r="4.5" fill="url(#ePod)"/><circle cx="88" cy="-50" r="24" fill="url(#eDuct)"/><path d="M71.2 -64.4 A24 24 0 0 1 100.0 -68.0" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="88" cy="-50" r="19" fill="#20272f"/><g transform="translate(88 -50)"><g class="rotor rev" opacity="0.5"><rect x="-17" y="-1.4" width="34" height="2.8" rx="1.4" fill="#aeb8c2"/><rect x="-1.4" y="-17" width="2.8" height="34" rx="1.4" fill="#aeb8c2"/></g></g><circle cx="88" cy="-50" r="4.5" fill="url(#ePod)"/><circle cx="-80" cy="-34" r="3" fill="#37e06a"/><circle cx="80" cy="-34" r="3" fill="#37e06a"/><circle cx="-58" cy="12" r="29" fill="url(#eDuct)"/><path d="M-78.3 -5.4 A29 29 0 0 1 -43.5 -9.8" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="-58" cy="12" r="24" fill="#20272f"/><g transform="translate(-58 12)"><g class="rotor rev" opacity="0.5"><rect x="-22" y="-1.4" width="44" height="2.8" rx="1.4" fill="#aeb8c2"/><rect x="-1.4" y="-22" width="2.8" height="44" rx="1.4" fill="#aeb8c2"/></g></g><circle cx="-58" cy="12" r="4.5" fill="url(#ePod)"/><circle cx="58" cy="12" r="29" fill="url(#eDuct)"/><path d="M37.7 -5.4 A29 29 0 0 1 72.5 -9.8" stroke="#f3f6f9" stroke-width="1.6" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="58" cy="12" r="24" fill="#20272f"/><g transform="translate(58 12)"><g class="rotor" opacity="0.5"><rect x="-22" y="-1.4" width="44" height="2.8" rx="1.4" fill="#aeb8c2"/><rect x="-1.4" y="-22" width="2.8" height="44" rx="1.4" fill="#aeb8c2"/></g></g><circle cx="58" cy="12" r="4.5" fill="url(#ePod)"/><path d="M-22 -34 C-22 -46 -12 -52 0 -52 C12 -52 22 -46 22 -34 L22 -6 C22 6 14 14 2 18 L0 20 L-2 18 C-14 14 -22 6 -22 -6 Z" fill="url(#ePod)" stroke="#4a535d" stroke-width="1"/><ellipse cx="0" cy="-38" rx="13" ry="9" fill="#cfd6dd" opacity="0.55"/><path d="M-16 -46 Q0 -51 16 -46" stroke="#eef2f6" stroke-width="2" fill="none" opacity="0.5" stroke-linecap="round"/><rect x="-9" y="16" width="18" height="12" rx="4" fill="url(#ePod)" stroke="#4a535d" stroke-width="1"/><circle cx="0" cy="30" r="8" fill="#2b333c"/><circle cx="0" cy="30" r="5" fill="url(#eLens)"/><circle cx="-1.6" cy="28.4" r="1.5" fill="#eafcff" opacity="0.8"/></g></svg>
-  </div>
-  <div class="load-pct" id="load-pct">0 %</div>
-   <div class="loading-label">Récupération des données…</div>
+  <div class="sky-loader" aria-hidden="true"><svg class="sky-loader-svg" viewBox="-150 -150 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skProg" x1="0" y1="-1" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#9CC8FF"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient>
+    <radialGradient id="skCore" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#1B3358"/><stop offset="1" stop-color="#091426"/></radialGradient>
+    <mask id="skSeg" maskUnits="userSpaceOnUse" x="-150" y="-150" width="300" height="300"><circle cx="0" cy="0" r="125" fill="none" stroke="#fff" stroke-width="22" stroke-dasharray="21.18 5" transform="rotate(-90 0 0)"/></mask>
+    <marker id="skArr2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#7FB3FF"/></marker>
+  </defs>
+  <g class="sky-orbit"><path d="M-110 -92 A 143 143 0 0 1 72 -124" fill="none" stroke="#6FA8FF" stroke-opacity=".6" stroke-width="2" marker-end="url(#skArr2)"/><path d="M110 92 A 143 143 0 0 1 -72 124" fill="none" stroke="#6FA8FF" stroke-opacity=".6" stroke-width="2" marker-end="url(#skArr2)"/></g>
+  <circle cx="0" cy="0" r="125" fill="none" stroke="#3D7FE8" stroke-opacity=".16" stroke-width="18" stroke-dasharray="21.18 5" transform="rotate(-90 0 0)"/>
+  <g mask="url(#skSeg)"><circle id="loadRing" cx="0" cy="0" r="125" fill="none" stroke="url(#skProg)" stroke-width="18" transform="rotate(-90 0 0)" stroke-dasharray="785" stroke-dashoffset="785" style="transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); filter:drop-shadow(0 0 6px #3D8BFF)"/></g>
+  <circle id="loadHead" cx="0" cy="-125" r="0" opacity="0"/>
+  <circle cx="0" cy="0" r="104" fill="none" stroke="#5FA2FF" stroke-opacity=".35" stroke-width="1.2"/>
+  <circle cx="0" cy="0" r="92" fill="url(#skCore)" stroke="#5FA2FF" stroke-opacity=".45" stroke-width="1.5"/>
+  <circle class="sky-spin" cx="0" cy="0" r="76" fill="none" stroke="#7FB3FF" stroke-opacity=".5" stroke-width="2" stroke-dasharray="60 18 8 18"/>
+  <g stroke="#EAF2FF" stroke-width="6" stroke-linecap="round"><line x1="-11" y1="-11" x2="-34" y2="-34"/><line x1="11" y1="-11" x2="34" y2="-34"/><line x1="-11" y1="11" x2="-34" y2="34"/><line x1="11" y1="11" x2="34" y2="34"/></g>
+  <g fill="none" stroke="#9CC4FF" stroke-width="3"><circle cx="-38" cy="-38" r="11"/><circle cx="38" cy="-38" r="11"/><circle cx="-38" cy="38" r="11"/><circle cx="38" cy="38" r="11"/></g>
+  <rect x="-15" y="-15" width="30" height="30" rx="9" fill="#EAF2FF"/><circle cx="0" cy="0" r="5" fill="#2F7BFF"/>
+</svg>
+</div>
+  <div class="sky-load-ttl">Chargement de la mission…</div>
+  <div class="sky-bar"><i id="load-bar"></i></div>
+  <div class="load-pct" id="load-pct">0 % chargé</div>
+   <div class="loading-label">Préparation de la météo, de la carte et de l'espace aérien…</div>
   <div class="loading-modules" id="lmods">
     <div class="lmod" id="lm-meteo"><span class="lmod-icon">○</span> Météo & coucher du soleil</div>
     <div class="lmod" id="lm-kp"><span class="lmod-icon">○</span> Indice KP — NOAA</div>
@@ -1889,12 +2217,12 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
   <div class="step-head">
     <div class="step-eyebrow">Étape 1 / 3</div>
     <div class="step-title">Météo & coucher du soleil</div>
-    <div class="step-dots"><i class="on"></i><i></i><i></i></div>
+    <div class="pv-rail"><div class="pv-node on"><i>01</i><span>Météo</span></div><b class="pv-link "></b><div class="pv-node "><i>02</i><span>Indice KP</span></div><b class="pv-link "></b><div class="pv-node "><i>03</i><span>Espace aérien</span></div></div>
   </div>
   <div class="wiz-scroll" id="wiz-meteo"></div>
   <div class="detail-nav">
-    <button class="btn-prev" onclick="newMission()">↺ Nouvelle mission</button>
-    <button class="btn-suivant" onclick="goStep('kp')">Suivant →</button>
+    <button type="button" class="pv-ib" onclick="newMission()" aria-label="Nouvelle mission" title="Nouvelle mission"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg><span>Nouvelle mission</span></button>
+    <button type="button" class="pv-cta pv-cta--nav" onclick="goStep('kp')"><span class="pv-cta-txt"><span class="pv-cta-k">Étape suivante</span><span class="pv-cta-l">Indice KP</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
   </div>
 </div>
 
@@ -1903,12 +2231,12 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
   <div class="step-head">
     <div class="step-eyebrow">Étape 2 / 3</div>
     <div class="step-title">Indice KP — géomagnétisme</div>
-    <div class="step-dots"><i class="done"></i><i class="on"></i><i></i></div>
+    <div class="pv-rail"><div class="pv-node done"><i>01</i><span>Météo</span></div><b class="pv-link done"></b><div class="pv-node on"><i>02</i><span>Indice KP</span></div><b class="pv-link "></b><div class="pv-node "><i>03</i><span>Espace aérien</span></div></div>
   </div>
   <div class="wiz-scroll" id="wiz-kp"></div>
   <div class="detail-nav">
-    <button class="btn-prev" onclick="goStep('meteo')">← Précédent</button>
-    <button class="btn-suivant" onclick="goStep('supaip')">Suivant →</button>
+    <button type="button" class="pv-ib" onclick="goStep('meteo')" aria-label="Précédent" title="Précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg><span>Précédent</span></button>
+    <button type="button" class="pv-cta pv-cta--nav" onclick="goStep('supaip')"><span class="pv-cta-txt"><span class="pv-cta-k">Étape suivante</span><span class="pv-cta-l">Espace aérien</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></button>
   </div>
 </div>
 
@@ -1917,15 +2245,15 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
   <div class="step-head">
     <div class="step-eyebrow">Étape 3 / 3</div>
     <div class="step-title">Espace aérien, zones & aérodromes</div>
-    <div class="step-dots"><i class="done"></i><i class="done"></i><i class="on"></i></div>
+    <div class="pv-rail"><div class="pv-node done"><i>01</i><span>Météo</span></div><b class="pv-link done"></b><div class="pv-node done"><i>02</i><span>Indice KP</span></div><b class="pv-link done"></b><div class="pv-node on"><i>03</i><span>Espace aérien</span></div></div>
   </div>
   <div class="wiz-scroll">
     <div id="supaip-map"></div>
   </div>
   <div class="detail-nav detail-nav--final">
-    <button class="btn-prev" onclick="goStep('kp')">← Préc.</button>
-    <button class="btn-suivant" onclick="newMission()">↺ Nouvelle</button>
-    <button class="btn-close" onclick="closeApp()">✕ Fermer</button>
+    <button type="button" class="pv-ib" onclick="goStep('kp')" aria-label="Précédent" title="Précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg><span>Précédent</span></button>
+    <button type="button" class="pv-cta pv-cta--nav" onclick="newMission()"><span class="pv-cta-txt"><span class="pv-cta-k">Préparation terminée</span><span class="pv-cta-l">Nouvelle mission</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg></span></button>
+    <button type="button" class="pv-ib" onclick="closeApp()" aria-label="Fermer" title="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Fermer</span></button>
   </div>
 </div>
 
@@ -1934,10 +2262,10 @@ body:has(#screen-supaip.active) .topbar-time{ font-size:11px; padding:2px 9px; }
 <!-- ══════════════════════════════════════════════════════ -->
 <div class="screen" id="screen-closed">
   <div class="closed-inner">
-    <div class="closed-ic">✓</div>
+    <div class="closed-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
     <h1>Préparation terminée</h1>
     <p>Tu peux fermer cet onglet en toute sécurité.<br>Bon vol — et reste vigilant : le télépilote demeure seul responsable de la sécurité et de la conformité de son vol.</p>
-    <button class="cover-cta" onclick="newMission()">↺ Nouvelle mission</button>
+    <button type="button" class="pv-cta" onclick="newMission()"><span class="pv-cta-txt"><span class="pv-cta-k">Nouveau briefing</span><span class="pv-cta-l">Nouvelle mission</span></span><span class="pv-cta-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg></span></button>
   </div>
 </div>
 
@@ -1953,14 +2281,14 @@ function toggleTheme() {
   const isNight = document.body.classList.contains('night');
   const next = isNight ? 'day' : 'night';
   applyTheme(next);
-  try { localStorage.setItem('droneops-theme', next); } catch(e) {}
+  try { localStorage.setItem('profenvol-sky-theme', next); } catch(e) {}
 }
 // Au démarrage : thème mémorisé, sinon jour par défaut (priorité plein soleil terrain)
 (function initTheme(){
   let saved = null;
-  try { saved = localStorage.getItem('droneops-theme'); } catch(e) {}
+  try { saved = localStorage.getItem('profenvol-sky-theme'); } catch(e) {}
   let _thm = saved;
-  if (!_thm) { _thm = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'day' : 'night'; }
+  if (!_thm) { _thm = 'night'; } // nouveau design : sombre par défaut
   applyTheme(_thm);
 })();
 
@@ -2431,7 +2759,8 @@ function lmod(id, state) {
 // Anneau de progression « activity ring » sur l'emblème de chargement (0..1)
 function setLoadProgress(frac) {
   frac = Math.max(0, Math.min(1, frac));
-  const _pct=document.getElementById('load-pct'); if(_pct) _pct.textContent = Math.round(frac*100) + ' %';
+  const _pct=document.getElementById('load-pct'); if(_pct) _pct.textContent = Math.round(frac*100) + ' % chargé';
+  const _bar=document.getElementById('load-bar'); if(_bar) _bar.style.width = (frac*100).toFixed(1) + '%';
   const R = 125, C = 2 * Math.PI * R;
   const ring = document.getElementById('loadRing');
   const head = document.getElementById('loadHead');
@@ -3123,14 +3452,14 @@ function buildAirspaceAttachment(aeroData, zonesData) {
     const txt = lim === 0 ? `Zone de restriction sur le point de vol : survol drone interdit sans dérogation${rem}.`
       : lim != null ? `Zone de restriction sur le point : vol drone limité à ${lim} m sans accord préalable${rem}.`
       : `Zone de restriction sur le point : conditions spécifiques${rem} — voir l'AIP.`;
-    limBlock = `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">${lim === 0 ? '✕' : '⚑'}</span><span>${txt}</span></div>`;
+    limBlock = `<div class="malert ${lim === 0 ? 'nogo' : 'warn'}" style="margin-bottom:10px"><span class="malert-ico">${lim === 0 ? '<svg viewBox="0 0 24 24"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>'}</span><span>${txt}</span></div>`;
   }
 
   // Les deux sources injoignables → indisponible (cas rare : WFS IGN est très fiable)
   if (!aeroOk && !zonesOk) {
     const err = (aeroData && aeroData.error) || (zonesData && zonesData.error) || 'sources injoignables';
     return modWrap('rattach', TITLE, 'warn', 'INDISPONIBLE', `
-      <div class="malert warn"><span class="malert-ico">⚠</span><span>Détermination momentanément indisponible (${err}). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>`);
+      <div class="malert warn"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Détermination momentanément indisponible (${err}). Reportez-vous à la carte OACI ci-dessus et à l'AIP.</span></div>`);
   }
 
   // WFS sans aérodrome trouvé (ou erreur) mais on a éventuellement une zone
@@ -3141,7 +3470,7 @@ function buildAirspaceAttachment(aeroData, zonesData) {
         <div class="malert info"><span class="malert-ico">${ic('pin')}</span><span>Aérodrome de rattachement non identifié automatiquement — confirmez sur la carte OACI ci-dessus.</span></div>`);
     }
     return modWrap('rattach', TITLE, 'go', 'DÉGAGÉ', `
-      <div class="malert go"><span class="malert-ico">✓</span><span>Aucun aérodrome recensé dans ~39 km autour de votre point, ni zone de restriction connue. Espace <strong>a priori non contrôlé</strong> — confirmez sur la carte OACI.</span></div>`);
+      <div class="malert go"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Aucun aérodrome recensé dans ~39 km autour de votre point, ni zone de restriction connue. Espace <strong>a priori non contrôlé</strong> — confirmez sur la carte OACI.</span></div>`);
   }
 
   // Cas nominal : aérodrome(s) trouvé(s) via WFS
@@ -3161,7 +3490,7 @@ function buildAirspaceAttachment(aeroData, zonesData) {
   return modWrap('rattach', TITLE, st, badge, `
     ${headline}
     ${limBlock}
-    <div class="malert ${ctlSt}" style="margin-bottom:10px"><span class="malert-ico">ℹ</span><span>${ctlTxt}</span></div>`);
+    <div class="malert ${ctlSt}" style="margin-bottom:10px"><span class="malert-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></span><span>${ctlTxt}</span></div>`);
 }
 
 // Carte « coucher du soleil & créneau »
@@ -3352,7 +3681,7 @@ function openVacSearch(query, filter) {
       .filter(e => { const h = _normHeliName(e[0]) + ' ' + e[1]; return terms.every(t => h.indexOf(t) >= 0); });
     cnt.textContent = rows.length + ' carte' + (rows.length > 1 ? 's' : '');
     list.innerHTML = rows.length
-      ? rows.slice(0, 200).map(e => `<button type="button" class="hp-row" onclick="openVac('${e[1]}','${encodeURIComponent(e[0]).replace(/'/g, '%27')}',${e[2] ? 'true' : 'false'})"><span><i class="hp-kind">${e[2] ? 'H' : '✈'}</i>${_ntEscape(e[0])}</span><span class="hp-code">${e[1]}</span></button>`).join('')
+      ? rows.slice(0, 200).map(e => `<button type="button" class="hp-row" onclick="openVac('${e[1]}','${encodeURIComponent(e[0]).replace(/'/g, '%27')}',${e[2] ? 'true' : 'false'})"><span class="hp-name"><i class="hp-kind ${e[2] ? 'h' : 'a'}">${e[2] ? 'H' : 'AD'}</i>${_ntEscape(e[0])}</span><span class="hp-code">${e[1]}</span></button>`).join('')
       : `<div class="hp-empty">Aucune carte VAC officielle ne correspond à cette recherche.</div>`;
   };
   chips.forEach(b => b.addEventListener('click', () => { flt = b.getAttribute('data-f'); render(); }));
@@ -3996,7 +4325,7 @@ function _uasDemoPopup(p) {
     <span class="zp-type" style="background:#868e96">DÉMO 2022</span>
     <div class="zp-nom">Zone UAS #${p.identifier || '?'}</div>
     ${v ? `<div class="zp-row"><b>Altitudes</b><span>${v}</span></div>` : ''}
-    <div class="malert nogo" style="margin-top:6px;font-size:11px"><span class="malert-ico">⚠</span><span><strong>Données de démonstration (déc. 2022)</strong> — ne pas utiliser en vol. Importez le fichier officiel SIA à jour.</span></div>
+    <div class="malert nogo" style="margin-top:6px;font-size:11px"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span><strong>Données de démonstration (déc. 2022)</strong> — ne pas utiliser en vol. Importez le fichier officiel SIA à jour.</span></div>
   </div>`;
 }
 // Rend la démo à partir d'un FeatureCollection déjà en mémoire.
@@ -4244,7 +4573,7 @@ function modWrap(id, title, status, badge, body) {
       <div class="mod-dot-ring"><div class="mod-dot"></div></div>
       <div class="mod-title">${title}</div>
       <div class="mod-badge">${badge}</div>
-      <div class="mod-chev">▼</div>
+      <div class="mod-chev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
     </div>
     <div class="mod-body">${body}</div>
   </div>`;
@@ -4256,10 +4585,10 @@ function dc(lbl, val, cls='', sub='') {
 }
 function alerts(arr) {
   if (!arr?.length) return '';
-  return `<div class="mod-alerts">${arr.map(a=>`<div class="malert ${a.niveau}"><span class="malert-ico">${a.niveau==='go'?'✓':a.niveau==='warn'?'⚠':'✕'}</span><span>${a.message}</span></div>`).join('')}</div>`;
+  return `<div class="mod-alerts">${arr.map(a=>`<div class="malert ${a.niveau}"><span class="malert-ico">${a.niveau==='go'?'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':a.niveau==='warn'?'<svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg>':'<svg viewBox="0 0 24 24"><path d="M7 7l10 10"/><path d="M17 7L7 17"/></svg>'}</span><span>${a.message}</span></div>`).join('')}</div>`;
 }
 function srcLinks(links) {
-  return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join('')}</div>`;
+  return `<div class="src-links">${links.map(l=>`<a class="src-link" href="${l.url}" target="_blank" rel="noopener">${l.label}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg></a>`).join('')}</div>`;
 }
 
 // Encart « Récupérer les SUP AIP » — option C enrichie : liens officiels (aucun fetch, aucun PDF inline,
@@ -4276,22 +4605,22 @@ function buildSupAipRetrieval(geo) {
     : `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('pin')}</span><span>Dans la liste officielle, <strong>repère les SUP AIP mentionnant ta zone</strong> (département, ville, aérodrome proche, « ZRT … »), puis télécharge le PDF concerné.</span></div>`;
   return modWrap('supaip-get', 'Récupérer les SUP AIP', 'info', 'OFFICIEL', `
     ${deptHint}
-    <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚠</span><span>La <strong>liste officielle du SIA</strong> est la seule source à jour (cycle AIRAC, ~28 jours). C'est au télépilote de <strong>vérifier et télécharger</strong> le SUP AIP applicable à son créneau et à sa zone.</span></div>
+    <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>La <strong>liste officielle du SIA</strong> est la seule source à jour (cycle AIRAC, ~28 jours). C'est au télépilote de <strong>vérifier et télécharger</strong> le SUP AIP applicable à son créneau et à sa zone.</span></div>
     <div style="margin:8px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.12em; font-weight:700;">Liens officiels — téléchargement</div>
     ${srcLinks([
       { label: '📄 SIA — SUP AIP Métropole en vigueur (liste + PDF)', url: SIA_LIST },
       { label: '🧭 SOFIA — Briefing trajet/zone (PIB NOTAM/SUP AIP)', url: SOFIA },
       { label: '🗺 SIA — Visualisateur AIP / zones actives', url: VAIP }
     ])}
-    <div class="malert info mt8"><span class="malert-ico">ℹ</span><span>Sur <strong>SOFIA</strong> : saisis ton aérodrome de départ/arrivée (ou des coordonnées en « point tournant », ex. <em>4536N00123W</em>), un rayon et ton créneau, puis lance le PIB. Les liens ouvrent la source officielle dans un nouvel onglet ; <strong>aucune donnée n'est récupérée automatiquement</strong> par l'application.</span></div>
+    <div class="malert info mt8"><span class="malert-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></span><span>Sur <strong>SOFIA</strong> : saisis ton aérodrome de départ/arrivée (ou des coordonnées en « point tournant », ex. <em>4536N00123W</em>), un rayon et ton créneau, puis lance le PIB. Les liens ouvrent la source officielle dans un nouvel onglet ; <strong>aucune donnée n'est récupérée automatiquement</strong> par l'application.</span></div>
     <div style="margin:14px 0 6px; font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.12em; font-weight:700;">Complément visuel — non officiel</div>
     ${srcLinks([{ label: '🗺 Carte SUP AIP — supaip.fr (outil tiers, indicatif)', url: SUPAIP }])}
-    <div class="malert warn mt8"><span class="malert-ico">⚠</span><span><strong>Source non officielle</strong> : site tiers, données auto-extraites des PDF du SIA, fournies à titre indicatif. Pratique pour <strong>visualiser</strong> les zones${dept ? ` autour de ta commune (dépt ${dept})` : ' autour de ta commune'}, mais ne s'y substitue pas : <strong>vérifie toujours sur le SIA</strong> ci-dessus.</span></div>`);
+    <div class="malert warn mt8"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span><strong>Source non officielle</strong> : site tiers, données auto-extraites des PDF du SIA, fournies à titre indicatif. Pratique pour <strong>visualiser</strong> les zones${dept ? ` autour de ta commune (dépt ${dept})` : ' autour de ta commune'}, mais ne s'y substitue pas : <strong>vérifie toujours sur le SIA</strong> ci-dessus.</span></div>`);
 }
 
 function buildNotam(r, s) {
   return modWrap('notam','NOTAM & SUP AIP', s, 'À VÉRIFIER', `
-    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico">→</span><span>${p}</span></div>`).join('')}</div>
+    <div class="mod-alerts">${r.points.map(p=>`<div class="malert info"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span><span>${p}</span></div>`).join('')}</div>
     ${srcLinks(r.liens)}`);
 }
 
@@ -4308,7 +4637,7 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
   // Cas erreur API zones
   if (!zonesData || zonesData.error) {
     return modWrap('oaci', TITRE, s, 'À VÉRIFIER', `
-      <div class="malert warn"><span class="malert-ico">⚠</span><span>Zones de restriction indisponibles${zonesData?.error?' : '+zonesData.error:''} — vérifiez directement sur Géoportail.</span></div>
+      <div class="malert warn"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Zones de restriction indisponibles${zonesData?.error?' : '+zonesData.error:''} — vérifiez directement sur Géoportail.</span></div>
       ${srcLinks(allLinks)}`);
   }
 
@@ -4318,12 +4647,12 @@ function buildOaci(r, s, zonesData, altMax, airspaceChecklist) {
   let insideHtml = '';
   if (inside.length > 0) {
     insideHtml = `
-      <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚑</span><span><strong>Le point de vol est situé dans ${inside.length} zone${inside.length>1?'s':''} de restriction.</strong> Vérifiez les conditions applicables à votre statut étatique.</span></div>
+      <div class="malert warn" style="margin-bottom:10px"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><span><strong>Le point de vol est situé dans ${inside.length} zone${inside.length>1?'s':''} de restriction.</strong> Vérifiez les conditions applicables à votre statut étatique.</span></div>
       <div class="dcells">
         ${inside.map(z => dc(z.nom, z.limite_alti_m!=null ? `${z.limite_alti_m} m max` : 'Voir condition', z.limite_alti_m!=null && altMax>z.limite_alti_m ? 'nogo' : 'warn', z.type||'')).join('')}
       </div>`;
   } else {
-    insideHtml = `<div class="malert go" style="margin-bottom:10px"><span class="malert-ico">✓</span><span>Le point de vol n'est dans aucune zone de restriction recensée (hors interdictions temporaires — voir NOTAM).</span></div>`;
+    insideHtml = `<div class="malert go" style="margin-bottom:10px"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Le point de vol n'est dans aucune zone de restriction recensée (hors interdictions temporaires — voir NOTAM).</span></div>`;
   }
 
   return modWrap('oaci', TITRE, s, badge, `
@@ -4365,7 +4694,7 @@ function buildLightData(lat, lon, flightDT, sun, effTemp, droneData) {
 
 function buildMeteo(m, s, altMax, droneData, metar) {
   if (m.error) return modWrap('meteo','Météo temps réel',s,'INDISPONIBLE',`
-    <div class="malert warn"><span class="malert-ico">⚠</span><span>Données indisponibles : ${m.error}</span></div>
+    <div class="malert warn"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Données indisponibles : ${m.error}</span></div>
     ${srcLinks([{label:'Météo-France Aviation',url:'https://aviation.meteo.fr'},{label:'SOFIA — METAR/TAF',url:'https://sofia-briefing.aviation-civile.gouv.fr'}])}`);
 
   const eff = m.win || m;
@@ -4411,7 +4740,7 @@ function buildMeteo(m, s, altMax, droneData, metar) {
 
   const winNote = isWin
     ? `<div class="malert info" style="margin-bottom:10px"><span class="malert-ico">${ic('clock')}</span><span>Conditions <strong>prévues pour votre créneau (${whenLbl})</strong> — base de la décision météo.</span></div>`
-    : `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico">⚠</span><span>Prévision indisponible pour le créneau saisi (hors plage) — <strong>conditions actuelles</strong> affichées.</span></div>`;
+    : `<div class="malert warn" style="margin-bottom:10px"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Prévision indisponible pour le créneau saisi (hors plage) — <strong>conditions actuelles</strong> affichées.</span></div>`;
 
   // Bannière source : modèle utilisé (AROME HD vs global) + heure de fraîcheur des données
   const isArome = m.modelCode === 'arome';
@@ -4458,6 +4787,7 @@ function buildHourStrip(hours, droneData) {
       <div class="hs-h">${hh}</div>
       <div class="hs-w">${Math.round(h.windKt)}<span>kt</span></div>
       <div class="hs-g ${gCls(h.gustKt)}">${h.gustKt != null ? Math.round(h.gustKt) : '—'}<span>raf.</span></div>
+      <div class="hs-meter"><i class="${gCls(h.gustKt)}" style="height:${h.gustKt != null ? Math.max(6, Math.min(100, Math.round(h.gustKt / (limKt || 30) * 100))) : 0}%"></i></div>
       <div class="hs-p">${pr}</div>
     </div>`;
   }).join('');
@@ -4466,7 +4796,7 @@ function buildHourStrip(hours, droneData) {
 
 function buildTraffic(d, s) {
   if (d.error) return modWrap('traffic','Trafic aérien ADS-B',s,'DONNÉES N/D',`
-    <div class="malert warn"><span class="malert-ico">⚠</span><span>Sources ADS-B indisponibles : ${d.error} — Vérifier via SOFIA ou contacter l'ATS local</span></div>
+    <div class="malert warn"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Sources ADS-B indisponibles : ${d.error} — Vérifier via SOFIA ou contacter l'ATS local</span></div>
     ${srcLinks([{label:'airplanes.live',url:'https://globe.airplanes.live'},{label:'OpenSky',url:'https://opensky-network.org'}])}`);
 
   const radius = d.radiusKm || 46;
@@ -4489,14 +4819,14 @@ function buildTraffic(d, s) {
       </tr>`).join('')}
       ${d.count>8?`<tr><td colspan="4" style="color:var(--ink-faint)">… +${d.count-8} aéronef(s)</td></tr>`:''}
       </tbody>
-    </table>` : `<div class="malert go"><span class="malert-ico">✓</span><span>Aucun aéronef détecté dans le rayon (~${radius} km)</span></div>`}
-    ${low.length>0?`<div class="malert warn mt8"><span class="malert-ico">⚠</span><span>${low.length} aéronef(s) sous 500 m — Communication radio recommandée</span></div>`:''}
+    </table>` : `<div class="malert go"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Aucun aéronef détecté dans le rayon (~${radius} km)</span></div>`}
+    ${low.length>0?`<div class="malert warn mt8"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>${low.length} aéronef(s) sous 500 m — Communication radio recommandée</span></div>`:''}
     ${srcLinks([{label:'airplanes.live',url:'https://globe.airplanes.live'},{label:'OpenSky Network',url:'https://opensky-network.org'}])}`);
 }
 
 function buildLight(li, s, droneData) {
   if (!li || li.error) return modWrap('light','Jour / nuit & soleil', 'warn', 'N/D', `
-    <div class="malert warn"><span class="malert-ico">⚠</span><span>Calcul jour/nuit indisponible${li&&li.error?' : '+li.error:''}.</span></div>
+    <div class="malert warn"><span class="malert-ico"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17.2h.01"/></svg></span><span>Calcul jour/nuit indisponible${li&&li.error?' : '+li.error:''}.</span></div>
     ${srcLinks([{label:'SHOM — éphémérides',url:'https://maree.shom.fr/'}])}`);
 
   const phaseLbl = li.phase==='jour'?'Jour':li.phase==='crepuscule'?'Crépuscule / aube':'Nuit aéronautique';
@@ -4519,7 +4849,7 @@ function buildLight(li, s, droneData) {
       ${dc('Mini constructeur (est.)', `${li.tmin}°C`)}
     </div>
     ${alerts(a)}
-    <div class="malert info"><span class="malert-ico">ℹ</span><span>Nuit aéronautique = du coucher du soleil +30 min au lever −30 min (valeur indicative). Élévation solaire par éphéméride.</span></div>
+    <div class="malert info"><span class="malert-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></span><span>Nuit aéronautique = du coucher du soleil +30 min au lever −30 min (valeur indicative). Élévation solaire par éphéméride.</span></div>
     ${srcLinks([{label:'SHOM — éphémérides',url:'https://maree.shom.fr/'},{label:'timeanddate — soleil',url:'https://www.timeanddate.com/sun/'}])}`);
 }
 
@@ -4547,7 +4877,7 @@ function buildKP(d, s) {
         <div class="lbl">Indice KP (NOAA SWPC)</div>
         <div class="kp-num" style="color:${kpCol}">${kpStr}</div>
         <div class="sub">${lvl?.l||'—'}</div>
-        <div class="kp-track mt12"><div class="kp-fill" style="width:${kpPct}%;background:${kpCol}"></div></div>
+        <div class="kp-seg mt12">${Array.from({length:9},(_,i)=>{const z=i<4?'g':i<5?'a':'r';const f=kp===null?0:Math.max(0,Math.min(1,kp-i));return `<i class="z${z}"><b style="width:${Math.round(f*100)}%"></b></i>`;}).join('')}</div>
         <div class="kp-lbls"><span>0 Calme</span><span>3</span><span>5 G1</span><span>7 G3</span><span>9</span></div>
       </div>
       ${dc('Impact GNSS', gnssImpact, gnSt)}
