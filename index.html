@@ -346,7 +346,8 @@ a { color: var(--orange); }
 .ds-cell .ds-val { font-family: var(--disp); font-size: 14px; font-weight: 700; color: var(--ink); }
 .ds-wind { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; margin:10px 0 8px; border-radius:12px; border:1px solid var(--stone-2); border-left:3px solid var(--orange); background:var(--orange-d); }
 .ds-wind-lbl { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
-.ds-wind-val { font-family: var(--disp); font-size:16px; font-weight:800; color:var(--ink); }
+.ds-wind-val { font-family: var(--disp); font-size:16px; font-weight:800; color:var(--ink); white-space:nowrap; flex:none; }
+.ds-wind-lbl { min-width:0; }
 .ds-note {
   font-size: 12px;
   color: var(--ink-soft);
@@ -2149,7 +2150,7 @@ html body .hp-chips button.on{ border-color:var(--orange) !important; background
       </div>
       <div class="section-body">
         <div class="field">
-          <label>Système UAS (DJI)</label>
+          <label>Système UAS</label>
           <select id="drone-model" onchange="updateDroneSpecs()">
             <option value="">Sélectionner un drone...</option>
           </select>
@@ -2588,31 +2589,37 @@ document.addEventListener('DOMContentLoaded', () => {
 const DJI_DRONES = {
   // ── Grand public — gamme Mini (< 250 g) ──
   "mini-5-pro": {
-    group: "Grand public — Mini", name: "DJI Mini 5 Pro", classe: "C0",
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Mini 5 Pro", classe: "C0",
     poids: "249 g", autonomie: "36 min", vitesseMax: "18 m/s (65 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "1\" — 50 MP",
     note: "Sous 250 g, catégorie ouverte A1. LiDAR + détection omnidirectionnelle."
   },
   "mini-4-pro": {
-    group: "Grand public — Mini", name: "DJI Mini 4 Pro", classe: "C0",
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Mini 4 Pro", classe: "C0",
     poids: "249 g", autonomie: "34 min", vitesseMax: "16 m/s (58 km/h)",
     ventMax: "10,7 m/s (38 km/h)", altMax: "6000 m", capteur: "1/1,3\" — 48 MP",
     note: "Sous 250 g, catégorie ouverte A1. Détection omnidirectionnelle."
   },
   "neo": {
-    group: "Grand public — Mini", name: "DJI Neo", classe: "C0",
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Neo", classe: "C0",
     poids: "135 g", autonomie: "18-20 min", vitesseMax: "16 m/s (58 km/h)",
     ventMax: "≈ 5 m/s (18 km/h)", altMax: "4000 m", capteur: "1/2\" — 12 MP",
     note: "Ultra-léger, pilotage sans télécommande possible. Sensible au vent."
   },
+  "neo-2": {
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Neo 2", classe: "C0",
+    poids: "151 g (160 g avec module de transmission)", autonomie: "19 min", vitesseMax: "12 m/s (43 km/h)",
+    ventMax: "10,7 m/s (38 km/h)", altMax: "2000 m", capteur: "1/2\" — 12 MP, nacelle 2 axes",
+    note: "Ultra-léger, pilotage par appli, gestes, voix ou radiocommande (RC-N3/RC 2). Détection d'obstacles omnidirectionnelle + LiDAR frontal."
+  },
   "flip": {
-    group: "Grand public — Mini", name: "DJI Flip", classe: "C0",
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Flip", classe: "C0",
     poids: "< 249 g", autonomie: "31 min", vitesseMax: "16 m/s (58 km/h)",
     ventMax: "10,7 m/s (38 km/h)", altMax: "4000 m", capteur: "1/1,3\" — 48 MP",
     note: "Hélices carénées intégrales. Pas de détection omnidirectionnelle."
   },
   "mini-4k": {
-    group: "Grand public — Mini", name: "DJI Mini 4K", classe: "C0",
+    group: "DJI — Loisir · Mini & ultra-légers", name: "DJI Mini 4K", classe: "C0",
     poids: "< 249 g", autonomie: "31 min", vitesseMax: "16 m/s (58 km/h)",
     ventMax: "10,5 m/s (38 km/h)", altMax: "4000 m", capteur: "1/2,3\" — 12 MP",
     note: "Modèle d'entrée de gamme. Pas de détection d'obstacles."
@@ -2620,13 +2627,13 @@ const DJI_DRONES = {
 
   // ── Grand public — Air / Mavic ──
   "mavic-4-pro": {
-    group: "Grand public — Air / Mavic", name: "DJI Mavic 4 Pro", classe: "C2",
+    group: "DJI — Loisir · Air & Mavic", name: "DJI Mavic 4 Pro", classe: "C2",
     poids: "1063 g", autonomie: "51 min", vitesseMax: "25 m/s (90 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 Hasselblad — 100 MP",
     note: "Catégorie A2 — formation complémentaire requise en zone habitée. Triple caméra, LiDAR."
   },
   "air-3s": {
-    group: "Grand public — Air / Mavic", name: "DJI Air 3S", classe: "C1",
+    group: "DJI — Loisir · Air & Mavic", name: "DJI Air 3S", classe: "C1",
     poids: "724 g", autonomie: "45 min", vitesseMax: "21 m/s (75 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "1\" + téléobjectif",
     note: "Catégorie A1/A3. Double capteur, détection omnidirectionnelle."
@@ -2634,55 +2641,85 @@ const DJI_DRONES = {
 
   // ── Entreprise ──
   "mavic-3e": {
-    group: "Entreprise", name: "DJI Mavic 3 Enterprise (3E)", classe: "C2",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Mavic 3 Enterprise (3E)", classe: "C2",
     poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 56x",
     note: "Cartographie, RTK disponible. IP54. Compatible nacelle Enterprise."
   },
   "mavic-3t": {
-    group: "Entreprise", name: "DJI Mavic 3 Enterprise Thermal (3T)", classe: "C2",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Mavic 3 Enterprise Thermal (3T)", classe: "C2",
     poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique 640×512 + zoom 56x",
     note: "Sécurité publique, SAR, lutte incendie. Caméra thermique intégrée."
   },
   "matrice-4e": {
-    group: "Entreprise", name: "DJI Matrice 4E", classe: "C2/C3",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Matrice 4E", classe: "C2/C3",
     poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 112x + laser",
     note: "Cartographie/géospatial. RTK intégré, télémètre laser 1800 m, IP54."
   },
   "matrice-4t": {
-    group: "Entreprise", name: "DJI Matrice 4T", classe: "C2/C3",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Matrice 4T", classe: "C2/C3",
     poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique + 3 caméras + laser",
     note: "Énergie, secours, sécurité publique, forêt. Zoom hybride 112x, IP54."
   },
   "matrice-4td": {
-    group: "Entreprise", name: "DJI Matrice 4TD", classe: "C2",
+    group: "DJI — Pro · Stations automatisées (Dock)", name: "DJI Matrice 4TD", classe: "C2",
     poids: "≈ 1,85 kg", autonomie: "54 min", vitesseMax: "20 m/s (72 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique 640×512 + grand angle 48MP + télé 48MP + laser",
     note: "Version IP55 étanche/anti-poussière du M4T, conçue pour DJI Dock 3 (vols automatisés BVLOS). Utilisable en manuel avec RC Plus 2 Enterprise. Idéal secours, sécurité publique, surveillance permanente. Plage -30°C à 50°C."
   },
+  "matrice-5td": {
+    group: "DJI — Pro · Stations automatisées (Dock)", name: "DJI Matrice 5TD", classe: "Spécifique",
+    poids: "≈ 2,6 kg (MTOW 3,05 kg)", autonomie: "59 min", vitesseMax: "21 m/s (75 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "5000 m", capteur: "Thermique 1280×1024 + 3 × 50 MP + laser 3 km",
+    note: "Dernier né (oct. 2026), conçu pour la DJI Dock 4 (BVLOS) ; commande d'urgence RC Plus 2 annoncée. IP55, -40 °C à 50 °C, LiDAR + radar, parachute AP1."
+  },
+  "anafi-ai": {
+    group: "Parrot — Pro · ANAFI", name: "Parrot ANAFI Ai", classe: "Pro",
+    poids: "898 g", autonomie: "32 min", vitesseMax: "16 m/s (58 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "5000 m", capteur: "1/2\" — 48 MP, zoom 6x",
+    note: "Connecté 4G, évitement d'obstacles (caméras stéréo), IP53, -10 °C à 40 °C. Vent : 12 m/s au décollage/atterrissage (limite retenue), 14 m/s en vol."
+  },
+  "anafi-usa": {
+    group: "Parrot — Pro · ANAFI", name: "Parrot ANAFI USA", classe: "Pro",
+    poids: "500 g (MTOM 644 g)", autonomie: "32 min", vitesseMax: "14,7 m/s (53 km/h)",
+    ventMax: "14,7 m/s (53 km/h)", altMax: "5000 m", capteur: "2 × 1/2,4\" 21 MP (zoom 32x) + thermique FLIR Boson",
+    note: "Versions GOV / MIL pour forces de sécurité et armées. IP53, -36 °C à 50 °C, chiffrement des données."
+  },
+  "anafi-ukr": {
+    group: "Parrot — Pro · ANAFI", name: "Parrot ANAFI UKR", classe: "Pro",
+    poids: "959 g (MTOM 1,45 kg)", autonomie: "38 min", vitesseMax: "17 m/s (61 km/h)",
+    ventMax: "15 m/s (54 km/h)", altMax: "5000 m", capteur: "2 × 1/2,4\" 21 MP (zoom 35x) + thermique FLIR Boson 640×512",
+    note: "Dernière génération (2025), défense et sécurité publique. IP53, -36 °C à 50 °C, vol sans GPS (navigation optique), radios résistantes au brouillage."
+  },
   "matrice-210-v2": {
-    group: "Entreprise", name: "DJI Matrice 210 V2 (M210)", classe: "Spécifique",
+    group: "DJI — Pro · Matrice (plateformes lourdes)", name: "DJI Matrice 210 V2 (M210)", classe: "Spécifique",
     poids: "≈ 4,27 kg (sans payload)", autonomie: "≈ 33 min", vitesseMax: "22,3 m/s (80 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "3000 m", capteur: "Selon nacelle (double possible)",
     note: "Plateforme pro (génération précédente). Double nacelle, IP43, RTK en option."
   },
   "matrice-300-rtk": {
-    group: "Entreprise", name: "DJI Matrice 300 RTK (M300)", classe: "Spécifique",
+    group: "DJI — Pro · Matrice (plateformes lourdes)", name: "DJI Matrice 300 RTK (M300)", classe: "Spécifique",
     poids: "≈ 3,6 kg (sans payload)", autonomie: "55 min", vitesseMax: "23 m/s (83 km/h)",
     ventMax: "15 m/s (54 km/h)", altMax: "5000 m", capteur: "Selon nacelle (H20 / H20T…)",
     note: "Plateforme pro éprouvée. IP45, détection 6 directions, RTK, double batterie à chaud."
   },
+  "matrice-30t": {
+    group: "DJI — Pro · Matrice (plateformes lourdes)", name: "DJI Matrice 30T (M30T)", classe: "Spécifique",
+    poids: "≈ 3,77 kg (MTOW 4,07 kg)", autonomie: "41 min", vitesseMax: "23 m/s (83 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Thermique 640×512 + zoom 48 MP (200x) + 12 MP + laser 1200 m",
+    note: "Compact, pliable, IP55, -20 °C à 50 °C. Vent : 12 m/s au décollage/atterrissage (limite retenue pour l'analyse), 15 m/s en vol."
+  },
   "matrice-350-rtk": {
-    group: "Entreprise", name: "DJI Matrice 350 RTK", classe: "C3",
+    group: "DJI — Pro · Matrice (plateformes lourdes)", name: "DJI Matrice 350 RTK", classe: "C3",
     poids: "≈ 3,8 kg (sans payload)", autonomie: "55 min", vitesseMax: "23 m/s (83 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Selon nacelle (Zenmuse)",
     note: "Plateforme modulaire lourde. IP55, double batterie à chaud, charge utile multiple."
   },
   "matrice-400": {
-    group: "Entreprise", name: "DJI Matrice 400 RTK", classe: "C3",
+    group: "DJI — Pro · Matrice (plateformes lourdes)", name: "DJI Matrice 400 RTK", classe: "C3",
     poids: "≈ 4,5 kg (sans payload)", autonomie: "59 min", vitesseMax: "25 m/s (90 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Selon nacelle (H30/H30T)",
     note: "Charge utile jusqu'à 6 kg. ADS-B In intégré, IP55, relais aérien, RTK cm."
@@ -2696,9 +2733,17 @@ function populateDroneSelect() {
     if (!groups[d.group]) groups[d.group] = [];
     groups[d.group].push([key, d]);
   });
-  Object.entries(groups).forEach(([groupName, drones]) => {
+  // Ordre : par constructeur, puis par section (loisir → pro)
+  const ORDER = ['DJI — Loisir · Mini & ultra-légers','DJI — Loisir · Air & Mavic','DJI — Pro · Compacts (Mavic 3 / Matrice 4)',
+    'DJI — Pro · Matrice (plateformes lourdes)','DJI — Pro · Stations automatisées (Dock)','Parrot — Pro · ANAFI'];
+  const rank = g => { const i = ORDER.indexOf(g); return i < 0 ? 99 : i; };
+  Object.entries(groups).sort((a, b) => rank(a[0]) - rank(b[0])).forEach(([groupName, drones]) => {
     const og = document.createElement('optgroup');
     og.label = groupName;
+    const IDS = ['neo','neo-2','flip','mini-4k','mini-4-pro','mini-5-pro','air-3s','mavic-4-pro','mavic-3e','mavic-3t',
+      'matrice-4e','matrice-4t','matrice-30t','matrice-210-v2','matrice-300-rtk','matrice-350-rtk','matrice-400',
+      'matrice-4td','matrice-5td','anafi-ai','anafi-usa','anafi-ukr'];
+    drones.sort((a, b) => IDS.indexOf(a[0]) - IDS.indexOf(b[0]));
     drones.forEach(([key, d]) => {
       const opt = document.createElement('option');
       opt.value = key;
