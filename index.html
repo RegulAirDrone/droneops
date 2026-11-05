@@ -2641,28 +2641,34 @@ const DJI_DRONES = {
 
   // ── Entreprise ──
   "mavic-3e": {
-    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Mavic 3 Enterprise (3E)", classe: "C2",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)", name: "DJI Mavic 3 Enterprise (3E)", classe: "C2",
     poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 56x",
     note: "Cartographie, RTK disponible. IP54. Compatible nacelle Enterprise."
   },
   "mavic-3t": {
-    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Mavic 3 Enterprise Thermal (3T)", classe: "C2",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)", name: "DJI Mavic 3 Enterprise Thermal (3T)", classe: "C2",
     poids: "≈ 920 g", autonomie: "45 min", vitesseMax: "15 m/s (54 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique 640×512 + zoom 56x",
     note: "Sécurité publique, SAR, lutte incendie. Caméra thermique intégrée."
   },
   "matrice-4e": {
-    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Matrice 4E", classe: "C2/C3",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)", name: "DJI Matrice 4E", classe: "C2/C3",
     poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "4/3 20 MP + zoom 112x + laser",
     note: "Cartographie/géospatial. RTK intégré, télémètre laser 1800 m, IP54."
   },
   "matrice-4t": {
-    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4)", name: "DJI Matrice 4T", classe: "C2/C3",
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)", name: "DJI Matrice 4T", classe: "C2/C3",
     poids: "≈ 1,2 kg", autonomie: "49 min", vitesseMax: "21 m/s (75 km/h)",
     ventMax: "12 m/s (43 km/h)", altMax: "6000 m", capteur: "Thermique + 3 caméras + laser",
     note: "Énergie, secours, sécurité publique, forêt. Zoom hybride 112x, IP54."
+  },
+  "matrice-5t": {
+    group: "DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)", name: "DJI Matrice 5T", classe: "Pro",
+    poids: "2239 g", autonomie: "59 min", vitesseMax: "23 m/s (83 km/h)",
+    ventMax: "12 m/s (43 km/h)", altMax: "7000 m", capteur: "Thermique 1280×1024 + grand angle 1/0,98\" + télé moyen 50 MP (3x) + télé 11x (176x hybride) + laser 3 km",
+    note: "Nouveauté (nov. 2026). IP55, -20 °C à 50 °C, LiDAR + radar mmWave + vision omnidirectionnelle, vision nocturne. Vent : 12 m/s au décollage/atterrissage. Marquage de classe UE à confirmer (module FTS pour la conformité C6)."
   },
   "matrice-4td": {
     group: "DJI — Pro · Stations automatisées (Dock)", name: "DJI Matrice 4TD", classe: "C2",
@@ -2734,14 +2740,14 @@ function populateDroneSelect() {
     groups[d.group].push([key, d]);
   });
   // Ordre : par constructeur, puis par section (loisir → pro)
-  const ORDER = ['DJI — Loisir · Mini & ultra-légers','DJI — Loisir · Air & Mavic','DJI — Pro · Compacts (Mavic 3 / Matrice 4)',
+  const ORDER = ['DJI — Loisir · Mini & ultra-légers','DJI — Loisir · Air & Mavic','DJI — Pro · Compacts (Mavic 3 / Matrice 4 / Matrice 5)',
     'DJI — Pro · Matrice (plateformes lourdes)','DJI — Pro · Stations automatisées (Dock)','Parrot — Pro · ANAFI'];
   const rank = g => { const i = ORDER.indexOf(g); return i < 0 ? 99 : i; };
   Object.entries(groups).sort((a, b) => rank(a[0]) - rank(b[0])).forEach(([groupName, drones]) => {
     const og = document.createElement('optgroup');
     og.label = groupName;
     const IDS = ['neo','neo-2','flip','mini-4k','mini-4-pro','mini-5-pro','air-3s','mavic-4-pro','mavic-3e','mavic-3t',
-      'matrice-4e','matrice-4t','matrice-30t','matrice-210-v2','matrice-300-rtk','matrice-350-rtk','matrice-400',
+      'matrice-4e','matrice-4t','matrice-5t','matrice-30t','matrice-210-v2','matrice-300-rtk','matrice-350-rtk','matrice-400',
       'matrice-4td','matrice-5td','anafi-ai','anafi-usa','anafi-ukr'];
     drones.sort((a, b) => IDS.indexOf(a[0]) - IDS.indexOf(b[0]));
     drones.forEach(([key, d]) => {
