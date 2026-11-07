@@ -3512,10 +3512,7 @@ async function runAnalysis() {
   results.light = buildLightData(lat, lon, flightDT, meteoData && meteoData.sun, effM ? effM.temp : null, inp.droneData);
 
   // Statut des cartes de chaque page
-  function zonesStatus(zd) {
-    if (!zd || zd.error) return 'info';
-    return zd.zones.filter(z => z.distance_m === 0).length > 0 ? 'warn' : 'info';
-  }
+  function zonesStatus(zd) { return pvZoneVerdict(zd, inp.altitude).status; }
   const statuses = {
     meteo: meteoStatus(meteoData.error ? meteoData : (meteoData.win || meteoData)),
     kp:    kpStatus(kpData.kp),
@@ -5137,6 +5134,28 @@ function pvWindRowHtml(key, d) {
 function pvWindPreview(v) { v = parseFloat(v); const o = document.getElementById('pv-wind-out'); if (o) o.textContent = `${pvFmt1(v)} m/s · ${Math.round(v * 3.6)} km/h · ${Math.round(v * 1.944)} kt`; }
 function pvWindSave(key, v) { pvLsSet(pvWindKey(key), v); updateDroneSpecs(); pvToast(v == null ? 'Limite perso supprimée.' : 'Limite perso enregistrée.'); }
 
+/// Espace aérien : hauteur prévue comparée au plafond de la zone la plus stricte au point de vol.
+/// Profenvol (vols de l'État) : au-dessus du plafond ou en zone interdite → vigilance forte.
+function pvZoneVerdict(zd, alt) {
+  if (!zd || zd.error) return { status: 'info', text: 'à vérifier (restrictions indisponibles)' };
+  const inside = (zd.zones || []).filter(z => z.distance_m === 0);
+  const why = 'Pourquoi « vigilance forte » : défavorable pour le grand public sans autorisation, mais un vol de l\'État peut y déroger sous conditions à vérifier (exemptions, coordination, NOTAM).';
+  let strong = false;
+  const parts = [];
+  let status = 'go';
+  if (alt > 120) { parts.push(`vigilance forte : hauteur prévue ${alt} m, au-delà de 120 m.`); status = 'warn'; strong = true; }
+  if (!inside.length) { parts.push('aucune zone de restriction au point de vol.'); if (strong) parts.push(why); return { status: status === 'warn' ? 'warn' : 'info', text: parts.join(' ') }; }
+  const ceil = inside.map(z => z.limite_alti_m).filter(v => v != null);
+  const min = ceil.length ? Math.min.apply(null, ceil) : null;
+  if (min === 0) { parts.push('vigilance forte : point de vol en zone « vol interdit ».'); status = 'warn'; strong = true; }
+  else if (min != null && alt > min) { parts.push(`vigilance forte : hauteur prévue ${alt} m, au-dessus du plafond de ${min} m.`); status = 'warn'; strong = true; }
+  else if (min != null && alt > 0.8 * min) { parts.push(`hauteur prévue ${alt} m, proche du plafond de ${min} m : gardez une marge.`); status = 'warn'; }
+  else if (min != null) parts.push(`sous le plafond de ${min} m de la zone (hauteur prévue ${alt} m).`);
+  if (inside.some(z => z.limite_alti_m == null)) { parts.push('restriction sans plafond chiffré : à vérifier sur la carte.'); status = 'warn'; }
+  if (strong) parts.push(why);
+  return { status, text: parts.join(' ') };
+}
+
 // ── Partage du bilan (texte daté : partage natif, sinon copie) ──
 function pvShare() {
   const b = window._pvBrief;
@@ -5155,7 +5174,7 @@ function pvShare() {
     'Vol prévu : ' + (b.flightDT ? fmtParisDateTime(b.flightDT.date) + ' (Paris)' : 'maintenant'),
     'Météo : ' + (lbl[b.statuses.meteo] || '—') + (m.error ? '' : ` — vent ${eff.windKt} kt, rafales ${eff.gustKt} kt, ${eff.desc}`),
     'Indice Kp : ' + (lbl[b.statuses.kp] || '—') + (kp != null ? ` (Kp ${Number(kp).toFixed(1).replace('.', ',')})` : ''),
-    'Espace aérien : ' + (zones == null ? 'à vérifier' : zones ? `point de vol dans ${zones} zone(s) de restriction` : 'aucune zone de restriction au point de vol'),
+    'Espace aérien : ' + pvZoneVerdict(b.results.zones, b.inp.altitude).text,
     'Briefing généré le ' + at + ' (heure de Paris).',
     'Indicatif : vérifiez toujours les NOTAM et publications officielles.'
   ];
